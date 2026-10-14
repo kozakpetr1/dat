@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transakce v MySQL / MariaDB — VOŠ, SPŠ a SOŠ Varnsdorf</title>
+<meta name="description" content="Výuková one-page prezentace o transakcích v MySQL a MariaDB, COMMIT, ROLLBACK, ACID a transakcích v PHP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,200;0,400;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-top:#003b4b;--bg-bottom:#006783;--text:#fff;
+  --yellow:#ffd400;--yellow2:#ffea80;--blue:#41d7ff;--blue2:#00c0f3;
+  --green:#a6ce39;--green2:#c2dd78;--panel:rgba(0,27,34,.48);
+  --panel2:rgba(0,27,34,.68);--muted:rgba(255,255,255,.62);
+  --sidebar:280px;--danger:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Raleway,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg-top),var(--bg-bottom)) fixed;line-height:1.6}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ radial-gradient(circle at 78% 8%,rgba(65,215,255,.10),transparent 25%),
+ radial-gradient(circle at 18% 70%,rgba(166,206,57,.07),transparent 25%)}
+a{color:inherit}
+aside{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:2rem 1.5rem;background:rgba(0,20,26,.76);backdrop-filter:blur(20px);z-index:10}
+main{margin-left:var(--sidebar);max-width:1250px;padding:3.5rem 3rem 5rem}
+.logo{display:flex;align-items:center;gap:1rem;text-decoration:none;margin-bottom:2.6rem}
+.logo svg{width:50px;height:43px;flex:none}.logo b{font-size:.84rem;line-height:1.25;letter-spacing:.05em}.logo span{color:var(--blue)}
+.nav-title{font-size:.72rem;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:1rem}
+nav ul{list-style:none}nav li{margin-bottom:.35rem}
+nav a{display:flex;gap:.75rem;align-items:center;text-decoration:none;color:rgba(255,255,255,.68);padding:.72rem .9rem;font-weight:600;font-size:.9rem;border-left:3px solid transparent;transition:.2s}
+nav a:hover,nav a.active{color:#fff;background:rgba(65,215,255,.09);border-left-color:var(--blue)}
+nav svg{width:18px;height:18px;fill:currentColor;flex:none}
+.side-note{position:absolute;bottom:1.5rem;color:var(--muted);font-size:.72rem}
+section{scroll-margin-top:2rem;margin-bottom:5.5rem}
+.eyebrow{color:var(--blue);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.16em}
+h1{font-size:clamp(2.7rem,6vw,5.2rem);line-height:1.02;letter-spacing:-.045em;margin:.6rem 0 1.4rem}
+h1 em{font-style:normal;color:var(--yellow)}
+h2{font-size:clamp(1.9rem,4vw,2.7rem);line-height:1.15;margin:.35rem 0 1.2rem;letter-spacing:-.025em}
+h3{font-size:1.35rem;line-height:1.25;margin-bottom:.65rem}
+h4{font-size:1rem;margin-bottom:.4rem}
+p{margin-bottom:1rem}strong{font-weight:700}.muted{color:var(--muted)}
+.lead{font-size:1.18rem;font-weight:200;line-height:1.7}
+.hero{min-height:78vh;display:flex;align-items:center}
+.hero-inner{max-width:940px}
+.hero-kicker{display:inline-flex;align-items:center;gap:.55rem;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:.76rem}
+.hero-kicker:before{content:"";width:28px;height:3px;background:var(--green)}
+.hero-sub{max-width:780px;font-size:1.28rem;color:rgba(255,255,255,.84);font-weight:200}
+.chips{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.8rem}.chip{padding:.42rem .75rem;background:rgba(255,255,255,.07);font-size:.8rem;font-weight:600}
+.panel{background:var(--panel);backdrop-filter:blur(12px);box-shadow:0 12px 35px rgba(0,0,0,.22);padding:2rem}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.card{background:rgba(0,20,26,.34);padding:1.45rem;min-height:100%}
+.card.accent-blue{border-top:3px solid var(--blue)}.card.accent-yellow{border-top:3px solid var(--yellow)}.card.accent-green{border-top:3px solid var(--green)}
+.icon{font-size:1.7rem;margin-bottom:.7rem}.card p:last-child{margin-bottom:0}
+.question{font-size:1.55rem;font-weight:600;line-height:1.3}.answer{margin-top:1.1rem;padding-left:1rem;border-left:3px solid var(--yellow)}
+.timeline{position:relative;display:grid;gap:1rem;margin-top:1.4rem}.step{display:grid;grid-template-columns:50px 1fr;gap:1rem;align-items:start}
+.step-num{width:42px;height:42px;display:grid;place-items:center;background:var(--blue2);color:#002d38;font-weight:700}
+.step h3{margin:.1rem 0 .2rem}.step p{color:rgba(255,255,255,.75)}
+.compare{width:100%;border-collapse:collapse;font-size:.92rem}.compare th{text-align:left;color:var(--blue);font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;background:rgba(0,20,26,.75);padding:1rem}.compare td{padding:1rem;background:rgba(0,20,26,.25);vertical-align:top}.compare tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.badge{display:inline-block;padding:.18rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.b-blue{background:rgba(65,215,255,.14);color:var(--blue)}.b-yellow{background:rgba(255,212,0,.14);color:var(--yellow)}.b-green{background:rgba(166,206,57,.14);color:var(--green)}
+.equation{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.8rem;align-items:center;margin:1.6rem 0}
+.eqbox{padding:1.4rem;text-align:center;background:rgba(0,20,26,.55);font-size:1.15rem;font-weight:700}.eqbox small{display:block;font-size:.7rem;color:var(--muted);font-weight:400;margin-top:.25rem}.plus{font-size:1.6rem;color:var(--yellow)}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.7rem;align-items:center;margin:1.5rem 0}.flowbox{padding:1rem;text-align:center;background:rgba(0,20,26,.5);font-weight:700}.arrow{color:var(--yellow);font-size:1.4rem}
+.callout{margin-top:1.4rem;padding:1.1rem 1.25rem;border-left:4px solid var(--blue);background:rgba(65,215,255,.07)}.callout.yellow{border-left-color:var(--yellow);background:rgba(255,212,0,.07)}.callout.green{border-left-color:var(--green);background:rgba(166,206,57,.07)}
+ul{list-style:none;margin:.7rem 0}li{padding:.28rem 0 .28rem 1.35rem;position:relative}li:before{content:"";position:absolute;left:0;top:.78em;width:.72em;height:.72em;background:var(--yellow);clip-path:polygon(0 0,100% 50%,0 100%,20% 50%)}
+.code{font-family:Consolas,monospace;background:rgba(0,0,0,.3);padding:.12rem .35rem;color:var(--yellow2)}
+footer{padding:2rem 0;color:var(--muted);font-size:.75rem;border-top:1px solid rgba(255,255,255,.08)}
+.mobile{display:none}
+@media(max-width:991px){
+ aside{display:none}.mobile{display:flex;position:sticky;top:0;z-index:20;background:rgba(0,20,26,.92);backdrop-filter:blur(15px);padding:.8rem 1rem;justify-content:space-between;align-items:center}.mobile .logo{margin:0}.mobile button{background:none;border:0;color:#fff;font-size:1.5rem}main{margin:0;padding:2rem 1.2rem}.hero{min-height:75vh}.grid2,.grid3{grid-template-columns:1fr}.equation,.flow{grid-template-columns:1fr;gap:.5rem}.plus,.arrow{transform:rotate(90deg);text-align:center}.panel{padding:1.35rem}.compare{min-width:720px}.table-wrap{overflow:auto}}
+</style>
+</head>
+<body>
+<div class="mobile"><a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a><button onclick="document.querySelector('aside').style.display='block'">☰</button></div>
+
+<aside>
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a>
+<div class="nav-title">DATABÁZE • TRANSAKCE</div>
+<nav><ul>
+<li><a class="active" href="#start">⌂ <span>Co je transakce?</span></a></li>
+<li><a href="#example">▣ <span>Praktický příklad</span></a></li>
+<li><a href="#acid">◇ <span>ACID</span></a></li>
+<li><a href="#sql">⌘ <span>Transakce v SQL</span></a></li>
+<li><a href="#backend">⚙ <span>Transakce v PHP</span></a></li>
+<li><a href="#pitfalls">⚠ <span>Na co pozor?</span></a></li>
+<li><a href="#summary">→ <span>Co si odnést</span></a></li>
+</ul></nav>
+<div class="side-note">MySQL / MariaDB<br>Výuková one-page prezentace</div>
+</aside>
+
+<main>
+<section id="start" class="hero">
+<div class="hero-inner">
+<div class="hero-kicker">MySQL • MariaDB • SQL</div>
+<h1>Transakce: když musí proběhnout <em>všechno, nebo nic.</em></h1>
+<p class="hero-sub">Transakce spojí několik operací nad databází do jednoho logického celku. Když vše proběhne správně, změny <strong>potvrdíme</strong>. Když nastane problém, změny <strong>vrátíme zpět</strong>.</p>
+<div class="chips"><span class="chip">START TRANSACTION</span><span class="chip">COMMIT</span><span class="chip">ROLLBACK</span><span class="chip">ACID</span></div>
+<div class="callout yellow"><strong>Základní myšlenka:</strong> převod 1 000 Kč není „odečti peníze a potom možná přičti“. Je to jedna operace, která musí skončit v konzistentním stavu.</div>
+</div>
+</section>
+
+<section id="example">
+<div class="eyebrow">01 • PŘÍKLAD</div><h2>Bankovní převod jako transakce</h2>
+<p class="lead">Představ si převod 1 000 Kč z účtu A na účet B. Databáze musí změnit minimálně dva záznamy.</p>
+<div class="grid2">
+<div class="card accent-yellow"><span class="badge b-yellow">Krok A</span><h3>Odečtení z účtu A</h3><p><span class="code">balance = balance - 1000</span></p><p class="muted">Tato změna sama o sobě ještě nemusí být konečným stavem.</p></div>
+<div class="card accent-blue"><span class="badge b-blue">Krok B</span><h3>Přičtení na účet B</h3><p><span class="code">balance = balance + 1000</span></p><p class="muted">Obě změny patří k jednomu převodu.</p></div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<p class="question">Co když po kroku A vypadne server?</p>
+<div class="answer"><strong>Bez transakce</strong> může vzniknout nekonzistentní stav: peníze zmizí z účtu A, ale na B se nepřipíšou. <strong>S transakcí</strong> lze neúspěšnou operaci vrátit zpět.</div>
+</div>
+<div class="flow"><div class="flowbox">💳 Účet A<br>− 1 000 Kč</div><div class="arrow">→</div><div class="flowbox">⚙ TRANSakCE</div><div class="arrow">→</div><div class="flowbox">💳 Účet B<br>+ 1 000 Kč</div></div>
+</section>
+
+<section id="purpose">
+<div class="eyebrow">02 • SMYSL</div><h2>Proč transakce potřebujeme?</h2>
+<div class="grid3">
+<div class="card accent-blue"><div class="icon">🔗</div><h3>Více operací = jeden celek</h3><p>Transakce spojí několik SQL příkazů do jedné logické operace.</p></div>
+<div class="card accent-green"><div class="icon">🛡️</div><h3>Konzistence</h3><p>Databáze nemá zůstat „napůl změněná“, pokud část operace selže.</p></div>
+<div class="card accent-yellow"><div class="icon">↩️</div><h3>Možnost návratu</h3><p>Pomocí <span class="code">ROLLBACK</span> lze neuložené změny transakce zrušit.</p></div>
+</div>
+<div class="callout"><strong>Důležité:</strong> transakce není totéž co jeden SQL příkaz. Je to <strong>hranice atomické operace</strong>, která může obsahovat více příkazů.</div>
+</section>
+
+<section id="acid">
+<div class="eyebrow">03 • VLASTNOSTI</div><h2>ACID: čtyři vlastnosti transakcí</h2>
+<div class="grid2">
+<div class="card accent-yellow"><span class="badge b-yellow">A</span><h3>Atomicity • Atomita</h3><p>Transakce se provede jako celek, nebo se její změny zruší.</p></div>
+<div class="card accent-blue"><span class="badge b-blue">C</span><h3>Consistency • Konzistence</h3><p>Po úspěšném dokončení jsou data v souladu s definovanými pravidly databáze.</p></div>
+<div class="card accent-green"><span class="badge b-green">I</span><h3>Isolation • Izolace</h3><p>Souběžné transakce se navzájem ovlivňují podle nastavené úrovně izolace.</p></div>
+<div class="card accent-blue"><span class="badge b-blue">D</span><h3>Durability • Trvalost</h3><p>Po <span class="code">COMMIT</span> databáze považuje změny za potvrzené a DBMS je chrání před běžným výpadkem.</p></div>
+</div>
+<div class="callout yellow"><strong>Pomůcka:</strong> <span style="color:var(--yellow)">A</span>ll or nothing • <span style="color:var(--yellow)">C</span>orrect state • <span style="color:var(--yellow)">I</span>ndependent work • <span style="color:var(--yellow)">D</span>on't lose committed data.</div>
+</section>
+
+<section id="sql">
+<div class="eyebrow">04 • SQL</div><h2>Jak vytvořit transakci v MySQL / MariaDB?</h2>
+<p class="lead">Nejčastěji explicitně vymezíme začátek transakce, provedeme změny a nakonec použijeme <strong>COMMIT</strong> nebo <strong>ROLLBACK</strong>.</p>
+<div class="panel">
+<div class="code" style="display:block;padding:1.5rem;line-height:1.9;white-space:pre-wrap;color:#fff;background:rgba(0,0,0,.38)">START TRANSACTION;
+
+UPDATE accounts
+SET balance = balance - 1000
+WHERE id = 1;
+
+UPDATE accounts
+SET balance = balance + 1000
+WHERE id = 2;
+
+COMMIT;</div>
+</div>
+<div class="grid2" style="margin-top:1.5rem">
+<div class="card accent-green"><h3>COMMIT</h3><p>Potvrdí změny aktuální transakce. Po potvrzení jsou změny trvalou součástí databázového stavu.</p><p class="muted">Použijeme, když všechny kroky dopadly správně.</p></div>
+<div class="card accent-yellow"><h3>ROLLBACK</h3><p>Zruší změny provedené od začátku transakce nebo od posledního relevantního bodu transakce.</p><p class="muted">Použijeme při chybě nebo když operaci nechceme potvrdit.</p></div>
+</div>
+<div class="callout"><strong>Alternativa:</strong> <span class="code">BEGIN</span> se v MySQL/MariaDB používá jako synonymní způsob zahájení transakce. Často se setkáš s <span class="code">START TRANSACTION</span>.</div>
+</section>
+
+<section id="flow">
+<div class="eyebrow">05 • ŽIVOTNÍ CYKLUS</div><h2>Transakce krok za krokem</h2>
+<div class="panel">
+<div class="timeline">
+<div class="step"><div class="step-num">1</div><div><h3>START TRANSACTION</h3><p>Začíná transakční kontext. Následující změny mohou být potvrzeny nebo vráceny.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><h3>SQL operace</h3><p>Provedeme jeden nebo více <span class="code">INSERT</span>, <span class="code">UPDATE</span> nebo <span class="code">DELETE</span>.</p></div></div>
+<div class="step"><div class="step-num">3</div><div><h3>Kontrola výsledku</h3><p>Aplikace nebo DBMS zjistí, zda všechny požadované kroky proběhly správně.</p></div></div>
+<div class="step"><div class="step-num">4</div><div><h3>COMMIT / ROLLBACK</h3><p>Úspěch → <strong>COMMIT</strong>. Chyba → <strong>ROLLBACK</strong>.</p></div></div>
+</div>
+</div>
+</section>
+
+<section id="backend">
+<div class="eyebrow">06 • BACKEND</div><h2>Transakce v PHP: DBMS ji řídí, aplikace rozhoduje</h2>
+<p class="lead">Na backendu obvykle použijeme PDO. Aplikace otevře transakci, provede databázové operace a podle výsledku ji potvrdí nebo vrátí.</p>
+<div class="panel">
+<div class="code" style="display:block;padding:1.5rem;line-height:1.85;white-space:pre-wrap;color:#fff;background:rgba(0,0,0,.38)">$pdo->beginTransaction();
+
+try {
+    $stmt = $pdo->prepare(
+        'UPDATE accounts SET balance = balance - ? WHERE id = ?'
+    );
+    $stmt->execute([1000, 1]);
+
+    $stmt = $pdo->prepare(
+        'UPDATE accounts SET balance = balance + ? WHERE id = ?'
+    );
+    $stmt->execute([1000, 2]);
+
+    $pdo->commit();
+} catch (Throwable $e) {
+    $pdo->rollBack();
+    throw $e;
+}</div>
+</div>
+<div class="grid3" style="margin-top:1.5rem">
+<div class="card"><h3>beginTransaction()</h3><p>PDO požádá databázové připojení o zahájení transakce.</p></div>
+<div class="card"><h3>commit()</h3><p>Potvrdí všechny změny provedené v dané transakci.</p></div>
+<div class="card"><h3>rollBack()</h3><p>Při chybě zruší dosud nepotvrzené změny transakce.</p></div>
+</div>
+<div class="callout green"><strong>Pravidlo backendu:</strong> <em>COMMIT až po úspěšném dokončení všech kroků.</em> Při výjimce se snažíme provést <span class="code">ROLLBACK</span>.</div>
+</section>
+
+<section id="isolation">
+<div class="eyebrow">07 • SOUBĚŽNOST</div><h2>Co když pracuje více uživatelů současně?</h2>
+<p class="lead">Transakce neřeší jen „chybu v programu“. DBMS musí koordinovat také souběžné transakce.</p>
+<div class="grid2">
+<div class="card accent-blue"><h3>Izolace</h3><p>Jedna transakce nemusí okamžitě vidět všechny necommitnuté změny jiné transakce. Konkrétní chování určuje <strong>isolation level</strong>.</p></div>
+<div class="card accent-yellow"><h3>Locky a souběh</h3><p>DBMS může při práci s daty používat zámky a další mechanismy řízení souběhu, aby zachoval požadovanou konzistenci.</p></div>
+</div>
+<div class="callout"><strong>Pro maturitu / základ:</strong> stačí si spojit transakce s pojmy <strong>atomita, konzistence, izolace, trvalost</strong> a s příkazy <strong>START TRANSACTION, COMMIT, ROLLBACK</strong>.</div>
+</section>
+
+<section id="pitfalls">
+<div class="eyebrow">08 • POZOR</div><h2>Časté chyby a důležité nuance</h2>
+<div class="grid2">
+<div class="card accent-yellow"><h3>Ne každý SQL příkaz se chová stejně</h3><p>Transakční chování závisí mimo jiné na použitém storage enginu. U běžného InnoDB je transakční zpracování standardní součástí práce s daty.</p></div>
+<div class="card accent-blue"><h3>COMMIT není jen „uložit formulář“</h3><p>COMMIT potvrzuje změny celé aktuální transakce na daném připojení.</p></div>
+<div class="card accent-green"><h3>Autocommit</h3><p>MySQL/MariaDB běžně pracují s <strong>autocommit</strong>. Pokud je zapnutý, samostatný příkaz může být automaticky potvrzen, pokud explicitně nevytvoříme transakci.</p></div>
+<div class="card accent-blue"><h3>Transakce musí mít rozumný rozsah</h3><p>Dlouhé transakce mohou držet zdroje a zámky déle, než je žádoucí. Backend by měl transakci zahájit co nejblíže potřebným operacím a rychle ji ukončit.</p></div>
+</div>
+</section>
+
+<section id="summary">
+<div class="eyebrow">09 • SHRNUTÍ</div><h2>Co si odnést</h2>
+<div class="grid2">
+<div class="card"><h3>① Transakce</h3><p>Je logický celek databázových operací, který má být proveden konzistentně.</p></div>
+<div class="card"><h3>② Atomita</h3><p>Myšlenka <strong>všechno, nebo nic</strong>.</p></div>
+<div class="card"><h3>③ COMMIT</h3><p>Potvrdí změny transakce.</p></div>
+<div class="card"><h3>④ ROLLBACK</h3><p>Vrátí nepotvrzené změny transakce.</p></div>
+<div class="card"><h3>⑤ SQL</h3><p><span class="code">START TRANSACTION → SQL → COMMIT / ROLLBACK</span></p></div>
+<div class="card"><h3>⑥ PHP</h3><p><span class="code">beginTransaction() → try → commit()</span>; při chybě <span class="code">rollBack()</span>.</p></div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<p class="question">Jedna věta na závěr:</p>
+<div class="answer">Transakce chrání databázi před tím, aby složitější operace skončily pouze „napůl“.</div>
+</div>
+</section>
+
+<footer>VOŠ, SPŠ a SOŠ Varnsdorf • Výukový materiál — Transakce v MySQL / MariaDB • Design vychází z přiloženého školního Design Systemu.</footer>
+</main>
+<script>
+const links=[...document.querySelectorAll('nav a')], sections=[...document.querySelectorAll('main section[id]')];
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}}),{rootMargin:'-25% 0px -65% 0px'});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=991)document.querySelector('aside').style.display='none'}));
+</script>
+</body>
+</html>

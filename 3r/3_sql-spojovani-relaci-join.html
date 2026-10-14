@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL – spojování relací (JOIN) — VOŠ, SPŠ a SOŠ Varnsdorf</title>
+<meta name="description" content="Výuková one-page prezentace: spojování tabulek v MySQL / MariaDB – INNER, LEFT, RIGHT, CROSS JOIN, emulace FULL OUTER JOIN, self join, spojení více tabulek, hledání chybějících záznamů a časté chyby.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,200;0,400;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-top:#003b4b;--bg-bottom:#006783;--text:#fff;
+  --yellow:#ffd400;--yellow2:#ffea80;--blue:#41d7ff;--blue2:#00c0f3;
+  --green:#a6ce39;--green2:#c2dd78;--panel:rgba(0,27,34,.48);
+  --panel2:rgba(0,27,34,.68);--muted:rgba(255,255,255,.62);
+  --sidebar:280px;--danger:#ef4444;--pink:#ff8fb1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Raleway,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg-top),var(--bg-bottom)) fixed;line-height:1.6}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ radial-gradient(circle at 78% 8%,rgba(65,215,255,.10),transparent 25%),
+ radial-gradient(circle at 18% 70%,rgba(166,206,57,.07),transparent 25%)}
+a{color:inherit}
+aside{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:2rem 1.5rem;background:rgba(0,20,26,.76);backdrop-filter:blur(20px);z-index:10;overflow-y:auto}
+main{margin-left:var(--sidebar);max-width:1250px;padding:3.5rem 3rem 5rem}
+.logo{display:flex;align-items:center;gap:1rem;text-decoration:none;margin-bottom:2.2rem}
+.logo svg{width:50px;height:43px;flex:none}.logo b{font-size:.84rem;line-height:1.25;letter-spacing:.05em}.logo span{color:var(--blue)}
+.nav-title{font-size:.72rem;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:1rem}
+nav ul{list-style:none;margin:0}nav li{margin-bottom:.1rem;padding:0}nav li:before{display:none}
+nav a{display:flex;gap:.75rem;align-items:center;text-decoration:none;color:rgba(255,255,255,.68);padding:.5rem .9rem;font-weight:600;font-size:.86rem;border-left:3px solid transparent;transition:.2s}
+nav a:hover,nav a.active{color:#fff;background:rgba(65,215,255,.09);border-left-color:var(--blue)}
+.side-note{margin-top:1.8rem;color:var(--muted);font-size:.72rem}
+section{scroll-margin-top:2rem;margin-bottom:5.5rem}
+.eyebrow{color:var(--blue);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.16em}
+h1{font-size:clamp(2.7rem,6vw,5.2rem);line-height:1.02;letter-spacing:-.045em;margin:.6rem 0 1.4rem}
+h1 em{font-style:normal;color:var(--yellow)}
+h2{font-size:clamp(1.9rem,4vw,2.7rem);line-height:1.15;margin:.35rem 0 1.2rem;letter-spacing:-.025em}
+h3{font-size:1.35rem;line-height:1.25;margin-bottom:.65rem}
+h4{font-size:1rem;margin-bottom:.4rem}
+p{margin-bottom:1rem}strong{font-weight:700}.muted{color:var(--muted)}
+.lead{font-size:1.18rem;font-weight:200;line-height:1.7}
+.hero{min-height:78vh;display:flex;align-items:center}
+.hero-inner{max-width:940px}
+.hero-kicker{display:inline-flex;align-items:center;gap:.55rem;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:.76rem}
+.hero-kicker:before{content:"";width:28px;height:3px;background:var(--green)}
+.hero-sub{max-width:780px;font-size:1.28rem;color:rgba(255,255,255,.84);font-weight:200}
+.chips{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.8rem}.chip{padding:.42rem .75rem;background:rgba(255,255,255,.07);font-size:.8rem;font-weight:600;font-family:Consolas,monospace}
+.panel{background:var(--panel);backdrop-filter:blur(12px);box-shadow:0 12px 35px rgba(0,0,0,.22);padding:2rem}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.grid2>*,.grid3>*,.grid4>*{min-width:0}
+.card{background:rgba(0,20,26,.34);padding:1.45rem;min-height:100%}
+.card.accent-blue{border-top:3px solid var(--blue)}.card.accent-yellow{border-top:3px solid var(--yellow)}.card.accent-green{border-top:3px solid var(--green)}.card.accent-red{border-top:3px solid var(--danger)}
+.icon{font-size:1.7rem;margin-bottom:.7rem}.card p:last-child{margin-bottom:0}
+.question{font-size:1.55rem;font-weight:600;line-height:1.3}.answer{margin-top:1.1rem;padding-left:1rem;border-left:3px solid var(--yellow)}
+.badge{display:inline-block;padding:.18rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.b-blue{background:rgba(65,215,255,.14);color:var(--blue)}.b-yellow{background:rgba(255,212,0,.14);color:var(--yellow)}.b-green{background:rgba(166,206,57,.14);color:var(--green)}.b-red{background:rgba(239,68,68,.16);color:#ff8a8a}
+.callout{margin-top:1.4rem;padding:1.1rem 1.25rem;border-left:4px solid var(--blue);background:rgba(65,215,255,.07)}.callout.yellow{border-left-color:var(--yellow);background:rgba(255,212,0,.07)}.callout.green{border-left-color:var(--green);background:rgba(166,206,57,.07)}.callout.red{border-left-color:var(--danger);background:rgba(239,68,68,.08)}
+ul{list-style:none;margin:.7rem 0}li{padding:.28rem 0 .28rem 1.35rem;position:relative}li:before{content:"";position:absolute;left:0;top:.78em;width:.72em;height:.72em;background:var(--yellow);clip-path:polygon(0 0,100% 50%,0 100%,20% 50%)}
+.code{font-family:Consolas,monospace;background:rgba(0,0,0,.3);padding:.12rem .35rem;color:var(--yellow2)}
+/* SQL */
+.sqlwrap{position:relative;margin:1rem 0}
+pre.sql{font-family:Consolas,monospace;font-size:.95rem;display:block;padding:1.3rem 1.5rem;line-height:1.75;white-space:pre;color:#fff;background:rgba(0,0,0,.38);overflow-x:auto}
+pre.sql .k{color:var(--yellow);font-weight:700}pre.sql .f{color:var(--blue)}pre.sql .s{color:var(--green2)}pre.sql .n{color:var(--pink)}pre.sql .c{color:var(--muted);font-style:italic}
+.copy{position:absolute;top:.5rem;right:.5rem;background:rgba(255,255,255,.08);border:0;color:var(--muted);font:600 .72rem Raleway,sans-serif;padding:.3rem .6rem;cursor:pointer;letter-spacing:.05em}
+.copy:hover{color:#fff;background:rgba(65,215,255,.18)}
+/* tabulky */
+.table-wrap{overflow-x:auto}
+table.data{border-collapse:collapse;font-size:.88rem;width:100%}
+table.data th{text-align:left;color:var(--blue);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;background:rgba(0,20,26,.75);padding:.55rem .75rem;font-family:Consolas,monospace;white-space:nowrap}
+table.data th.grp{color:var(--muted);text-align:center;font-size:.66rem;background:rgba(0,20,26,.55)}
+table.data td{padding:.45rem .75rem;background:rgba(0,20,26,.25);font-family:Consolas,monospace;white-space:nowrap}
+table.data tr:nth-child(even) td{background:rgba(255,255,255,.035)}
+table.data td.num{text-align:right}
+table.data td.sep,table.data th.sep{border-left:2px solid rgba(255,255,255,.25)}
+.null{color:var(--pink);font-style:italic}
+.tname{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green);font-weight:700;margin:.2rem 0 .4rem;font-family:Consolas,monospace}
+.result-label{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green);font-weight:700;margin:.4rem 0 .4rem}
+/* barvy tříd */
+tr.ca td:first-child{box-shadow:inset 4px 0 var(--yellow)}tr.cb td:first-child{box-shadow:inset 4px 0 var(--blue)}tr.cc td:first-child{box-shadow:inset 4px 0 var(--green)}tr.cn td:first-child{box-shadow:inset 4px 0 var(--pink)}
+.dot{display:inline-block;width:.7em;height:.7em;margin-right:.35em;vertical-align:middle}
+.dot.ca{background:var(--yellow)}.dot.cb{background:var(--blue)}.dot.cc{background:var(--green)}.dot.cn{background:var(--pink)}
+.compare{width:100%;border-collapse:collapse;font-size:.92rem}.compare th{text-align:left;color:var(--blue);font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;background:rgba(0,20,26,.75);padding:1rem}.compare td{padding:1rem;background:rgba(0,20,26,.25);vertical-align:top}.compare tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+/* ER diagram */
+.er{width:100%;height:auto;display:block}
+.er .box{fill:rgba(0,20,26,.6);stroke:rgba(255,255,255,.25);stroke-width:1.5}
+.er .head{fill:rgba(65,215,255,.16)}
+.er .t{fill:#fff;font:700 17px Consolas,monospace}
+.er .a{fill:rgba(255,255,255,.82);font:14px Consolas,monospace}
+.er .pk{fill:var(--yellow);font:700 14px Consolas,monospace}
+.er .fk{fill:var(--blue);font:700 14px Consolas,monospace}
+.er .line{stroke:var(--yellow);stroke-width:2;fill:none}
+.er .card{fill:var(--yellow);font:700 15px Raleway,sans-serif}
+/* matice kartézského součinu */
+table.matrix{border-collapse:separate;border-spacing:4px;font-family:Consolas,monospace;font-size:.9rem;margin:0 auto}
+table.matrix th{padding:.5rem .7rem;color:var(--blue);font-weight:700;text-align:center;white-space:nowrap}
+table.matrix th.rowh{text-align:left;color:#fff;font-weight:400}
+table.matrix td{width:64px;height:46px;text-align:center;background:rgba(0,20,26,.45);color:rgba(255,255,255,.3);font-size:1.1rem}
+table.matrix td.ok{background:rgba(166,206,57,.28);color:#fff;font-weight:700;outline:2px solid var(--green)}
+table.matrix td.nul{background:rgba(255,143,177,.12);color:var(--pink);font-size:.8rem}
+/* myšlenkový model */
+.steps{display:grid;gap:1rem;margin-top:1.2rem}
+.step{display:grid;grid-template-columns:50px 1fr;gap:1rem;align-items:start}
+.step-num{width:42px;height:42px;display:grid;place-items:center;background:var(--blue2);color:#002d38;font-weight:700}
+.step h3{margin:.1rem 0 .2rem}.step p{color:rgba(255,255,255,.78);margin-bottom:0}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.mini{display:flex;gap:4px;align-items:flex-start;justify-content:center;margin:1rem 0}
+.mini .col{display:grid;gap:4px}
+.mini span{display:block;width:44px;height:22px}
+.mini .y{background:rgba(255,212,0,.6)}.mini .bl{background:rgba(65,215,255,.6)}
+/* průzkumník */
+.ex-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.ex-tabs button{background:rgba(255,255,255,.07);border:0;color:rgba(255,255,255,.8);font:700 .85rem Consolas,monospace;padding:.65rem 1rem;cursor:pointer;border-bottom:3px solid transparent}
+.ex-tabs button:hover{background:rgba(65,215,255,.12);color:#fff}
+.ex-tabs button.on{background:rgba(255,212,0,.14);color:var(--yellow);border-bottom-color:var(--yellow)}
+.ex-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,.6fr) minmax(0,1.5fr);gap:1.2rem;align-items:start}
+.ex-grid table.data tr{transition:opacity .25s,outline .15s}
+.ex-grid tr.dim{opacity:.32}
+.ex-grid tr.hl td{background:rgba(255,212,0,.22)!important}
+.ex-grid tbody tr{cursor:default}
+#excap{margin-top:1.1rem}
+.count{display:inline-block;background:var(--yellow);color:#002d38;font-weight:700;padding:.1rem .5rem;margin-right:.4rem}
+.okmark{color:var(--green);font-weight:700}.nomark{color:rgba(255,255,255,.3)}
+/* procvičování */
+details{background:rgba(0,20,26,.34);margin-bottom:1rem;border-left:3px solid var(--green)}
+summary{cursor:pointer;padding:1.1rem 1.3rem;font-weight:600;font-size:1.05rem;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:before{content:"▸";color:var(--green);margin-right:.6rem;display:inline-block;transition:transform .2s}
+details[open] summary:before{transform:rotate(90deg)}
+details .sol{padding:0 1.3rem 1.2rem}
+footer{padding:2rem 0;color:var(--muted);font-size:.75rem;border-top:1px solid rgba(255,255,255,.08)}
+.mobile{display:none}
+@media(max-width:1200px){.ex-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ex-grid>div:last-child{grid-column:1/-1}.grid4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:991px){
+ aside{display:none}.mobile{display:flex;position:sticky;top:0;z-index:20;background:rgba(0,20,26,.92);backdrop-filter:blur(15px);padding:.8rem 1rem;justify-content:space-between;align-items:center}.mobile .logo{margin:0}.mobile button{background:none;border:0;color:#fff;font-size:1.5rem}main{margin:0;padding:2rem 1.2rem}.hero{min-height:75vh}.grid2,.grid3,.vs{grid-template-columns:1fr}.grid4{grid-template-columns:1fr}.ex-grid{grid-template-columns:minmax(0,1fr)}.panel{padding:1.35rem}.compare{min-width:640px}table.matrix td{width:56px}}
+</style>
+</head>
+<body>
+<div class="mobile"><a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a><button onclick="document.querySelector('aside').style.display='block'">☰</button></div>
+
+<aside>
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a>
+<div class="nav-title">SQL • SPOJOVÁNÍ RELACÍ</div>
+<nav><ul>
+<li><a class="active" href="#start">⌂ <span>Data jsou rozdělená</span></a></li>
+<li><a href="#why">? <span>Proč JOIN</span></a></li>
+<li><a href="#data">▤ <span>Ukázková data</span></a></li>
+<li><a href="#model">⊞ <span>Jak JOIN „přemýšlí“</span></a></li>
+<li><a href="#inner">⋈ <span>INNER JOIN</span></a></li>
+<li><a href="#outer">⟕ <span>LEFT a RIGHT JOIN</span></a></li>
+<li><a href="#explorer">▶ <span>Vyzkoušej si</span></a></li>
+<li><a href="#multi">⛓ <span>Více tabulek</span></a></li>
+<li><a href="#multiply">✕ <span>Násobení řádků</span></a></li>
+<li><a href="#missing">∅ <span>Hledání chybějících</span></a></li>
+<li><a href="#onwhere">⚖ <span>ON, nebo WHERE?</span></a></li>
+<li><a href="#more">✚ <span>Další možnosti</span></a></li>
+<li><a href="#pitfalls">⚠ <span>Na co pozor?</span></a></li>
+<li><a href="#practice">✎ <span>Procvič si</span></a></li>
+<li><a href="#summary">→ <span>Co si odnést</span></a></li>
+</ul></nav>
+<div class="side-note">MySQL / MariaDB<br>Navazuje na: Seskupování a agregační funkce</div>
+</aside>
+
+<main>
+<!-- HERO -->
+<section id="start" class="hero">
+<div class="hero-inner">
+<div class="hero-kicker">SQL • DQL • MySQL / MariaDB</div>
+<h1>Data jsou rozdělená. <em>JOIN je skládá zpět.</em></h1>
+<p class="hero-sub">Dobře navržená databáze ukládá každou informaci jen jednou – žáky do jedné tabulky, třídy do druhé, známky do třetí. Když pak chceme vidět „žák, jeho třída a jeho známky“ v jednom výsledku, musíme tabulky <strong>spojit</strong>.</p>
+<div class="chips"><span class="chip">INNER JOIN</span><span class="chip">LEFT JOIN</span><span class="chip">RIGHT JOIN</span><span class="chip">CROSS JOIN</span><span class="chip">ON</span><span class="chip">IS NULL</span></div>
+<div class="callout yellow"><strong>Kde jsme:</strong> v minulé kapitole jsme seskupovali a počítali souhrny – ale vše bylo v jediné tabulce <span class="code">grades</span>. Teď data rozdělíme tak, jak to dělá skutečná databáze, a naučíme se je zase spojovat. Na konci obě témata propojíme.</div>
+</div>
+</section>
+
+<!-- 01 PROČ -->
+<section id="why">
+<div class="eyebrow">01 • PROČ JOIN</div><h2>Proč nemít všechno v jedné tabulce?</h2>
+<p class="lead">V minulé kapitole měla tabulka u každé známky napsané jméno žáka i třídu. To je pohodlné na čtení, ale nepraktické na údržbu.</p>
+<div class="grid3">
+<div class="card accent-red"><div class="icon">📝</div><h3>Opakování</h3><p>„Novák, 2.A“ je zapsáno u každé jeho známky. Při 40 známkách 40×.</p></div>
+<div class="card accent-red"><div class="icon">🔀</div><h3>Nekonzistence</h3><p>Když Novák přestoupí do 2.B, musíme opravit všechny řádky. Zapomeneme-li jeden, je v databázi ve dvou třídách najednou.</p></div>
+<div class="card accent-red"><div class="icon">🕳️</div><h3>Nelze uložit</h3><p>Novou třídu bez žáků nebo nového žáka bez známek nemáme kam zapsat.</p></div>
+</div>
+<p style="margin-top:1.8rem">Proto data <strong>rozdělíme do více tabulek</strong> (normalizace – znáš z návrhu databáze) a propojíme je <strong>klíči</strong>: cizí klíč (FK) v jedné tabulce ukazuje na primární klíč (PK) v jiné.</p>
+<div class="panel">
+<svg class="er" viewBox="0 0 960 190" role="img" aria-label="ER diagram: classes 1:N students 1:N grades N:1 subjects">
+ <!-- classes -->
+ <rect class="box" x="10" y="20" width="190" height="130"/><rect class="head" x="10" y="20" width="190" height="34"/>
+ <text class="t" x="24" y="43">classes</text>
+ <text class="pk" x="24" y="80">PK id</text><text class="a" x="24" y="104">name</text>
+ <!-- students -->
+ <rect class="box" x="260" y="20" width="200" height="130"/><rect class="head" x="260" y="20" width="200" height="34"/>
+ <text class="t" x="274" y="43">students</text>
+ <text class="pk" x="274" y="80">PK id</text><text class="a" x="274" y="104">name</text><text class="fk" x="274" y="128">FK class_id</text>
+ <!-- grades -->
+ <rect class="box" x="520" y="20" width="200" height="154"/><rect class="head" x="520" y="20" width="200" height="34"/>
+ <text class="t" x="534" y="43">grades</text>
+ <text class="pk" x="534" y="80">PK id</text><text class="fk" x="534" y="104">FK student_id</text><text class="fk" x="534" y="128">FK subject_id</text><text class="a" x="534" y="152">grade</text>
+ <!-- subjects -->
+ <rect class="box" x="780" y="20" width="170" height="130"/><rect class="head" x="780" y="20" width="170" height="34"/>
+ <text class="t" x="794" y="43">subjects</text>
+ <text class="pk" x="794" y="80">PK id</text><text class="a" x="794" y="104">code</text><text class="a" x="794" y="128">name</text>
+ <!-- vazby -->
+ <path class="line" d="M200 76 H260"/><text class="card" x="205" y="68">1</text><text class="card" x="243" y="68">N</text>
+ <path class="line" d="M460 76 H520"/><text class="card" x="465" y="68">1</text><text class="card" x="503" y="68">N</text>
+ <path class="line" d="M720 76 H780"/><text class="card" x="725" y="68">N</text><text class="card" x="768" y="68">1</text>
+</svg>
+</div>
+<div class="callout"><strong>Jak číst diagram:</strong> jedna třída má <em>N</em> žáků (<span class="code">students.class_id → classes.id</span>), jeden žák má <em>N</em> známek (<span class="code">grades.student_id → students.id</span>) a k jednomu předmětu patří <em>N</em> známek. Tabulka <span class="code">grades</span> zároveň realizuje vztah M:N mezi žáky a předměty.</div>
+</section>
+
+<!-- 02 DATA -->
+<section id="data">
+<div class="eyebrow">02 • UKÁZKOVÁ DATA</div><h2>Naše tabulky</h2>
+<p class="lead">Data jsou malá, ale záměrně obsahují „díry“: žák <strong>Malý</strong> zatím nemá třídu, třída <strong>3.C</strong> nemá žádné žáky, <strong>Černá</strong> nemá žádnou známku a z <strong>ANJ</strong> nikdo známku nedostal. Právě na dírách se ukazují rozdíly mezi typy JOIN.</p>
+<div class="grid2">
+<div><div class="tname">classes</div><div class="table-wrap"><table class="data">
+<tr><th>id</th><th>name</th></tr>
+<tr class="ca"><td>1</td><td>2.A</td></tr><tr class="cb"><td>2</td><td>2.B</td></tr><tr class="cc"><td>3</td><td>3.C</td></tr></table></div></div>
+<div><div class="tname">students</div><div class="table-wrap"><table class="data">
+<tr><th>id</th><th>name</th><th>class_id</th></tr>
+<tr class="ca"><td>1</td><td>Novák</td><td class="num">1</td></tr>
+<tr class="ca"><td>2</td><td>Svobodová</td><td class="num">1</td></tr>
+<tr class="cb"><td>3</td><td>Dvořák</td><td class="num">2</td></tr>
+<tr class="cb"><td>4</td><td>Černá</td><td class="num">2</td></tr>
+<tr class="cn"><td>5</td><td>Malý</td><td class="num null">NULL</td></tr></table></div></div>
+<div><div class="tname">subjects</div><div class="table-wrap"><table class="data">
+<tr><th>id</th><th>code</th><th>name</th></tr>
+<tr><td>1</td><td>MAT</td><td>Matematika</td></tr><tr><td>2</td><td>CJL</td><td>Český jazyk</td></tr>
+<tr><td>3</td><td>DAT</td><td>Databáze</td></tr><tr><td>4</td><td>ANJ</td><td>Anglický jazyk</td></tr></table></div></div>
+<div><div class="tname">grades</div><div class="table-wrap"><table class="data">
+<tr><th>id</th><th>student_id</th><th>subject_id</th><th>grade</th></tr>
+<tr><td>1</td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td>2</td><td class="num">1</td><td class="num">3</td><td class="num">1</td></tr>
+<tr><td>3</td><td class="num">2</td><td class="num">1</td><td class="num">3</td></tr>
+<tr><td>4</td><td class="num">2</td><td class="num">2</td><td class="num">1</td></tr>
+<tr><td>5</td><td class="num">3</td><td class="num">1</td><td class="num">4</td></tr>
+<tr><td>6</td><td class="num">5</td><td class="num">3</td><td class="num">2</td></tr></table></div></div>
+</div>
+<p class="muted" style="margin-top:1rem">Barevný proužek u žáků = třída, do které patří (<span class="dot ca"></span>2.A, <span class="dot cb"></span>2.B, <span class="dot cc"></span>3.C, <span class="dot cn"></span>bez třídy). Stejné barvy uvidíš ve výsledcích.</p>
+<details><summary>Skript pro vytvoření databáze – zkopíruj a vyzkoušej</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">CREATE TABLE classes (
+  id   INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE students (
+  id       INT AUTO_INCREMENT PRIMARY KEY,
+  name     VARCHAR(50) NOT NULL,
+  class_id INT NULL,
+  FOREIGN KEY (class_id) REFERENCES classes(id)
+);
+
+CREATE TABLE subjects (
+  id   INT AUTO_INCREMENT PRIMARY KEY,
+  code CHAR(3)     NOT NULL,
+  name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE grades (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  student_id INT NOT NULL,
+  subject_id INT NOT NULL,
+  grade      TINYINT NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(id),
+  FOREIGN KEY (subject_id) REFERENCES subjects(id)
+);
+
+INSERT INTO classes (id, name) VALUES (1,'2.A'), (2,'2.B'), (3,'3.C');
+INSERT INTO students (id, name, class_id) VALUES
+  (1,'Novák',1), (2,'Svobodová',1), (3,'Dvořák',2), (4,'Černá',2), (5,'Malý',NULL);
+INSERT INTO subjects (id, code, name) VALUES
+  (1,'MAT','Matematika'), (2,'CJL','Český jazyk'), (3,'DAT','Databáze'), (4,'ANJ','Anglický jazyk');
+INSERT INTO grades (student_id, subject_id, grade) VALUES
+  (1,1,1), (1,3,1), (2,1,3), (2,2,1), (3,1,4), (5,3,2);</pre></div>
+</div></details>
+</section>
+
+<!-- 03 MODEL -->
+<section id="model">
+<div class="eyebrow">03 • JAK JOIN „PŘEMÝŠLÍ“</div><h2>Každý s každým – a pak jen ty, kdo k sobě patří</h2>
+<p class="lead">Nejspolehlivější představa, jak JOIN funguje: databáze (myšlenkově) zkusí <strong>každý řádek první tabulky s každým řádkem druhé</strong> a ponechá jen dvojice, které splní <strong>podmínku spojení</strong>.</p>
+<div class="grid2">
+<div class="panel">
+<p class="result-label">5 žáků × 3 třídy = 15 dvojic</p>
+<div class="table-wrap"><table class="matrix">
+<tr><th></th><th>2.A<br><small class="muted">id 1</small></th><th>2.B<br><small class="muted">id 2</small></th><th>3.C<br><small class="muted">id 3</small></th></tr>
+<tr><th class="rowh">Novák<br><small class="muted">class_id 1</small></th><td class="ok">✓</td><td>·</td><td>·</td></tr>
+<tr><th class="rowh">Svobodová<br><small class="muted">class_id 1</small></th><td class="ok">✓</td><td>·</td><td>·</td></tr>
+<tr><th class="rowh">Dvořák<br><small class="muted">class_id 2</small></th><td>·</td><td class="ok">✓</td><td>·</td></tr>
+<tr><th class="rowh">Černá<br><small class="muted">class_id 2</small></th><td>·</td><td class="ok">✓</td><td>·</td></tr>
+<tr><th class="rowh">Malý<br><small class="null">class_id NULL</small></th><td>·</td><td>·</td><td>·</td></tr>
+</table></div>
+<p class="muted" style="margin-top:1rem;text-align:center">✓ = dvojice splňuje <span class="code">students.class_id = classes.id</span></p>
+</div>
+<div>
+<div class="steps">
+<div class="step"><div class="step-num">1</div><div><h3>Všechny kombinace</h3><p>Vznikne 15 dvojic (žák, třída). Tomu se říká <strong>kartézský součin</strong> – v SQL <span class="code">CROSS JOIN</span>.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><h3>Podmínka ON</h3><p>Ponechají se jen dvojice, kde <span class="code">class_id</span> žáka odpovídá <span class="code">id</span> třídy. To jsou 4 zelená políčka = <span class="code">INNER JOIN</span>.</p></div></div>
+<div class="step"><div class="step-num">3</div><div><h3>Řádky bez páru</h3><p>Malý (celý řádek bez ✓) a 3.C (celý sloupec bez ✓) ve výsledku INNER JOIN <strong>nebudou</strong>. Pokud je tam chceme, použijeme <span class="code">LEFT</span> nebo <span class="code">RIGHT JOIN</span>.</p></div></div>
+</div>
+<div class="callout yellow"><strong>Proč Malý nemá shodu ani s jednou třídou?</strong> Porovnání <span class="code">NULL = 1</span> není pravda, ale <em>neznámo</em>. Podmínka s NULL nikdy neprojde.</div>
+</div>
+</div>
+<div class="callout"><strong>Pozn.:</strong> skutečná databáze 15 dvojic opravdu nevytváří – použije indexy a najde páry chytřeji. <strong>Výsledek</strong> je ale vždy stejný, jako kdyby to udělala. Tahle představa tě proto nikdy nezradí.</div>
+</section>
+
+<!-- 04 INNER -->
+<section id="inner">
+<div class="eyebrow">04 • INNER JOIN</div><h2>INNER JOIN: jen řádky, které mají pár</h2>
+<div class="grid2">
+<div>
+<div class="sqlwrap"><pre class="sql">SELECT s.id,
+       s.name AS student,
+       c.name AS trida
+FROM students AS s
+INNER JOIN classes AS c
+        ON c.id = s.class_id
+ORDER BY s.id;</pre></div>
+<p class="result-label">Výsledek – 4 řádky</p>
+<div class="table-wrap"><table class="data">
+<tr><th>id</th><th>student</th><th>trida</th></tr>
+<tr class="ca"><td>1</td><td>Novák</td><td>2.A</td></tr>
+<tr class="ca"><td>2</td><td>Svobodová</td><td>2.A</td></tr>
+<tr class="cb"><td>3</td><td>Dvořák</td><td>2.B</td></tr>
+<tr class="cb"><td>4</td><td>Černá</td><td>2.B</td></tr>
+</table></div>
+<p class="muted" style="margin-top:.8rem">Malý ani 3.C ve výsledku nejsou – nemají pár.</p>
+</div>
+<div>
+<div class="table-wrap"><table class="compare">
+<tr><th>Část dotazu</th><th>Co znamená</th></tr>
+<tr><td><span class="code">FROM students AS s</span></td><td>Výchozí tabulka. <span class="code">s</span> je <strong>alias</strong> – krátké jméno, kterým se na tabulku dál odkazujeme.</td></tr>
+<tr><td><span class="code">INNER JOIN classes AS c</span></td><td>Připoj tabulku tříd s aliasem <span class="code">c</span>. Slovo <span class="code">INNER</span> lze vynechat – samotné <span class="code">JOIN</span> znamená totéž.</td></tr>
+<tr><td><span class="code">ON c.id = s.class_id</span></td><td><strong>Podmínka spojení.</strong> Téměř vždy: primární klíč jedné tabulky = cizí klíč druhé.</td></tr>
+<tr><td><span class="code">s.name AS student</span></td><td>Obě tabulky mají sloupec <span class="code">name</span>, proto musíme říct, <em>čí</em> name chceme, a výsledné sloupce přejmenovat.</td></tr>
+</table></div>
+</div>
+</div>
+<div class="callout red"><strong>Chyba, kterou uvidíš často:</strong> napíšeš-li jen <span class="code">SELECT name FROM students s JOIN classes c ON …</span>, MySQL odpoví <em>Column 'name' in field list is ambiguous</em> – sloupec je nejednoznačný, existuje v obou tabulkách. Řešení: vždy piš <span class="code">alias.sloupec</span>.</div>
+<div class="callout green"><strong>Pořadí v ON nehraje roli:</strong> <span class="code">ON c.id = s.class_id</span> a <span class="code">ON s.class_id = c.id</span> jsou totéž. U INNER JOIN nezáleží ani na pořadí tabulek – <span class="code">FROM classes c JOIN students s</span> dá stejné řádky.</div>
+</section>
+
+<!-- 05 OUTER -->
+<section id="outer">
+<div class="eyebrow">05 • LEFT A RIGHT JOIN</div><h2>LEFT JOIN: všechny řádky zleva, i bez páru</h2>
+<p class="lead"><span class="code">LEFT JOIN</span> ponechá <strong>každý řádek levé tabulky</strong> (té, která je v dotazu před slovem JOIN). Když k němu v pravé tabulce není pár, sloupce pravé tabulky se doplní hodnotou <span class="code">NULL</span>.</p>
+<div class="grid2">
+<div>
+<div class="sqlwrap"><pre class="sql">SELECT s.name AS student,
+       c.name AS trida
+FROM students AS s          -- levá tabulka
+LEFT JOIN classes AS c      -- pravá tabulka
+       ON c.id = s.class_id
+ORDER BY s.id;</pre></div>
+</div>
+<div>
+<p class="result-label">Výsledek – 5 řádků (všichni žáci)</p>
+<div class="table-wrap"><table class="data">
+<tr><th>student</th><th>trida</th></tr>
+<tr class="ca"><td>Novák</td><td>2.A</td></tr>
+<tr class="ca"><td>Svobodová</td><td>2.A</td></tr>
+<tr class="cb"><td>Dvořák</td><td>2.B</td></tr>
+<tr class="cb"><td>Černá</td><td>2.B</td></tr>
+<tr class="cn"><td>Malý</td><td class="null">NULL</td></tr>
+</table></div>
+</div>
+</div>
+
+<h3 style="margin-top:2.2rem">RIGHT JOIN je zrcadlo</h3>
+<p><span class="code">RIGHT JOIN</span> ponechá všechny řádky <strong>pravé</strong> tabulky. Teď ve výsledku bude třída 3.C (bez žáků), ale Malý (bez třídy) zmizí.</p>
+<div class="grid2">
+<div><div class="sqlwrap"><pre class="sql">SELECT s.name AS student,
+       c.name AS trida
+FROM students AS s
+RIGHT JOIN classes AS c
+        ON c.id = s.class_id
+ORDER BY c.id, s.id;</pre></div></div>
+<div><div class="table-wrap"><table class="data">
+<tr><th>student</th><th>trida</th></tr>
+<tr class="ca"><td>Novák</td><td>2.A</td></tr>
+<tr class="ca"><td>Svobodová</td><td>2.A</td></tr>
+<tr class="cb"><td>Dvořák</td><td>2.B</td></tr>
+<tr class="cb"><td>Černá</td><td>2.B</td></tr>
+<tr class="cc"><td class="null">NULL</td><td>3.C</td></tr>
+</table></div></div>
+</div>
+<div class="callout yellow"><strong>V praxi se RIGHT JOIN skoro nepoužívá.</strong> Stejný výsledek dá LEFT JOIN s prohozenými tabulkami: <span class="code">FROM classes c LEFT JOIN students s ON …</span>. Většina lidí píše jen LEFT JOIN a tabulku, ze které chce „všechno“, dává na začátek do FROM. Doporučujeme totéž.</div>
+
+<div class="panel" style="margin-top:1.5rem">
+<p class="question">Jak si zapamatovat, která tabulka je „levá“?</p>
+<div class="answer">Přečti dotaz jako větu zleva doprava: <em>„Vezmi <strong>žáky</strong> (levá) a připoj k nim <strong>třídy</strong> (pravá), pokud nějaké mají.“</em> LEFT JOIN tedy znamená: <strong>„levou tabulku chci celou, pravá je bonus“</strong>. Neplatí to podle toho, jak tabulky leží v diagramu, ale jen podle pořadí v dotazu.</div>
+</div>
+</section>
+
+<!-- 06 PRŮZKUMNÍK -->
+<section id="explorer">
+<div class="eyebrow">06 • VYZKOUŠEJ SI</div><h2>Průzkumník JOINů</h2>
+<p class="lead">Přepínej typy spojení a sleduj, které řádky se dostanou do výsledku. <strong>Najeď myší na řádek výsledku</strong> – zvýrazní se řádky, ze kterých vznikl. Zašedlé řádky se do výsledku nedostaly.</p>
+<div class="panel">
+<div class="ex-tabs" id="extabs">
+<button data-t="cross">CROSS JOIN</button>
+<button data-t="inner" class="on">INNER JOIN</button>
+<button data-t="left">LEFT JOIN</button>
+<button data-t="right">RIGHT JOIN</button>
+<button data-t="full">FULL (emulace)</button>
+</div>
+<div class="sqlwrap"><pre class="sql" id="exsql"></pre></div>
+<div class="ex-grid">
+<div><div class="tname">students s <span class="muted">(levá)</span></div><div class="table-wrap"><table class="data" id="exS"></table></div></div>
+<div><div class="tname">classes c <span class="muted">(pravá)</span></div><div class="table-wrap"><table class="data" id="exC"></table></div></div>
+<div><div class="tname">výsledek</div><div class="table-wrap"><table class="data" id="exR"></table></div></div>
+</div>
+<div class="callout" id="excap"></div>
+</div>
+<div class="callout yellow"><strong>A co Vennovy diagramy (dvě překrývající se kružnice)?</strong> Často se JOIN vysvětluje jimi. Jsou dobrá <em>pomůcka na zapamatování</em>, které řádky bez páru se zachovají – ale nejsou přesné: JOIN neslučuje dvě množiny stejných prvků, nýbrž <strong>skládá řádky vedle sebe</strong> a jeden řádek se může ve výsledku objevit <strong>vícekrát</strong> (viz Násobení řádků). Průzkumník výše ukazuje, co se děje doopravdy.</div>
+</section>
+
+<!-- 07 VÍCE TABULEK -->
+<section id="multi">
+<div class="eyebrow">07 • VÍCE TABULEK</div><h2>Spojujeme tři i čtyři tabulky</h2>
+<p class="lead">JOINy se řetězí. Každý další <span class="code">JOIN … ON …</span> připojí k dosavadnímu výsledku další tabulku. Postupuj po vazbách v ER diagramu.</p>
+<div class="steps" style="margin-bottom:1.5rem">
+<div class="step"><div class="step-num">1</div><div><h3>Které tabulky potřebuji?</h3><p>Chci jméno žáka, předmět a známku → <span class="code">students</span>, <span class="code">subjects</span>, <span class="code">grades</span>.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><h3>Jak spolu souvisí?</h3><p>Najdi v diagramu cestu: <span class="code">grades.student_id → students.id</span> a <span class="code">grades.subject_id → subjects.id</span>. Každá šipka = jedna podmínka ON.</p></div></div>
+<div class="step"><div class="step-num">3</div><div><h3>Chci i řádky bez páru?</h3><p>Ne → INNER JOIN. Ano → LEFT JOIN (a tabulku, ze které chci vše, dej do FROM).</p></div></div>
+</div>
+<div class="grid2">
+<div><div class="sqlwrap"><pre class="sql">SELECT s.name   AS student,
+       sub.code AS predmet,
+       g.grade  AS znamka
+FROM grades AS g
+JOIN students AS s   ON s.id   = g.student_id
+JOIN subjects AS sub ON sub.id = g.subject_id
+ORDER BY g.id;</pre></div></div>
+<div><p class="result-label">Výsledek – 6 řádků = 6 známek</p>
+<div class="table-wrap"><table class="data">
+<tr><th>student</th><th>predmet</th><th>znamka</th></tr>
+<tr><td>Novák</td><td>MAT</td><td class="num">1</td></tr>
+<tr><td>Novák</td><td>DAT</td><td class="num">1</td></tr>
+<tr><td>Svobodová</td><td>MAT</td><td class="num">3</td></tr>
+<tr><td>Svobodová</td><td>CJL</td><td class="num">1</td></tr>
+<tr><td>Dvořák</td><td>MAT</td><td class="num">4</td></tr>
+<tr><td>Malý</td><td>DAT</td><td class="num">2</td></tr>
+</table></div></div>
+</div>
+
+<h3 style="margin-top:2.2rem">Přidáme třídu – a pozor na Malého</h3>
+<p>Kdybychom třídu připojili přes <span class="code">INNER JOIN</span>, Malý by z výsledku zmizel i se svou známkou, protože nemá třídu. Jedno INNER JOIN v řetězu stačí, aby řádek bez páru vypadl.</p>
+<div class="grid2">
+<div><div class="sqlwrap"><pre class="sql">SELECT s.name   AS student,
+       c.name   AS trida,
+       sub.code AS predmet,
+       g.grade  AS znamka
+FROM grades AS g
+JOIN students AS s       ON s.id   = g.student_id
+JOIN subjects AS sub     ON sub.id = g.subject_id
+LEFT JOIN classes AS c   ON c.id   = s.class_id
+ORDER BY g.id;</pre></div></div>
+<div><div class="table-wrap"><table class="data">
+<tr><th>student</th><th>trida</th><th>predmet</th><th>znamka</th></tr>
+<tr class="ca"><td>Novák</td><td>2.A</td><td>MAT</td><td class="num">1</td></tr>
+<tr class="ca"><td>Novák</td><td>2.A</td><td>DAT</td><td class="num">1</td></tr>
+<tr class="ca"><td>Svobodová</td><td>2.A</td><td>MAT</td><td class="num">3</td></tr>
+<tr class="ca"><td>Svobodová</td><td>2.A</td><td>CJL</td><td class="num">1</td></tr>
+<tr class="cb"><td>Dvořák</td><td>2.B</td><td>MAT</td><td class="num">4</td></tr>
+<tr class="cn"><td>Malý</td><td class="null">NULL</td><td>DAT</td><td class="num">2</td></tr>
+</table></div>
+<p class="muted" style="margin-top:.8rem">Všimni si: Černá ve výsledku není – začínáme od <span class="code">grades</span> a ona žádnou známku nemá.</p></div>
+</div>
+<div class="callout"><strong>Odkud začít (co dát do FROM)?</strong> Z tabulky, jejíž řádky chceš ve výsledku vidět všechny. Chceš „všechny známky“ → začni od <span class="code">grades</span>. Chceš „všechny žáky, i bez známek“ → začni od <span class="code">students</span> a známky připoj přes LEFT JOIN.</div>
+</section>
+
+<!-- 08 NÁSOBENÍ -->
+<section id="multiply">
+<div class="eyebrow">08 • NÁSOBENÍ ŘÁDKŮ</div><h2>Když JOIN „namnoží“ řádky</h2>
+<p class="lead">U vazby 1:N se řádek ze strany „1“ zopakuje <strong>tolikrát, kolik má partnerů</strong> na straně „N“. To je správně a očekávané – ale musíš na to myslet, když pak počítáš souhrny (předchozí kapitola).</p>
+<div class="grid2">
+<div><div class="sqlwrap"><pre class="sql">SELECT c.name AS trida, s.name AS student,
+       g.id, g.grade
+FROM classes AS c
+LEFT JOIN students AS s ON s.class_id  = c.id
+LEFT JOIN grades   AS g ON g.student_id = s.id
+ORDER BY c.id, s.id, g.id;</pre></div>
+<p>Třída 2.A má 2 žáky, ale <strong>4 řádky</strong> – každý žák se zopakoval pro každou svou známku.</p></div>
+<div><div class="table-wrap"><table class="data">
+<tr><th>trida</th><th>student</th><th>id</th><th>grade</th></tr>
+<tr class="ca"><td>2.A</td><td>Novák</td><td class="num">1</td><td class="num">1</td></tr>
+<tr class="ca"><td>2.A</td><td>Novák</td><td class="num">2</td><td class="num">1</td></tr>
+<tr class="ca"><td>2.A</td><td>Svobodová</td><td class="num">3</td><td class="num">3</td></tr>
+<tr class="ca"><td>2.A</td><td>Svobodová</td><td class="num">4</td><td class="num">1</td></tr>
+<tr class="cb"><td>2.B</td><td>Dvořák</td><td class="num">5</td><td class="num">4</td></tr>
+<tr class="cb"><td>2.B</td><td>Černá</td><td class="num null">NULL</td><td class="num null">NULL</td></tr>
+<tr class="cc"><td>3.C</td><td class="null">NULL</td><td class="num null">NULL</td><td class="num null">NULL</td></tr>
+</table></div></div>
+</div>
+
+<h3 style="margin-top:2.2rem">Kolik žáků má každá třída? Tři pokusy</h3>
+<div class="grid2">
+<div><div class="sqlwrap"><pre class="sql">SELECT c.name AS trida,
+       COUNT(*)                AS pokus_1,
+       COUNT(s.id)             AS pokus_2,
+       COUNT(DISTINCT s.id)    AS pokus_3
+FROM classes AS c
+LEFT JOIN students AS s ON s.class_id  = c.id
+LEFT JOIN grades   AS g ON g.student_id = s.id
+GROUP BY c.id, c.name
+ORDER BY c.id;</pre></div></div>
+<div><div class="table-wrap"><table class="data">
+<tr><th>trida</th><th>pokus_1</th><th>pokus_2</th><th>pokus_3</th></tr>
+<tr class="ca"><td>2.A</td><td class="num">4 ✗</td><td class="num">4 ✗</td><td class="num">2 ✓</td></tr>
+<tr class="cb"><td>2.B</td><td class="num">2 ✓</td><td class="num">2 ✓</td><td class="num">2 ✓</td></tr>
+<tr class="cc"><td>3.C</td><td class="num">1 ✗</td><td class="num">0 ✓</td><td class="num">0 ✓</td></tr>
+</table></div>
+<ul>
+<li><strong>COUNT(*)</strong> počítá řádky – i namnožené i ten „prázdný“ řádek 3.C doplněný NULL.</li>
+<li><strong>COUNT(s.id)</strong> přeskočí NULL (3.C je správně 0), ale namnožení u 2.A neřeší.</li>
+<li><strong>COUNT(DISTINCT s.id)</strong> započítá každého žáka jen jednou ✓</li>
+</ul></div>
+</div>
+<div class="callout green"><strong>Nejjednodušší řešení:</strong> nepřipojuj tabulky, které k výpočtu nepotřebuješ. Na počet žáků stačí <span class="code">classes LEFT JOIN students</span> s <span class="code">COUNT(s.id)</span> – známky vůbec nejsou potřeba. Každý JOIN navíc je příležitost k namnožení.</div>
+</section>
+
+<!-- 09 CHYBĚJÍCÍ -->
+<section id="missing">
+<div class="eyebrow">09 • HLEDÁNÍ CHYBĚJÍCÍCH</div><h2>Kdo nemá žádnou známku?</h2>
+<p class="lead">Častý úkol: najdi řádky, ke kterým <strong>neexistuje</strong> pár. Trik: udělej LEFT JOIN a ponech jen řádky, kde se pravá strana doplnila hodnotou NULL.</p>
+<div class="grid2">
+<div><div class="sqlwrap"><pre class="sql">SELECT s.name AS student
+FROM students AS s
+LEFT JOIN grades AS g ON g.student_id = s.id
+WHERE g.id IS NULL;</pre></div>
+<p class="result-label">Výsledek</p>
+<div class="table-wrap"><table class="data"><tr><th>student</th></tr><tr class="cb"><td>Černá</td></tr></table></div>
+</div>
+<div>
+<div class="steps">
+<div class="step"><div class="step-num">1</div><div><h3>LEFT JOIN</h3><p>Každý žák ve výsledku zůstane. Kdo nemá známku, má ve sloupcích <span class="code">g.*</span> hodnotu NULL.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><h3>WHERE g.id IS NULL</h3><p>Ponech jen řádky, kde se pár nenašel. Testujeme <strong>primární klíč</strong> pravé tabulky – ten u existujícího řádku nikdy NULL není.</p></div></div>
+</div>
+<div class="callout red"><strong>Pozor:</strong> <span class="code">WHERE g.id = NULL</span> nefunguje (vrátí 0 řádků). S NULL se vždy porovnává pomocí <span class="code">IS NULL</span> / <span class="code">IS NOT NULL</span>.</div>
+</div>
+</div>
+<p class="muted" style="margin-top:1rem">Totéž lze zapsat poddotazem: <span class="code">WHERE NOT EXISTS (SELECT 1 FROM grades g WHERE g.student_id = s.id)</span>. Poddotazům se budeme věnovat samostatně.</p>
+</section>
+
+<!-- 10 ON vs WHERE -->
+<section id="onwhere">
+<div class="eyebrow">10 • ON, NEBO WHERE?</div><h2>Nejzrádnější rozdíl u LEFT JOIN</h2>
+<p class="lead">Úkol: <em>vypiš <strong>všechny</strong> žáky a u každého jeho známku z matematiky (subject_id = 1), pokud ji má.</em> Dva dotazy vypadají skoro stejně, ale dávají jiný výsledek.</p>
+<div class="grid2">
+<div class="card accent-red">
+<span class="badge b-red">Podmínka ve WHERE</span>
+<div class="sqlwrap"><pre class="sql">SELECT s.name, g.grade
+FROM students AS s
+LEFT JOIN grades AS g
+       ON g.student_id = s.id
+WHERE g.subject_id = 1
+ORDER BY s.id;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>name</th><th>grade</th></tr>
+<tr><td>Novák</td><td class="num">1</td></tr><tr><td>Svobodová</td><td class="num">3</td></tr><tr><td>Dvořák</td><td class="num">4</td></tr></table></div>
+<p style="margin-top:.8rem">Jen 3 žáci. Černá a Malý zmizeli: LEFT JOIN je sice doplnil s NULL, ale <span class="code">WHERE NULL = 1</span> neprojde. <strong>LEFT JOIN se tím fakticky změnil na INNER JOIN.</strong></p>
+</div>
+<div class="card accent-green">
+<span class="badge b-green">Podmínka v ON</span>
+<div class="sqlwrap"><pre class="sql">SELECT s.name, g.grade
+FROM students AS s
+LEFT JOIN grades AS g
+       ON g.student_id = s.id
+      AND g.subject_id = 1
+ORDER BY s.id;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>name</th><th>grade</th></tr>
+<tr><td>Novák</td><td class="num">1</td></tr><tr><td>Svobodová</td><td class="num">3</td></tr><tr><td>Dvořák</td><td class="num">4</td></tr>
+<tr><td>Černá</td><td class="num null">NULL</td></tr><tr><td>Malý</td><td class="num null">NULL</td></tr></table></div>
+<p style="margin-top:.8rem">Všech 5 žáků ✓. Podmínka v ON říká, <strong>jaký pár hledáme</strong> („známku z MAT“). Kdo ho nemá, zůstane s NULL.</p>
+</div>
+</div>
+<div class="callout yellow"><strong>Pravidlo:</strong> u <span class="code">LEFT JOIN</span> patří podmínky na <strong>pravou</strong> tabulku do <span class="code">ON</span>. Do <span class="code">WHERE</span> dávej podmínky na levou tabulku (nebo <span class="code">IS NULL</span> při hledání chybějících). U <span class="code">INNER JOIN</span> je jedno, kam podmínku dáš – výsledek je stejný.</div>
+</section>
+
+<!-- 11 DALŠÍ -->
+<section id="more">
+<div class="eyebrow">11 • DALŠÍ MOŽNOSTI</div><h2>Self join, FULL JOIN, USING a další</h2>
+<div class="grid2">
+<div class="card accent-blue">
+<span class="badge b-blue">Self join</span><h3>Tabulka spojená sama se sebou</h3>
+<p>Kdo chodí do stejné třídy? Tabulku použijeme dvakrát pod různými aliasy.</p>
+<div class="sqlwrap"><pre class="sql">SELECT a.name AS zak_1,
+       b.name AS zak_2
+FROM students AS a
+JOIN students AS b
+  ON a.class_id = b.class_id
+ AND a.id &lt; b.id;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>zak_1</th><th>zak_2</th></tr>
+<tr class="ca"><td>Novák</td><td>Svobodová</td></tr><tr class="cb"><td>Dvořák</td><td>Černá</td></tr></table></div>
+<p class="muted" style="margin-top:.8rem"><span class="code">a.id &lt; b.id</span> vyřadí dvojice „sám se sebou“ a duplicitu Svobodová–Novák. Typické použití: zaměstnanec a jeho nadřízený v téže tabulce.</p>
+</div>
+<div class="card accent-yellow">
+<span class="badge b-yellow">FULL OUTER JOIN</span><h3>MySQL/MariaDB ho nemají</h3>
+<p>FULL JOIN = všechny řádky z obou stran. V MySQL i MariaDB ho poskládáme z LEFT a RIGHT JOIN a operátoru <span class="code">UNION</span>.</p>
+<div class="sqlwrap"><pre class="sql">SELECT s.name AS student, c.name AS trida
+FROM students s LEFT JOIN classes c
+  ON c.id = s.class_id
+UNION
+SELECT s.name, c.name
+FROM students s RIGHT JOIN classes c
+  ON c.id = s.class_id;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>student</th><th>trida</th></tr>
+<tr class="ca"><td>Novák</td><td>2.A</td></tr><tr class="ca"><td>Svobodová</td><td>2.A</td></tr><tr class="cb"><td>Dvořák</td><td>2.B</td></tr><tr class="cb"><td>Černá</td><td>2.B</td></tr><tr class="cn"><td>Malý</td><td class="null">NULL</td></tr><tr class="cc"><td class="null">NULL</td><td>3.C</td></tr></table></div>
+<p class="muted" style="margin-top:.8rem">UNION odstraní řádky, které vrátily obě poloviny. Pořadí řádků bez ORDER BY není zaručeno.</p>
+</div>
+<div class="card accent-green">
+<span class="badge b-green">USING</span><h3>Zkratka pro stejně pojmenované sloupce</h3>
+<p>Pokud se spojovací sloupce jmenují v obou tabulkách stejně, lze místo <span class="code">ON a.x = b.x</span> psát <span class="code">USING (x)</span>. Kdyby tabulka tříd měla klíč <span class="code">class_id</span>:</p>
+<div class="sqlwrap"><pre class="sql">FROM students s
+JOIN classes c USING (class_id)</pre></div>
+<p class="muted">V našich tabulkách (<span class="code">id</span> vs. <span class="code">class_id</span>) USING použít nelze – proto píšeme ON, který funguje vždy.</p>
+</div>
+<div class="card accent-red">
+<span class="badge b-red">NATURAL JOIN</span><h3>Raději nepoužívat</h3>
+<p>Spojí tabulky automaticky podle <strong>všech</strong> sloupců se stejným jménem. U nás mají obě tabulky <span class="code">id</span> i <span class="code">name</span>, takže:</p>
+<div class="sqlwrap"><pre class="sql">SELECT * FROM students NATURAL JOIN classes;
+-- = ON s.id = c.id AND s.name = c.name
+-- výsledek: 0 řádků</pre></div>
+<p class="muted">Nesmysl, a bez chybové hlášky. Navíc stačí do tabulky přidat sloupec a dotaz začne vracet něco jiného.</p>
+</div>
+</div>
+<div class="callout"><strong>Starý zápis s čárkou:</strong> v některých materiálech uvidíš <span class="code">FROM students s, classes c WHERE c.id = s.class_id</span>. Je to INNER JOIN zapsaný postaru. Funguje, ale snadno se zapomene podmínka (→ kartézský součin) a neumí LEFT JOIN. Piš raději <span class="code">JOIN … ON</span>.</div>
+</section>
+
+<!-- 12 POZOR -->
+<section id="pitfalls">
+<div class="eyebrow">12 • POZOR</div><h2>Časté chyby a jak je poznat</h2>
+<div class="table-wrap"><table class="compare">
+<tr><th>Příznak</th><th>Příčina</th><th>Oprava</th></tr>
+<tr><td>Výsledek má podezřele mnoho řádků (např. 15 místo 4)</td><td>Chybí nebo je špatně podmínka ON. MySQL/MariaDB dovolí napsat <span class="code">JOIN</span> i bez ON – a udělá kartézský součin.</td><td>Ke každému JOIN napiš ON s klíči. Zkontroluj, že spojuješ PK s odpovídajícím FK (ne <span class="code">c.id = s.id</span>!).</td></tr>
+<tr><td>Chybí řádky, které ve výsledku čekám</td><td>INNER JOIN vyřadil řádky bez páru – nebo podmínka ve WHERE „zrušila“ LEFT JOIN.</td><td>Použij LEFT JOIN; podmínky na pravou tabulku přesuň do ON.</td></tr>
+<tr><td><em>Column 'name' in field list is ambiguous</em></td><td>Sloupec stejného jména je ve více tabulkách.</td><td>Piš <span class="code">alias.sloupec</span>, výsledné sloupce přejmenuj přes <span class="code">AS</span>.</td></tr>
+<tr><td>SUM / COUNT vychází víc, než by mělo</td><td>JOIN namnožil řádky (vazba 1:N).</td><td>Nepřipojuj zbytečné tabulky; případně <span class="code">COUNT(DISTINCT …)</span>.</td></tr>
+<tr><td>COUNT vrací 1 u skupiny, která nemá nic</td><td><span class="code">COUNT(*)</span> počítá i řádek doplněný NULL z LEFT JOIN.</td><td>Počítej sloupec pravé tabulky: <span class="code">COUNT(s.id)</span>.</td></tr>
+<tr><td>Hledání chybějících vrací 0 řádků</td><td>Použito <span class="code">= NULL</span> místo <span class="code">IS NULL</span>, nebo INNER místo LEFT JOIN.</td><td><span class="code">LEFT JOIN … WHERE prava.id IS NULL</span></td></tr>
+</table></div>
+</section>
+
+<!-- 13 PROCVIČ -->
+<section id="practice">
+<div class="eyebrow">13 • PROCVIČ SI</div><h2>Úlohy nad databází školy</h2>
+<p class="lead">Než rozbalíš řešení, odpověz si: <em>Které tabulky? Jak souvisí? Chci i řádky bez páru?</em></p>
+
+<details><summary>1. Vypiš všechny známky se jménem žáka a celým názvem předmětu.</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT s.name AS student, sub.name AS predmet, g.grade
+FROM grades AS g
+JOIN students AS s   ON s.id   = g.student_id
+JOIN subjects AS sub ON sub.id = g.subject_id
+ORDER BY g.id;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>student</th><th>predmet</th><th>grade</th></tr>
+<tr><td>Novák</td><td>Matematika</td><td class="num">1</td></tr><tr><td>Novák</td><td>Databáze</td><td class="num">1</td></tr>
+<tr><td>Svobodová</td><td>Matematika</td><td class="num">3</td></tr><tr><td>Svobodová</td><td>Český jazyk</td><td class="num">1</td></tr>
+<tr><td>Dvořák</td><td>Matematika</td><td class="num">4</td></tr><tr><td>Malý</td><td>Databáze</td><td class="num">2</td></tr></table></div>
+</div></details>
+
+<details><summary>2. Kolik známek má každý žák? Ve výsledku musí být všichni žáci.</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT s.name AS student, COUNT(g.id) AS znamek
+FROM students AS s
+LEFT JOIN grades AS g ON g.student_id = s.id
+GROUP BY s.id, s.name
+ORDER BY s.id;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>student</th><th>znamek</th></tr>
+<tr><td>Novák</td><td class="num">2</td></tr><tr><td>Svobodová</td><td class="num">2</td></tr><tr><td>Dvořák</td><td class="num">1</td></tr><tr><td>Černá</td><td class="num">0</td></tr><tr><td>Malý</td><td class="num">1</td></tr></table></div>
+<p class="muted" style="margin-top:.8rem">LEFT JOIN, aby zůstala Černá; <span class="code">COUNT(g.id)</span>, aby u ní byla 0, a ne 1. Seskupujeme podle <span class="code">s.id</span> – dva žáci by se mohli jmenovat stejně.</p>
+</div></details>
+
+<details><summary>3. Ze kterých předmětů zatím nikdo nedostal známku?</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT sub.code
+FROM subjects AS sub
+LEFT JOIN grades AS g ON g.subject_id = sub.id
+WHERE g.id IS NULL;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>code</th></tr><tr><td>ANJ</td></tr></table></div>
+</div></details>
+
+<details><summary>4. Průměr známek každého předmětu – včetně předmětů bez známek.</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT sub.code, COUNT(g.id) AS znamek, ROUND(AVG(g.grade), 2) AS prumer
+FROM subjects AS sub
+LEFT JOIN grades AS g ON g.subject_id = sub.id
+GROUP BY sub.id, sub.code
+ORDER BY sub.id;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>code</th><th>znamek</th><th>prumer</th></tr>
+<tr><td>MAT</td><td class="num">3</td><td class="num">2.67</td></tr><tr><td>CJL</td><td class="num">1</td><td class="num">1.00</td></tr>
+<tr><td>DAT</td><td class="num">2</td><td class="num">1.50</td></tr><tr><td>ANJ</td><td class="num">0</td><td class="num null">NULL</td></tr></table></div>
+</div></details>
+
+<details><summary>5. Průměr známek po třídách – všechny třídy.</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT c.name AS trida, COUNT(g.id) AS znamek, ROUND(AVG(g.grade), 2) AS prumer
+FROM classes AS c
+LEFT JOIN students AS s ON s.class_id  = c.id
+LEFT JOIN grades   AS g ON g.student_id = s.id
+GROUP BY c.id, c.name
+ORDER BY c.id;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>trida</th><th>znamek</th><th>prumer</th></tr>
+<tr class="ca"><td>2.A</td><td class="num">4</td><td class="num">1.50</td></tr><tr class="cb"><td>2.B</td><td class="num">1</td><td class="num">4.00</td></tr><tr class="cc"><td>3.C</td><td class="num">0</td><td class="num null">NULL</td></tr></table></div>
+<p class="muted" style="margin-top:.8rem">Oba JOINy musí být LEFT – kdyby byl druhý INNER, zmizela by 3.C. Tady namnožení nevadí: počítáme známky, a ty se nenamnožily. Malého známka v průměru tříd není – nemá třídu.</p>
+</div></details>
+
+<details><summary>6. Kteří žáci nejsou zařazeni do žádné třídy? (Je tu JOIN vůbec potřeba?)</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT name FROM students WHERE class_id IS NULL;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>name</th></tr><tr class="cn"><td>Malý</td></tr></table></div>
+<p class="muted" style="margin-top:.8rem">JOIN potřeba není – informace „nemá třídu“ je přímo v tabulce students. Varianta s <span class="code">LEFT JOIN classes … WHERE c.id IS NULL</span> dá stejný výsledek. Než sáhneš po JOINu, zeptej se, jestli data nejsou v jedné tabulce.</p>
+</div></details>
+</section>
+
+<!-- 14 SHRNUTÍ -->
+<section id="summary">
+<div class="eyebrow">14 • SHRNUTÍ</div><h2>Co si odnést</h2>
+<div class="grid2">
+<div class="card"><h3>① Proč</h3><p>Data jsou kvůli normalizaci v několika tabulkách. JOIN je skládá zpět podle klíčů.</p></div>
+<div class="card"><h3>② Jak</h3><p>Každý s každým, pak jen dvojice splňující <span class="code">ON</span> (obvykle <span class="code">PK = FK</span>).</p></div>
+<div class="card"><h3>③ INNER JOIN</h3><p>Jen řádky, které mají pár na obou stranách.</p></div>
+<div class="card"><h3>④ LEFT JOIN</h3><p>Celá levá tabulka; chybějící pár se doplní NULL. RIGHT = zrcadlo.</p></div>
+<div class="card"><h3>⑤ Chybějící</h3><p><span class="code">LEFT JOIN … WHERE prava.id IS NULL</span></p></div>
+<div class="card"><h3>⑥ ON vs. WHERE</h3><p>U LEFT JOIN podmínky na pravou tabulku do ON, jinak se z něj stane INNER.</p></div>
+<div class="card"><h3>⑦ Násobení</h3><p>Vazba 1:N opakuje řádky. Pozor na COUNT a SUM; nepřipojuj zbytečné tabulky.</p></div>
+<div class="card"><h3>⑧ MySQL/MariaDB</h3><p>Nemají FULL JOIN (→ LEFT + RIGHT + UNION). JOIN bez ON = kartézský součin.</p></div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<p class="question">Tři otázky před každým JOINem:</p>
+<div class="answer"><strong>1.</strong> Které tabulky potřebuji? <strong>2.</strong> Jakými klíči spolu souvisí? <strong>3.</strong> Chci vidět i řádky, které pár nemají? – Odpověď na třetí otázku rozhoduje mezi <strong>INNER</strong> a <strong>LEFT</strong>.</div>
+</div>
+</section>
+
+<footer>VOŠ, SPŠ a SOŠ Varnsdorf • Výukový materiál — SQL – spojování relací (JOIN) • Navazuje na prezentaci „SQL – seskupování a agregační funkce“.</footer>
+</main>
+<script>
+// navigace
+const links=[...document.querySelectorAll('nav a')], sections=[...document.querySelectorAll('main section[id]')];
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}}),{rootMargin:'-25% 0px -65% 0px'});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=991)document.querySelector('aside').style.display='none'}));
+
+// zvýraznění SQL
+const KW=/\b(SELECT|FROM|WHERE|GROUP|BY|HAVING|ORDER|LIMIT|AS|AND|OR|IN|NOT|NULL|IS|DISTINCT|DESC|ASC|JOIN|INNER|LEFT|RIGHT|OUTER|FULL|CROSS|NATURAL|ON|USING|UNION|ALL|EXISTS|CREATE|TABLE|INSERT|INTO|VALUES|PRIMARY|FOREIGN|REFERENCES|KEY|AUTO_INCREMENT|INT|VARCHAR|CHAR|TINYINT)\b/g;
+const FN=/\b(COUNT|SUM|AVG|MIN|MAX|ROUND|COALESCE)(?=\s*\()/g;
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function hl(raw){
+  return raw.split(/(--[^\n]*|'[^']*')/g).map(p=>{
+    if(p.startsWith('--'))return '<span class="c">'+esc(p)+'</span>';
+    if(p.startsWith("'"))return '<span class="s">'+esc(p)+'</span>';
+    return esc(p).replace(FN,'<span class="f">$1</span>').replace(KW,'<span class="k">$1</span>').replace(/\b(\d+)\b/g,'<span class="n">$1</span>');
+  }).join('');
+}
+function addCopy(pre,getText){
+  const b=document.createElement('button');b.className='copy';b.textContent='KOPÍROVAT';
+  b.onclick=()=>{navigator.clipboard.writeText(getText()).then(()=>{b.textContent='ZKOPÍROVÁNO';setTimeout(()=>b.textContent='KOPÍROVAT',1500)})};
+  pre.parentElement.appendChild(b);
+}
+document.querySelectorAll('pre.sql:not(#exsql)').forEach(pre=>{const raw=pre.textContent;pre.innerHTML=hl(raw);addCopy(pre,()=>raw);});
+
+// průzkumník JOINů
+const S=[{id:1,name:'Novák',cid:1},{id:2,name:'Svobodová',cid:1},{id:3,name:'Dvořák',cid:2},{id:4,name:'Černá',cid:2},{id:5,name:'Malý',cid:null}];
+const C=[{id:1,name:'2.A'},{id:2,name:'2.B'},{id:3,name:'3.C'}];
+const col={1:'ca',2:'cb',3:'cc'};
+const N='<span class="null">NULL</span>';
+const SQL={
+ cross:"SELECT *\nFROM students AS s\nCROSS JOIN classes AS c;",
+ inner:"SELECT *\nFROM students AS s\nINNER JOIN classes AS c ON c.id = s.class_id;",
+ left:"SELECT *\nFROM students AS s\nLEFT JOIN classes AS c ON c.id = s.class_id;",
+ right:"SELECT *\nFROM students AS s\nRIGHT JOIN classes AS c ON c.id = s.class_id;",
+ full:"SELECT * FROM students AS s LEFT JOIN classes AS c ON c.id = s.class_id\nUNION\nSELECT * FROM students AS s RIGHT JOIN classes AS c ON c.id = s.class_id;"
+};
+const CAP={
+ cross:'<span class="count">15 řádků</span> Každý žák s každou třídou (5 × 3). Bez podmínky nedává výsledek smysl – Novák je tu i ve 2.B a 3.C. Sloupec <strong>shoda?</strong> ukazuje dvojice, které by zůstaly po přidání <span class="code">ON c.id = s.class_id</span>.',
+ inner:'<span class="count">4 řádky</span> Jen dvojice, které splňují podmínku. <strong>Malý</strong> (bez třídy) a <strong>3.C</strong> (bez žáků) nemají pár, a proto ve výsledku nejsou.',
+ left:'<span class="count">5 řádků</span> Všichni žáci z levé tabulky. <strong>Malý</strong> nemá pár, a tak má sloupce třídy doplněné NULL. Třída 3.C ve výsledku není.',
+ right:'<span class="count">5 řádků</span> Všechny třídy z pravé tabulky. <strong>3.C</strong> nemá žádného žáka, a tak má sloupce žáka doplněné NULL. Malý ve výsledku není.',
+ full:'<span class="count">6 řádků</span> Všechny řádky z obou stran: Malý i 3.C, každý s NULL na straně, kde pár chybí. MySQL/MariaDB FULL JOIN nemají – skládáme ho z LEFT a RIGHT JOIN pomocí UNION.'
+};
+function compute(t){
+  const r=[];
+  if(t==='cross'){S.forEach(s=>C.forEach(c=>r.push({s,c,m:s.cid===c.id})));return r;}
+  if(t==='right'){C.forEach(c=>{const m=S.filter(s=>s.cid===c.id);if(m.length)m.forEach(s=>r.push({s,c}));else r.push({s:null,c});});return r;}
+  S.forEach(s=>{const m=C.filter(c=>c.id===s.cid);if(m.length)m.forEach(c=>r.push({s,c}));else if(t!=='inner')r.push({s,c:null});});
+  if(t==='full')C.forEach(c=>{if(!S.some(s=>s.cid===c.id))r.push({s:null,c});});
+  return r;
+}
+const exS=document.getElementById('exS'),exC=document.getElementById('exC'),exR=document.getElementById('exR');
+function v(x){return x===null||x===undefined?N:esc(String(x));}
+function render(t){
+  document.querySelectorAll('#extabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  const sql=document.getElementById('exsql');sql.innerHTML=hl(SQL[t]);
+  const res=compute(t);
+  const usedS=new Set(res.filter(r=>r.s&&(t!=='cross'||true)).map(r=>r.s.id));
+  const usedC=new Set(res.filter(r=>r.c).map(r=>r.c.id));
+  exS.innerHTML='<tr><th>id</th><th>name</th><th>class_id</th></tr>'+S.map(s=>`<tr data-s="${s.id}" class="${s.cid?col[s.cid]:'cn'} ${usedS.has(s.id)?'':'dim'}"><td>${s.id}</td><td>${esc(s.name)}</td><td class="num">${v(s.cid)}</td></tr>`).join('');
+  exC.innerHTML='<tr><th>id</th><th>name</th></tr>'+C.map(c=>`<tr data-c="${c.id}" class="${col[c.id]} ${usedC.has(c.id)?'':'dim'}"><td>${c.id}</td><td>${c.name}</td></tr>`).join('');
+  const extra=t==='cross'?'<th class="sep">shoda?</th>':'';
+  exR.innerHTML='<tr><th class="grp" colspan="3">ze students s</th><th class="grp sep" colspan="2">z classes c</th>'+(t==='cross'?'<th class="grp sep"></th>':'')+'</tr>'+
+    '<tr><th>s.id</th><th>s.name</th><th>s.class_id</th><th class="sep">c.id</th><th>c.name</th>'+extra+'</tr>'+
+    res.map(r=>{
+      const cls=r.c?col[r.c.id]:(r.s&&r.s.cid?col[r.s.cid]:'cn');
+      const rowcls=(r.s&&!r.c)||(!r.s&&r.c)?'cn':cls;
+      return `<tr class="${t==='cross'?cls:rowcls}" data-s="${r.s?r.s.id:''}" data-c="${r.c?r.c.id:''}">`+
+        `<td>${r.s?r.s.id:N}</td><td>${r.s?esc(r.s.name):N}</td><td class="num">${r.s?v(r.s.cid):N}</td>`+
+        `<td class="sep">${r.c?r.c.id:N}</td><td>${r.c?r.c.name:N}</td>`+
+        (t==='cross'?`<td class="sep">${r.m?'<span class="okmark">✓ ano</span>':'<span class="nomark">ne</span>'}</td>`:'')+'</tr>';
+    }).join('');
+  document.getElementById('excap').innerHTML=CAP[t];
+  exR.querySelectorAll('tr[data-s]').forEach(tr=>{
+    tr.addEventListener('mouseenter',()=>{
+      tr.classList.add('hl');
+      if(tr.dataset.s)exS.querySelector(`tr[data-s="${tr.dataset.s}"]`).classList.add('hl');
+      if(tr.dataset.c)exC.querySelector(`tr[data-c="${tr.dataset.c}"]`).classList.add('hl');
+    });
+    tr.addEventListener('mouseleave',()=>document.querySelectorAll('.ex-grid tr.hl').forEach(x=>x.classList.remove('hl')));
+  });
+}
+document.querySelectorAll('#extabs button').forEach(b=>b.addEventListener('click',()=>render(b.dataset.t)));
+render('inner');
+addCopy(document.getElementById('exsql'),()=>document.getElementById('exsql').textContent);
+</script>
+</body>
+</html>

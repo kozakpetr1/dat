@@ -1,0 +1,12 @@
+# Ignoruj vše…
+/*
+
+# …kromě rozcestníku a skriptu
+!/.gitignore
+!/index.html
+!/kapitoly.js
+!/aktualizuj_kapitoly.py
+
+# …a složek ročníků s celým obsahem
+!/2r/
+!/3r/

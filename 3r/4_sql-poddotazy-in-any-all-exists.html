@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL – operátory IN, ANY/SOME, ALL a EXISTS — VOŠ, SPŠ a SOŠ Varnsdorf</title>
+<meta name="description" content="Výuková one-page prezentace: poddotazy a operátory IN, NOT IN, ANY/SOME, ALL, EXISTS a NOT EXISTS v MySQL / MariaDB – princip, praktické ukázky, chování s NULL a prázdnou množinou, časté chyby a úlohy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,200;0,400;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-top:#003b4b;--bg-bottom:#006783;--text:#fff;
+  --yellow:#ffd400;--yellow2:#ffea80;--blue:#41d7ff;--blue2:#00c0f3;
+  --green:#a6ce39;--green2:#c2dd78;--panel:rgba(0,27,34,.48);
+  --panel2:rgba(0,27,34,.68);--muted:rgba(255,255,255,.62);
+  --sidebar:280px;--danger:#ef4444;--pink:#ff8fb1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Raleway,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg-top),var(--bg-bottom)) fixed;line-height:1.6}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ radial-gradient(circle at 78% 8%,rgba(65,215,255,.10),transparent 25%),
+ radial-gradient(circle at 18% 70%,rgba(166,206,57,.07),transparent 25%)}
+a{color:inherit}
+aside{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:2rem 1.5rem;background:rgba(0,20,26,.76);backdrop-filter:blur(20px);z-index:10;overflow-y:auto}
+main{margin-left:var(--sidebar);max-width:1250px;padding:3.5rem 3rem 5rem}
+.logo{display:flex;align-items:center;gap:1rem;text-decoration:none;margin-bottom:2.2rem}
+.logo svg{width:50px;height:43px;flex:none}.logo b{font-size:.84rem;line-height:1.25;letter-spacing:.05em}.logo span{color:var(--blue)}
+.nav-title{font-size:.72rem;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:1rem}
+nav ul{list-style:none;margin:0}nav li{margin-bottom:.1rem;padding:0}nav li:before{display:none}
+nav a{display:flex;gap:.75rem;align-items:center;text-decoration:none;color:rgba(255,255,255,.68);padding:.5rem .9rem;font-weight:600;font-size:.86rem;border-left:3px solid transparent;transition:.2s}
+nav a:hover,nav a.active{color:#fff;background:rgba(65,215,255,.09);border-left-color:var(--blue)}
+.side-note{margin-top:1.8rem;color:var(--muted);font-size:.72rem}
+section{scroll-margin-top:2rem;margin-bottom:5.5rem}
+.eyebrow{color:var(--blue);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.16em}
+h1{font-size:clamp(2.7rem,6vw,5.2rem);line-height:1.02;letter-spacing:-.045em;margin:.6rem 0 1.4rem}
+h1 em{font-style:normal;color:var(--yellow)}
+h2{font-size:clamp(1.9rem,4vw,2.7rem);line-height:1.15;margin:.35rem 0 1.2rem;letter-spacing:-.025em}
+h3{font-size:1.35rem;line-height:1.25;margin-bottom:.65rem}
+h4{font-size:1rem;margin-bottom:.4rem}
+p{margin-bottom:1rem}strong{font-weight:700}.muted{color:var(--muted)}
+.lead{font-size:1.18rem;font-weight:200;line-height:1.7}
+.hero{min-height:78vh;display:flex;align-items:center}
+.hero-inner{max-width:940px}
+.hero-kicker{display:inline-flex;align-items:center;gap:.55rem;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:.76rem}
+.hero-kicker:before{content:"";width:28px;height:3px;background:var(--green)}
+.hero-sub{max-width:780px;font-size:1.28rem;color:rgba(255,255,255,.84);font-weight:200}
+.chips{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.8rem}.chip{padding:.42rem .75rem;background:rgba(255,255,255,.07);font-size:.8rem;font-weight:600;font-family:Consolas,monospace}
+.panel{background:var(--panel);backdrop-filter:blur(12px);box-shadow:0 12px 35px rgba(0,0,0,.22);padding:2rem}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.grid2>*,.grid3>*,.grid4>*{min-width:0}
+.card{background:rgba(0,20,26,.34);padding:1.45rem;min-height:100%}
+.card.accent-blue{border-top:3px solid var(--blue)}.card.accent-yellow{border-top:3px solid var(--yellow)}.card.accent-green{border-top:3px solid var(--green)}.card.accent-red{border-top:3px solid var(--danger)}
+.icon{font-size:1.7rem;margin-bottom:.7rem}.card p:last-child{margin-bottom:0}
+.question{font-size:1.55rem;font-weight:600;line-height:1.3}.answer{margin-top:1.1rem;padding-left:1rem;border-left:3px solid var(--yellow)}
+.badge{display:inline-block;padding:.18rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.b-blue{background:rgba(65,215,255,.14);color:var(--blue)}.b-yellow{background:rgba(255,212,0,.14);color:var(--yellow)}.b-green{background:rgba(166,206,57,.14);color:var(--green)}.b-red{background:rgba(239,68,68,.16);color:#ff8a8a}
+.callout{margin-top:1.4rem;padding:1.1rem 1.25rem;border-left:4px solid var(--blue);background:rgba(65,215,255,.07)}.callout.yellow{border-left-color:var(--yellow);background:rgba(255,212,0,.07)}.callout.green{border-left-color:var(--green);background:rgba(166,206,57,.07)}.callout.red{border-left-color:var(--danger);background:rgba(239,68,68,.08)}
+ul{list-style:none;margin:.7rem 0}li{padding:.28rem 0 .28rem 1.35rem;position:relative}li:before{content:"";position:absolute;left:0;top:.78em;width:.72em;height:.72em;background:var(--yellow);clip-path:polygon(0 0,100% 50%,0 100%,20% 50%)}
+.code{font-family:Consolas,monospace;background:rgba(0,0,0,.3);padding:.12rem .35rem;color:var(--yellow2)}
+/* SQL */
+.sqlwrap{position:relative;margin:1rem 0}
+pre.sql{font-family:Consolas,monospace;font-size:.95rem;display:block;padding:1.3rem 1.5rem;line-height:1.75;white-space:pre;color:#fff;background:rgba(0,0,0,.38);overflow-x:auto}
+pre.sql .k{color:var(--yellow);font-weight:700}pre.sql .f{color:var(--blue)}pre.sql .s{color:var(--green2)}pre.sql .n{color:var(--pink)}pre.sql .c{color:var(--muted);font-style:italic}
+.copy{position:absolute;top:.5rem;right:.5rem;background:rgba(255,255,255,.08);border:0;color:var(--muted);font:600 .72rem Raleway,sans-serif;padding:.3rem .6rem;cursor:pointer;letter-spacing:.05em}
+.copy:hover{color:#fff;background:rgba(65,215,255,.18)}
+/* tabulky */
+.table-wrap{overflow-x:auto}
+table.data{border-collapse:collapse;font-size:.88rem;width:100%}
+table.data th{text-align:left;color:var(--blue);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;background:rgba(0,20,26,.75);padding:.55rem .75rem;font-family:Consolas,monospace;white-space:nowrap}
+table.data th.grp{color:var(--muted);text-align:center;font-size:.66rem;background:rgba(0,20,26,.55)}
+table.data td{padding:.45rem .75rem;background:rgba(0,20,26,.25);font-family:Consolas,monospace;white-space:nowrap}
+table.data tr:nth-child(even) td{background:rgba(255,255,255,.035)}
+table.data td.num{text-align:right}
+table.data td.sep,table.data th.sep{border-left:2px solid rgba(255,255,255,.25)}
+.null{color:var(--pink);font-style:italic}
+.tname{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green);font-weight:700;margin:.2rem 0 .4rem;font-family:Consolas,monospace}
+.result-label{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green);font-weight:700;margin:.4rem 0 .4rem}
+/* barvy tříd */
+tr.ca td:first-child{box-shadow:inset 4px 0 var(--yellow)}tr.cb td:first-child{box-shadow:inset 4px 0 var(--blue)}tr.cc td:first-child{box-shadow:inset 4px 0 var(--green)}tr.cn td:first-child{box-shadow:inset 4px 0 var(--pink)}
+.dot{display:inline-block;width:.7em;height:.7em;margin-right:.35em;vertical-align:middle}
+.dot.ca{background:var(--yellow)}.dot.cb{background:var(--blue)}.dot.cc{background:var(--green)}.dot.cn{background:var(--pink)}
+.compare{width:100%;border-collapse:collapse;font-size:.92rem}.compare th{text-align:left;color:var(--blue);font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;background:rgba(0,20,26,.75);padding:1rem}.compare td{padding:1rem;background:rgba(0,20,26,.25);vertical-align:top}.compare tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+/* ER diagram */
+.er{width:100%;height:auto;display:block}
+.er .box{fill:rgba(0,20,26,.6);stroke:rgba(255,255,255,.25);stroke-width:1.5}
+.er .head{fill:rgba(65,215,255,.16)}
+.er .t{fill:#fff;font:700 17px Consolas,monospace}
+.er .a{fill:rgba(255,255,255,.82);font:14px Consolas,monospace}
+.er .pk{fill:var(--yellow);font:700 14px Consolas,monospace}
+.er .fk{fill:var(--blue);font:700 14px Consolas,monospace}
+.er .line{stroke:var(--yellow);stroke-width:2;fill:none}
+.er .card{fill:var(--yellow);font:700 15px Raleway,sans-serif}
+/* matice kartézského součinu */
+table.matrix{border-collapse:separate;border-spacing:4px;font-family:Consolas,monospace;font-size:.9rem;margin:0 auto}
+table.matrix th{padding:.5rem .7rem;color:var(--blue);font-weight:700;text-align:center;white-space:nowrap}
+table.matrix th.rowh{text-align:left;color:#fff;font-weight:400}
+table.matrix td{width:64px;height:46px;text-align:center;background:rgba(0,20,26,.45);color:rgba(255,255,255,.3);font-size:1.1rem}
+table.matrix td.ok{background:rgba(166,206,57,.28);color:#fff;font-weight:700;outline:2px solid var(--green)}
+table.matrix td.nul{background:rgba(255,143,177,.12);color:var(--pink);font-size:.8rem}
+/* myšlenkový model */
+.steps{display:grid;gap:1rem;margin-top:1.2rem}
+.step{display:grid;grid-template-columns:50px 1fr;gap:1rem;align-items:start}
+.step-num{width:42px;height:42px;display:grid;place-items:center;background:var(--blue2);color:#002d38;font-weight:700}
+.step h3{margin:.1rem 0 .2rem}.step p{color:rgba(255,255,255,.78);margin-bottom:0}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.mini{display:flex;gap:4px;align-items:flex-start;justify-content:center;margin:1rem 0}
+.mini .col{display:grid;gap:4px}
+.mini span{display:block;width:44px;height:22px}
+.mini .y{background:rgba(255,212,0,.6)}.mini .bl{background:rgba(65,215,255,.6)}
+/* průzkumník */
+.ex-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.ex-tabs button{background:rgba(255,255,255,.07);border:0;color:rgba(255,255,255,.8);font:700 .85rem Consolas,monospace;padding:.65rem 1rem;cursor:pointer;border-bottom:3px solid transparent}
+.ex-tabs button:hover{background:rgba(65,215,255,.12);color:#fff}
+.ex-tabs button.on{background:rgba(255,212,0,.14);color:var(--yellow);border-bottom-color:var(--yellow)}
+.ex-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,.6fr) minmax(0,1.5fr);gap:1.2rem;align-items:start}
+.ex-grid table.data tr{transition:opacity .25s,outline .15s}
+.ex-grid tr.dim{opacity:.32}
+.ex-grid tr.hl td{background:rgba(255,212,0,.22)!important}
+.ex-grid tbody tr{cursor:default}
+#excap{margin-top:1.1rem}
+.count{display:inline-block;background:var(--yellow);color:#002d38;font-weight:700;padding:.1rem .5rem;margin-right:.4rem}
+.okmark{color:var(--green);font-weight:700}.nomark{color:rgba(255,255,255,.3)}
+/* procvičování */
+details{background:rgba(0,20,26,.34);margin-bottom:1rem;border-left:3px solid var(--green)}
+summary{cursor:pointer;padding:1.1rem 1.3rem;font-weight:600;font-size:1.05rem;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:before{content:"▸";color:var(--green);margin-right:.6rem;display:inline-block;transition:transform .2s}
+details[open] summary:before{transform:rotate(90deg)}
+details .sol{padding:0 1.3rem 1.2rem}
+footer{padding:2rem 0;color:var(--muted);font-size:.75rem;border-top:1px solid rgba(255,255,255,.08)}
+.mobile{display:none}
+@media(max-width:1200px){.ex-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ex-grid>div:last-child{grid-column:1/-1}.grid4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:991px){
+ aside{display:none}.mobile{display:flex;position:sticky;top:0;z-index:20;background:rgba(0,20,26,.92);backdrop-filter:blur(15px);padding:.8rem 1rem;justify-content:space-between;align-items:center}.mobile .logo{margin:0}.mobile button{background:none;border:0;color:#fff;font-size:1.5rem}main{margin:0;padding:2rem 1.2rem}.hero{min-height:75vh}.grid2,.grid3,.vs{grid-template-columns:1fr}.grid4{grid-template-columns:1fr}.ex-grid{grid-template-columns:minmax(0,1fr)}.panel{padding:1.35rem}.compare{min-width:640px}table.matrix td{width:56px}}
+
+/* pravdivostní hodnoty */
+.t-true{color:var(--green)!important;font-weight:700}.t-false{color:#ff8a8a!important;font-weight:700}.t-unk{color:var(--yellow)!important;font-weight:700}
+table.data td.t-true,table.data td.t-false,table.data td.t-unk,.compare td.t-true,.compare td.t-false,.compare td.t-unk{font-family:Consolas,monospace}
+/* číselná osa */
+.numline svg{width:100%;max-width:680px;height:auto;display:block;margin-top:.6rem}
+/* vyhodnocovač */
+.ev-row{display:grid;grid-template-columns:140px 1fr;gap:.8rem;align-items:center;margin-bottom:.4rem}
+.ev-row .ex-tabs{margin-bottom:0}
+.ev-label{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green);font-weight:700}
+.ev-big{font-family:Consolas,monospace;font-size:2.4rem;font-weight:700;padding:.6rem 1rem;background:rgba(0,20,26,.45);display:inline-block}
+.okline{color:var(--green)}.noline{color:#ff8a8a}
+@media(max-width:991px){.ev-row{grid-template-columns:1fr;gap:.3rem;margin-bottom:.8rem}}
+</style>
+</head>
+<body>
+<div class="mobile"><a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a><button onclick="document.querySelector('aside').style.display='block'" aria-label="Menu">☰</button></div>
+
+<aside>
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a>
+<div class="nav-title">SQL • IN, ANY, ALL, EXISTS</div>
+<nav><ul>
+<li><a class="active" href="#start">⌂ <span>Patří do množiny?</span></a></li>
+<li><a href="#overview">≡ <span>Logické operátory</span></a></li>
+<li><a href="#data">▤ <span>Ukázková data</span></a></li>
+<li><a href="#subquery">⊂ <span>Poddotaz</span></a></li>
+<li><a href="#in">∈ <span>IN a NOT IN</span></a></li>
+<li><a href="#null">∅ <span>Past jménem NULL</span></a></li>
+<li><a href="#any">∃ <span>ANY / SOME</span></a></li>
+<li><a href="#all">∀ <span>ALL</span></a></li>
+<li><a href="#explorer">▶ <span>Vyzkoušej si</span></a></li>
+<li><a href="#exists">? <span>EXISTS</span></a></li>
+<li><a href="#compare">⚖ <span>IN, EXISTS, nebo JOIN?</span></a></li>
+<li><a href="#pitfalls">⚠ <span>Na co pozor?</span></a></li>
+<li><a href="#practice">✎ <span>Procvič si</span></a></li>
+<li><a href="#summary">→ <span>Co si odnést</span></a></li>
+</ul></nav>
+<div class="side-note">MySQL / MariaDB<br>Navazuje na: Spojování relací (JOIN)</div>
+</aside>
+
+<main>
+<!-- HERO -->
+<section id="start" class="hero">
+<div class="hero-inner">
+<div class="hero-kicker">SQL • DQL • MySQL / MariaDB</div>
+<h1>Patří hodnota do množiny? <em>IN, ANY, ALL a EXISTS.</em></h1>
+<p class="hero-sub">Zatím jsme ve <span class="code">WHERE</span> porovnávali hodnotu s jednou jinou hodnotou: <span class="code">grade = 1</span>, <span class="code">class_id = 2</span>. Teď ji budeme porovnávat s <strong>celou množinou hodnot</strong> – se seznamem nebo s výsledkem jiného dotazu.</p>
+<div class="chips"><span class="chip">IN</span><span class="chip">NOT IN</span><span class="chip">ANY</span><span class="chip">SOME</span><span class="chip">ALL</span><span class="chip">EXISTS</span><span class="chip">NOT EXISTS</span><span class="chip">poddotaz</span></div>
+<div class="callout yellow"><strong>Kde jsme:</strong> v kapitole o JOIN jsme hledali žáky bez známky pomocí <span class="code">LEFT JOIN … IS NULL</span> a slíbili si, že totéž umí i <strong>poddotaz</strong>. Dnes ho poznáme – a s ním operátory, které se s poddotazy používají nejčastěji.</div>
+</div>
+</section>
+
+<!-- 01 PŘEHLED -->
+<section id="overview">
+<div class="eyebrow">01 • LOGICKÉ OPERÁTORY</div><h2>Co už známe a co přibude</h2>
+<p class="lead">Logický operátor vrací pravdivostní hodnotu. Ve <span class="code">WHERE</span> projde řádek do výsledku <strong>jen tehdy, když je podmínka TRUE</strong>. V SQL ale existuje i třetí hodnota – <strong>UNKNOWN</strong> (neznámo), která vzniká při práci s <span class="code">NULL</span>. Uvidíme, že je to dnes velmi důležité.</p>
+<div class="table-wrap"><table class="compare">
+<tr><th>Operátor</th><th>Otázka, kterou klade</th><th>Příklad</th><th>Stav</th></tr>
+<tr><td><span class="code">AND</span>, <span class="code">OR</span>, <span class="code">NOT</span></td><td>Platí obě / aspoň jedna / neplatí?</td><td><span class="code">grade = 1 AND subject_id = 3</span></td><td class="muted">známe</td></tr>
+<tr><td><span class="code">BETWEEN</span></td><td>Leží hodnota v intervalu (včetně krajů)?</td><td><span class="code">grade BETWEEN 1 AND 2</span></td><td class="muted">známe</td></tr>
+<tr><td><span class="code">LIKE</span></td><td>Odpovídá text vzoru?</td><td><span class="code">name LIKE 'N%'</span></td><td class="muted">známe</td></tr>
+<tr><td><span class="code">IS NULL</span></td><td>Chybí hodnota?</td><td><span class="code">class_id IS NULL</span></td><td class="muted">známe</td></tr>
+<tr><td><span class="code">IN</span></td><td>Je hodnota <strong>rovna některé</strong> hodnotě z množiny?</td><td><span class="code">code IN ('MAT','DAT')</span></td><td><span class="badge b-yellow">dnes</span></td></tr>
+<tr><td><span class="code">ANY</span> = <span class="code">SOME</span></td><td>Platí porovnání <strong>aspoň s jednou</strong> hodnotou z množiny?</td><td><span class="code">grade &lt; ANY (SELECT …)</span></td><td><span class="badge b-yellow">dnes</span></td></tr>
+<tr><td><span class="code">ALL</span></td><td>Platí porovnání <strong>se všemi</strong> hodnotami z množiny?</td><td><span class="code">grade &lt;= ALL (SELECT …)</span></td><td><span class="badge b-yellow">dnes</span></td></tr>
+<tr><td><span class="code">EXISTS</span></td><td>Vrátí poddotaz <strong>aspoň jeden řádek</strong>?</td><td><span class="code">EXISTS (SELECT 1 FROM …)</span></td><td><span class="badge b-yellow">dnes</span></td></tr>
+</table></div>
+<div class="grid4" style="margin-top:1.5rem">
+<div class="card accent-yellow"><h3 class="code" style="background:none;padding:0">IN</h3><p>„Je v seznamu?“</p></div>
+<div class="card accent-blue"><h3 class="code" style="background:none;padding:0">ANY</h3><p>„Platí aspoň pro jednu?“<br><span class="muted">matematicky ∃</span></p></div>
+<div class="card accent-green"><h3 class="code" style="background:none;padding:0">ALL</h3><p>„Platí pro všechny?“<br><span class="muted">matematicky ∀</span></p></div>
+<div class="card accent-red"><h3 class="code" style="background:none;padding:0">EXISTS</h3><p>„Je tam vůbec něco?“</p></div>
+</div>
+</section>
+
+<!-- 02 DATA -->
+<section id="data">
+<div class="eyebrow">02 • UKÁZKOVÁ DATA</div><h2>Stejné tabulky jako u JOIN</h2>
+<p class="lead">Pracujeme se stejnou databází školy. „Díry“ v datech se nám budou znovu hodit: <strong>Malý</strong> nemá třídu (<span class="null">NULL</span>), třída <strong>3.C</strong> nemá žáky, <strong>Černá</strong> nemá známku a z <strong>ANJ</strong> nikdo známku nedostal.</p>
+<div class="grid2">
+<div><div class="tname">classes</div><div class="table-wrap"><table class="data">
+<tr><th>id</th><th>name</th></tr>
+<tr class="ca"><td>1</td><td>2.A</td></tr><tr class="cb"><td>2</td><td>2.B</td></tr><tr class="cc"><td>3</td><td>3.C</td></tr></table></div></div>
+<div><div class="tname">students</div><div class="table-wrap"><table class="data">
+<tr><th>id</th><th>name</th><th>class_id</th></tr>
+<tr class="ca"><td>1</td><td>Novák</td><td class="num">1</td></tr>
+<tr class="ca"><td>2</td><td>Svobodová</td><td class="num">1</td></tr>
+<tr class="cb"><td>3</td><td>Dvořák</td><td class="num">2</td></tr>
+<tr class="cb"><td>4</td><td>Černá</td><td class="num">2</td></tr>
+<tr class="cn"><td>5</td><td>Malý</td><td class="num null">NULL</td></tr></table></div></div>
+<div><div class="tname">subjects</div><div class="table-wrap"><table class="data">
+<tr><th>id</th><th>code</th><th>name</th></tr>
+<tr><td>1</td><td>MAT</td><td>Matematika</td></tr><tr><td>2</td><td>CJL</td><td>Český jazyk</td></tr>
+<tr><td>3</td><td>DAT</td><td>Databáze</td></tr><tr><td>4</td><td>ANJ</td><td>Anglický jazyk</td></tr></table></div></div>
+<div><div class="tname">grades</div><div class="table-wrap"><table class="data">
+<tr><th>id</th><th>student_id</th><th>subject_id</th><th>grade</th></tr>
+<tr><td>1</td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td>2</td><td class="num">1</td><td class="num">3</td><td class="num">1</td></tr>
+<tr><td>3</td><td class="num">2</td><td class="num">1</td><td class="num">3</td></tr>
+<tr><td>4</td><td class="num">2</td><td class="num">2</td><td class="num">1</td></tr>
+<tr><td>5</td><td class="num">3</td><td class="num">1</td><td class="num">4</td></tr>
+<tr><td>6</td><td class="num">5</td><td class="num">3</td><td class="num">2</td></tr></table></div></div>
+</div>
+<p class="muted" style="margin-top:1rem">Pro orientaci: známky z <strong>MAT</strong> jsou <span class="code">1, 3, 4</span>, z <strong>DAT</strong> <span class="code">1, 2</span>, z <strong>CJL</strong> <span class="code">1</span> a z <strong>ANJ</strong> žádné.</p>
+<details><summary>Skript pro vytvoření databáze – zkopíruj a vyzkoušej</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">CREATE TABLE classes (
+  id   INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE students (
+  id       INT AUTO_INCREMENT PRIMARY KEY,
+  name     VARCHAR(50) NOT NULL,
+  class_id INT NULL,
+  FOREIGN KEY (class_id) REFERENCES classes(id)
+);
+
+CREATE TABLE subjects (
+  id   INT AUTO_INCREMENT PRIMARY KEY,
+  code CHAR(3)     NOT NULL,
+  name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE grades (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  student_id INT NOT NULL,
+  subject_id INT NOT NULL,
+  grade      TINYINT NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(id),
+  FOREIGN KEY (subject_id) REFERENCES subjects(id)
+);
+
+INSERT INTO classes (id, name) VALUES (1,'2.A'), (2,'2.B'), (3,'3.C');
+INSERT INTO students (id, name, class_id) VALUES
+  (1,'Novák',1), (2,'Svobodová',1), (3,'Dvořák',2), (4,'Černá',2), (5,'Malý',NULL);
+INSERT INTO subjects (id, code, name) VALUES
+  (1,'MAT','Matematika'), (2,'CJL','Český jazyk'), (3,'DAT','Databáze'), (4,'ANJ','Anglický jazyk');
+INSERT INTO grades (student_id, subject_id, grade) VALUES
+  (1,1,1), (1,3,1), (2,1,3), (2,2,1), (3,1,4), (5,3,2);</pre></div>
+</div></details>
+</section>
+
+<!-- 03 PODDOTAZ -->
+<section id="subquery">
+<div class="eyebrow">03 • PODDOTAZ</div><h2>SELECT uvnitř SELECTu</h2>
+<p class="lead"><strong>Poddotaz</strong> (subquery, vnořený dotaz) je celý <span class="code">SELECT</span> zapsaný v závorkách uvnitř jiného dotazu. Databáze nejdřív zjistí jeho výsledek a ten pak použije <strong>vnější dotaz</strong> – jako by tam byl napsaný ručně.</p>
+<div class="grid2">
+<div>
+<p class="result-label">Úloha: kteří žáci mají známku z matematiky?</p>
+<div class="sqlwrap"><pre class="sql">SELECT id, name
+FROM students
+WHERE id IN (
+    SELECT student_id          -- poddotaz
+    FROM grades
+    WHERE subject_id = 1
+);</pre></div>
+</div>
+<div class="steps">
+<div class="step"><div class="step-num">1</div><div><h3>Vnitřní dotaz</h3><p>Vrátí sloupec <span class="code">student_id</span> známek z MAT: <span class="code">1, 2, 3</span>.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><h3>Dosazení</h3><p>Vnější dotaz se chová, jako by bylo napsáno <span class="code">WHERE id IN (1, 2, 3)</span>.</p></div></div>
+<div class="step"><div class="step-num">3</div><div><h3>Výsledek</h3><p>Novák, Svobodová, Dvořák.</p></div></div>
+</div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<h3>Tři tvary výsledku poddotazu</h3>
+<div class="table-wrap"><table class="compare">
+<tr><th>Tvar</th><th>Příklad</th><th>Kde se použije</th></tr>
+<tr><td><strong>Skalární</strong><br><span class="muted">1 řádek × 1 sloupec</span></td><td><span class="code">(SELECT id FROM subjects WHERE code = 'MAT')</span> → <span class="code">1</span></td><td>místo jedné hodnoty: <span class="code">subject_id = (…)</span></td></tr>
+<tr><td><strong>Sloupcový</strong><br><span class="muted">N řádků × 1 sloupec</span></td><td><span class="code">(SELECT grade FROM grades WHERE subject_id = 1)</span> → <span class="code">1, 3, 4</span></td><td><span class="code">IN</span>, <span class="code">ANY</span>, <span class="code">SOME</span>, <span class="code">ALL</span></td></tr>
+<tr><td><strong>Tabulkový</strong><br><span class="muted">N řádků × M sloupců</span></td><td><span class="code">(SELECT * FROM grades WHERE …)</span></td><td><span class="code">EXISTS</span> (na sloupcích nezáleží), <span class="code">FROM (…) AS t</span></td></tr>
+</table></div>
+</div>
+<div class="grid2" style="margin-top:1.5rem">
+<div class="card accent-blue"><span class="badge b-blue">Nekorelovaný</span><h3>Nezávisí na vnějším dotazu</h3><p>Dá se spustit samostatně. Logicky se vyhodnotí <strong>jednou</strong> a výsledek se použije pro všechny řádky. Příklad výše.</p></div>
+<div class="card accent-yellow"><span class="badge b-yellow">Korelovaný</span><h3>Odkazuje na vnější řádek</h3><p>Obsahuje sloupec vnějšího dotazu, např. <span class="code">g.student_id = s.id</span>. Logicky se vyhodnotí <strong>pro každý řádek</strong> vnějšího dotazu znovu. Typické pro <span class="code">EXISTS</span>.</p></div>
+</div>
+<div class="callout green"><strong>Rada:</strong> poddotaz si nejdřív spusť samostatně (bez vnějšího dotazu). Uvidíš přesně tu množinu, se kterou bude <span class="code">IN</span>, <span class="code">ANY</span> nebo <span class="code">ALL</span> porovnávat.</div>
+</section>
+
+<!-- 04 IN -->
+<section id="in">
+<div class="eyebrow">04 • IN A NOT IN</div><h2>IN: je hodnota v seznamu?</h2>
+<p class="lead"><span class="code">x IN (a, b, c)</span> je zkratka pro <span class="code">x = a OR x = b OR x = c</span>. Množinu můžeme zapsat <strong>ručně jako seznam</strong>, nebo ji získat <strong>poddotazem</strong>.</p>
+<div class="grid2">
+<div>
+<h3>Seznam hodnot</h3>
+<div class="sqlwrap"><pre class="sql">SELECT id, code
+FROM subjects
+WHERE code IN ('MAT', 'DAT');
+
+-- totéž bez IN:
+-- WHERE code = 'MAT' OR code = 'DAT'</pre></div>
+<p class="result-label">Výsledek – 2 řádky</p>
+<div class="table-wrap"><table class="data"><tr><th>id</th><th>code</th></tr><tr><td>1</td><td>MAT</td></tr><tr><td>3</td><td>DAT</td></tr></table></div>
+</div>
+<div>
+<h3>Poddotaz</h3>
+<div class="sqlwrap"><pre class="sql">-- předměty, ze kterých existuje známka
+SELECT code
+FROM subjects
+WHERE id IN (SELECT subject_id FROM grades);</pre></div>
+<p class="result-label">Výsledek – 3 řádky</p>
+<div class="table-wrap"><table class="data"><tr><th>code</th></tr><tr><td>MAT</td></tr><tr><td>CJL</td></tr><tr><td>DAT</td></tr></table></div>
+<p class="muted" style="margin-top:.6rem">Poddotaz vrátí <span class="code">1, 3, 1, 2, 1, 3</span> – duplicity nevadí, IN se ptá jen „je tam?“.</p>
+</div>
+</div>
+
+<h3 style="margin-top:2.2rem">Poddotaz s JOINem uvnitř</h3>
+<p>V poddotazu může být cokoli, co už umíme – i JOIN. Hlavně musí vracet <strong>jeden sloupec</strong>.</p>
+<div class="grid2">
+<div class="sqlwrap"><pre class="sql">-- žáci se známkou z DAT nebo CJL
+SELECT name
+FROM students
+WHERE id IN (
+    SELECT g.student_id
+    FROM grades AS g
+    JOIN subjects AS sub ON sub.id = g.subject_id
+    WHERE sub.code IN ('DAT', 'CJL')
+);</pre></div>
+<div><p class="result-label">Výsledek – 3 řádky</p>
+<div class="table-wrap"><table class="data"><tr><th>name</th></tr><tr class="ca"><td>Novák</td></tr><tr class="ca"><td>Svobodová</td></tr><tr class="cn"><td>Malý</td></tr></table></div>
+<p class="muted" style="margin-top:.6rem">Novák má známku z DAT, Svobodová z CJL, Malý z DAT.</p></div>
+</div>
+
+<h3 style="margin-top:2.2rem">NOT IN: není v seznamu</h3>
+<div class="grid2">
+<div class="sqlwrap"><pre class="sql">-- žáci, kteří nemají žádnou známku
+SELECT id, name
+FROM students
+WHERE id NOT IN (SELECT student_id FROM grades);</pre></div>
+<div><p class="result-label">Výsledek – 1 řádek</p>
+<div class="table-wrap"><table class="data"><tr><th>id</th><th>name</th></tr><tr class="cb"><td>4</td><td>Černá</td></tr></table></div>
+<p class="muted" style="margin-top:.6rem">Stejný výsledek jako <span class="code">LEFT JOIN … WHERE g.id IS NULL</span> z minulé kapitoly – jen čitelněji.</p></div>
+</div>
+<div class="callout yellow"><strong>Funguje to jen díky tomu, že <span class="code">grades.student_id</span> je <span class="code">NOT NULL</span>.</strong> Kdyby poddotaz pro NOT IN vrátil jediné <span class="code">NULL</span>, výsledek by byl prázdný. Proč? To je další kapitola.</div>
+</section>
+
+<!-- 05 NULL -->
+<section id="null">
+<div class="eyebrow">05 • PAST JMÉNEM NULL</div><h2>Proč NOT IN někdy nevrátí nic</h2>
+<p class="lead">Úloha: <strong>Které třídy nemají žádného žáka?</strong> Správná odpověď je 3.C. Zkusme to přes NOT IN:</p>
+<div class="grid2">
+<div>
+<div class="sqlwrap"><pre class="sql">SELECT id, name
+FROM classes
+WHERE id NOT IN (SELECT class_id FROM students);</pre></div>
+<p class="result-label">Výsledek – 0 řádků 😮</p>
+<div class="table-wrap"><table class="data"><tr><th>id</th><th>name</th></tr><tr><td colspan="2" class="muted" style="font-family:Raleway,sans-serif">(prázdný výsledek)</td></tr></table></div>
+</div>
+<div class="panel">
+<h3>Co se stalo u třídy 3.C?</h3>
+<p>Poddotaz vrátil <span class="code">1, 1, 2, 2, <span class="null">NULL</span></span> (Malý nemá třídu). NOT IN se rozepíše na řadu nerovností spojených <span class="code">AND</span>:</p>
+<div class="table-wrap"><table class="data">
+<tr><th>porovnání</th><th>výsledek</th></tr>
+<tr><td>3 &lt;&gt; 1</td><td class="t-true">TRUE</td></tr>
+<tr><td>3 &lt;&gt; 1</td><td class="t-true">TRUE</td></tr>
+<tr><td>3 &lt;&gt; 2</td><td class="t-true">TRUE</td></tr>
+<tr><td>3 &lt;&gt; 2</td><td class="t-true">TRUE</td></tr>
+<tr><td>3 &lt;&gt; <span class="null">NULL</span></td><td class="t-unk">UNKNOWN</td></tr>
+<tr><td><strong>AND všech</strong></td><td class="t-unk"><strong>UNKNOWN</strong></td></tr>
+</table></div>
+<p class="muted" style="margin-top:.8rem">Nevíme, zda se 3 nerovná neznámé hodnotě. Celek je proto UNKNOWN – a <span class="code">WHERE</span> propouští jen TRUE.</p>
+</div>
+</div>
+
+<div class="panel" style="margin-top:1.5rem">
+<h3>Trojhodnotová logika u IN v kostce</h3>
+<div class="table-wrap"><table class="compare">
+<tr><th>Výraz</th><th>Výsledek</th><th>Proč</th></tr>
+<tr><td><span class="code">3 IN (1, 2)</span></td><td class="t-false">FALSE</td><td>3 se nerovná žádné hodnotě.</td></tr>
+<tr><td><span class="code">1 IN (1, NULL)</span></td><td class="t-true">TRUE</td><td>Shoda s 1 stačí, NULL už nic nezmění.</td></tr>
+<tr><td><span class="code">3 IN (1, NULL)</span></td><td class="t-unk">UNKNOWN</td><td>Shoda nenalezena, ale neznámá hodnota by 3 být mohla.</td></tr>
+<tr><td><span class="code">3 NOT IN (1, NULL)</span></td><td class="t-unk">UNKNOWN</td><td>NOT z UNKNOWN je pořád UNKNOWN.</td></tr>
+<tr><td><span class="code">NULL IN (1, 2)</span></td><td class="t-unk">UNKNOWN</td><td>Neznámou hodnotu nelze porovnat.</td></tr>
+</table></div>
+</div>
+
+<h3 style="margin-top:2.2rem">Dvě správná řešení</h3>
+<div class="grid2">
+<div><span class="badge b-green">1 • vyřadit NULL</span>
+<div class="sqlwrap"><pre class="sql">SELECT id, name
+FROM classes
+WHERE id NOT IN (
+    SELECT class_id
+    FROM students
+    WHERE class_id IS NOT NULL
+);</pre></div></div>
+<div><span class="badge b-green">2 • NOT EXISTS (doporučeno)</span>
+<div class="sqlwrap"><pre class="sql">SELECT c.id, c.name
+FROM classes AS c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM students AS s
+    WHERE s.class_id = c.id
+);</pre></div></div>
+</div>
+<p class="result-label">Oba vrátí – 1 řádek</p>
+<div class="table-wrap" style="max-width:320px"><table class="data"><tr><th>id</th><th>name</th></tr><tr class="cc"><td>3</td><td>3.C</td></tr></table></div>
+<div class="callout red"><strong>Pravidlo:</strong> u <span class="code">NOT IN (poddotaz)</span> se vždy zeptej: <em>„Může poddotaz vrátit NULL?“</em> Pokud ano (sloupec není <span class="code">NOT NULL</span>), přidej <span class="code">WHERE … IS NOT NULL</span>, nebo použij <span class="code">NOT EXISTS</span>.</div>
+</section>
+
+<!-- 06 ANY -->
+<section id="any">
+<div class="eyebrow">06 • ANY / SOME</div><h2>ANY: platí aspoň pro jednu hodnotu?</h2>
+<p class="lead"><span class="code">x &lt;operátor&gt; ANY (poddotaz)</span> je TRUE, když porovnání platí <strong>alespoň s jednou</strong> hodnotou z poddotazu. <span class="code">SOME</span> je jen jiný název pro totéž – <span class="code">ANY</span> a <span class="code">SOME</span> jsou zaměnitelné.</p>
+<div class="grid2">
+<div>
+<p class="result-label">Známky lepší (menší číslo) než aspoň jedna známka z MAT</p>
+<div class="sqlwrap"><pre class="sql">SELECT s.name, sub.code, g.grade
+FROM grades AS g
+JOIN students AS s   ON s.id = g.student_id
+JOIN subjects AS sub ON sub.id = g.subject_id
+WHERE g.grade &lt; ANY (
+    SELECT grade FROM grades WHERE subject_id = 1
+);   -- známky z MAT: 1, 3, 4</pre></div>
+</div>
+<div>
+<p class="result-label">Výsledek – 5 řádků</p>
+<div class="table-wrap"><table class="data">
+<tr><th>name</th><th>code</th><th>grade</th><th class="sep">proč</th></tr>
+<tr class="ca"><td>Novák</td><td>MAT</td><td class="num">1</td><td class="sep">1 &lt; 3 ✓</td></tr>
+<tr class="ca"><td>Novák</td><td>DAT</td><td class="num">1</td><td class="sep">1 &lt; 3 ✓</td></tr>
+<tr class="ca"><td>Svobodová</td><td>MAT</td><td class="num">3</td><td class="sep">3 &lt; 4 ✓</td></tr>
+<tr class="ca"><td>Svobodová</td><td>CJL</td><td class="num">1</td><td class="sep">1 &lt; 3 ✓</td></tr>
+<tr class="cn"><td>Malý</td><td>DAT</td><td class="num">2</td><td class="sep">2 &lt; 3 ✓</td></tr>
+</table></div>
+<p class="muted" style="margin-top:.6rem">Chybí jen Dvořákova čtyřka: 4 není menší než 1, 3 ani 4.</p>
+</div>
+</div>
+
+<div class="panel" style="margin-top:1.5rem">
+<h3>Jak ANY „přemýšlí“</h3>
+<p><span class="code">x &lt; ANY (1, 3, 4)</span> se rozepíše na <span class="code">x &lt; 1 <strong>OR</strong> x &lt; 3 <strong>OR</strong> x &lt; 4</span>. Stačí jedna pravda. Prakticky to znamená <strong>x &lt; největší hodnota</strong>.</p>
+<div class="numline" data-set="1,3,4" data-mode="any"></div>
+<div class="table-wrap" style="margin-top:1rem"><table class="compare">
+<tr><th>Zápis</th><th>Slovy</th><th>Stejně jako</th></tr>
+<tr><td><span class="code">x = ANY (…)</span></td><td>x se rovná aspoň jedné hodnotě</td><td><span class="code">x IN (…)</span></td></tr>
+<tr><td><span class="code">x &lt; ANY (…)</span></td><td>x je menší než aspoň jedna hodnota</td><td>x &lt; největší hodnota</td></tr>
+<tr><td><span class="code">x &gt; ANY (…)</span></td><td>x je větší než aspoň jedna hodnota</td><td>x &gt; nejmenší hodnota</td></tr>
+<tr><td><span class="code">x &lt;&gt; ANY (…)</span></td><td>x se liší aspoň od jedné hodnoty</td><td><em>téměř vždy TRUE</em> – pozor, viz níže</td></tr>
+</table></div>
+</div>
+
+<div class="grid2" style="margin-top:1.5rem">
+<div>
+<h3><span class="code">= ANY</span> je totéž co IN</h3>
+<div class="sqlwrap"><pre class="sql">-- spolužáci Nováka (ze stejné třídy)
+SELECT name
+FROM students
+WHERE class_id = ANY (
+        SELECT class_id
+        FROM students
+        WHERE name = 'Novák'
+      )
+  AND name &lt;&gt; 'Novák';</pre></div>
+<p class="result-label">Výsledek: Svobodová</p>
+</div>
+<div>
+<h3>Past: <span class="code">&lt;&gt; ANY</span> není „žádný“</h3>
+<div class="sqlwrap"><pre class="sql">-- chtěli jsme žáky BEZ známky…
+SELECT name
+FROM students
+WHERE id &lt;&gt; ANY (SELECT student_id FROM grades);
+-- …a dostali jsme VŠECH 5 žáků</pre></div>
+<p class="muted">Každé id se liší <em>aspoň od jednoho</em> student_id v seznamu. Anglické „not equal to any“ znamená v běžné řeči „žádnému“, v SQL ale ne! Pro „žádnému“ použij <span class="code">NOT IN</span> nebo <span class="code">&lt;&gt; ALL</span>.</p>
+</div>
+</div>
+<div class="callout"><strong>MySQL / MariaDB:</strong> za <span class="code">ANY</span>, <span class="code">SOME</span> i <span class="code">ALL</span> musí následovat <strong>poddotaz</strong>. Ručně zapsaný seznam <span class="code">grade = ANY (1, 2)</span> skončí syntaktickou chybou – pro seznam hodnot použij <span class="code">IN</span>.</div>
+</section>
+
+<!-- 07 ALL -->
+<section id="all">
+<div class="eyebrow">07 • ALL</div><h2>ALL: platí pro všechny hodnoty?</h2>
+<p class="lead"><span class="code">x &lt;operátor&gt; ALL (poddotaz)</span> je TRUE, když porovnání platí <strong>se všemi</strong> hodnotami z poddotazu. Rozepisuje se pomocí <span class="code">AND</span>.</p>
+<div class="grid2">
+<div>
+<p class="result-label">Nejlepší známky v celé škole</p>
+<div class="sqlwrap"><pre class="sql">SELECT s.name, sub.code, g.grade
+FROM grades AS g
+JOIN students AS s   ON s.id = g.student_id
+JOIN subjects AS sub ON sub.id = g.subject_id
+WHERE g.grade &lt;= ALL (SELECT grade FROM grades);</pre></div>
+</div>
+<div>
+<p class="result-label">Výsledek – 3 řádky</p>
+<div class="table-wrap"><table class="data">
+<tr><th>name</th><th>code</th><th>grade</th></tr>
+<tr class="ca"><td>Novák</td><td>MAT</td><td class="num">1</td></tr>
+<tr class="ca"><td>Novák</td><td>DAT</td><td class="num">1</td></tr>
+<tr class="ca"><td>Svobodová</td><td>CJL</td><td class="num">1</td></tr>
+</table></div>
+<p class="muted" style="margin-top:.6rem">Jednička je ≤ všem známkám (1, 1, 3, 1, 4, 2). Dvojka ne – není ≤ 1.</p>
+</div>
+</div>
+
+<div class="panel" style="margin-top:1.5rem">
+<h3>Jak ALL „přemýšlí“</h3>
+<p><span class="code">x &gt; ALL (1, 3, 4)</span> se rozepíše na <span class="code">x &gt; 1 <strong>AND</strong> x &gt; 3 <strong>AND</strong> x &gt; 4</span>. Musí platit všechno. Prakticky to znamená <strong>x &gt; největší hodnota</strong>.</p>
+<div class="numline" data-set="1,3,4" data-mode="all"></div>
+<div class="table-wrap" style="margin-top:1rem"><table class="compare">
+<tr><th>Zápis</th><th>Slovy</th><th>Stejně jako</th></tr>
+<tr><td><span class="code">x &gt; ALL (…)</span></td><td>x je větší než všechny hodnoty</td><td>x &gt; největší hodnota</td></tr>
+<tr><td><span class="code">x &lt; ALL (…)</span></td><td>x je menší než všechny hodnoty</td><td>x &lt; nejmenší hodnota</td></tr>
+<tr><td><span class="code">x &lt;&gt; ALL (…)</span></td><td>x se liší od všech hodnot, tj. nerovná se žádné</td><td><span class="code">x NOT IN (…)</span></td></tr>
+<tr><td><span class="code">x = ALL (…)</span></td><td>všechny hodnoty se rovnají x</td><td>množina obsahuje jen x (nebo je prázdná!)</td></tr>
+</table></div>
+</div>
+
+<div class="grid2" style="margin-top:1.5rem">
+<div>
+<h3>Kombinace s další podmínkou</h3>
+<div class="sqlwrap"><pre class="sql">-- nejlepší známka z matematiky
+SELECT s.name, g.grade
+FROM grades AS g
+JOIN students AS s ON s.id = g.student_id
+WHERE g.subject_id = 1
+  AND g.grade &lt;= ALL (
+        SELECT grade FROM grades WHERE subject_id = 1
+      );</pre></div>
+<p class="result-label">Výsledek: Novák, 1</p>
+</div>
+<div>
+<h3>Horší než všechny z DAT</h3>
+<div class="sqlwrap"><pre class="sql">SELECT s.name, g.grade
+FROM grades AS g
+JOIN students AS s ON s.id = g.student_id
+WHERE g.grade &gt; ALL (
+        SELECT grade FROM grades
+        WHERE subject_id = 3      -- DAT: 1, 2
+      );</pre></div>
+<p class="result-label">Výsledek: Svobodová 3, Dvořák 4</p>
+</div>
+</div>
+
+<h3 style="margin-top:2.2rem">Dvě zvláštnosti ALL, které musíš znát</h3>
+<div class="grid2">
+<div class="card accent-red"><span class="badge b-red">prázdný poddotaz</span><h3>ALL nad ničím = TRUE</h3>
+<div class="sqlwrap"><pre class="sql">SELECT COUNT(*) FROM grades
+WHERE grade &lt; ALL (
+  SELECT grade FROM grades
+  WHERE subject_id = 4     -- ANJ: žádné
+);
+-- 6  (všechny známky!)</pre></div>
+<p>„Všechny známky z ANJ jsou horší“ – žádné nejsou, takže nelze najít protipříklad. Tvrzení o prázdné množině je vždy pravdivé. Naopak <span class="code">ANY</span> nad prázdnou množinou je vždy FALSE (vrátil by 0).</p></div>
+<div class="card accent-red"><span class="badge b-red">NULL v poddotazu</span><h3>Jedno NULL zablokuje vše</h3>
+<div class="sqlwrap"><pre class="sql">SELECT id, name FROM classes
+WHERE id &gt; ALL (SELECT class_id FROM students);
+-- 0 řádků
+
+-- bez NULL:
+WHERE id &gt; ALL (SELECT class_id FROM students
+                WHERE class_id IS NOT NULL);
+-- 3.C</pre></div>
+<p>U 3.C: <span class="code">3 &gt; 1 AND … AND 3 &gt; NULL</span> = UNKNOWN. Stejná past jako u NOT IN – <span class="code">&lt;&gt; ALL</span> je přece totéž co NOT IN.</p></div>
+</div>
+</section>
+
+<!-- 08 EXPLORER -->
+<section id="explorer">
+<div class="eyebrow">08 • VYZKOUŠEJ SI</div><h2>Vyhodnocovač IN / ANY / ALL</h2>
+<p class="lead">Vyber množinu, kterou vrací poddotaz, operátor a testovanou hodnotu. Uvidíš každé jednotlivé porovnání i to, jak se z nich složí výsledek.</p>
+<div class="panel">
+<div class="ev-row"><span class="ev-label">Poddotaz vrací</span><div class="ex-tabs" id="evSet"></div></div>
+<div class="ev-row"><span class="ev-label">Operátor</span><div class="ex-tabs" id="evOp"></div></div>
+<div class="ev-row" id="evCmpRow"><span class="ev-label">Porovnání</span><div class="ex-tabs" id="evCmp"></div></div>
+<div class="ev-row"><span class="ev-label">Hodnota x</span><div class="ex-tabs" id="evX"></div></div>
+<div class="sqlwrap"><pre class="sql" id="evsql"></pre></div>
+<div class="grid2">
+<div><p class="result-label">Jednotlivá porovnání</p><div class="table-wrap"><table class="data" id="evTable"></table></div></div>
+<div><p class="result-label">Výsledek</p><div id="evRes"></div></div>
+</div>
+</div>
+<div class="callout green"><strong>Zkus:</strong> (1) množinu <em>class_id žáků</em> s operátorem <span class="code">NOT IN</span> a x = 3. (2) Prázdnou množinu ANJ s <span class="code">ALL</span> a pak s <span class="code">ANY</span>. (3) Operátor <span class="code">&lt;&gt;</span> s <span class="code">ANY</span> – najdeš x, pro které je výsledek FALSE?</div>
+</section>
+
+<!-- 09 EXISTS -->
+<section id="exists">
+<div class="eyebrow">09 • EXISTS</div><h2>EXISTS: vrátí poddotaz aspoň jeden řádek?</h2>
+<p class="lead"><span class="code">EXISTS (poddotaz)</span> nic neporovnává. Ptá se jen, zda je výsledek poddotazu <strong>neprázdný</strong>. Vrací vždy TRUE, nebo FALSE – <strong>nikdy UNKNOWN</strong>, a proto mu NULL nevadí.</p>
+<div class="grid2">
+<div>
+<p class="result-label">Žáci, kteří mají aspoň jednu známku</p>
+<div class="sqlwrap"><pre class="sql">SELECT s.id, s.name
+FROM students AS s
+WHERE EXISTS (
+    SELECT 1
+    FROM grades AS g
+    WHERE g.student_id = s.id   -- korelace
+);</pre></div>
+<p class="muted"><span class="code">SELECT 1</span> je zvyk: na tom, <em>co</em> poddotaz vybírá, nezáleží – EXISTS zajímá jen, <em>zda</em> něco vrátí. Stejně dobře funguje <span class="code">SELECT *</span>.</p>
+</div>
+<div>
+<p class="result-label">Vyhodnocení řádek po řádku</p>
+<div class="table-wrap"><table class="data">
+<tr><th>s.id</th><th>s.name</th><th class="sep">poddotaz pro tento řádek</th><th>řádků</th><th>EXISTS</th></tr>
+<tr class="ca"><td>1</td><td>Novák</td><td class="sep">… WHERE g.student_id = 1</td><td class="num">2</td><td class="t-true">TRUE</td></tr>
+<tr class="ca"><td>2</td><td>Svobodová</td><td class="sep">… WHERE g.student_id = 2</td><td class="num">2</td><td class="t-true">TRUE</td></tr>
+<tr class="cb"><td>3</td><td>Dvořák</td><td class="sep">… WHERE g.student_id = 3</td><td class="num">1</td><td class="t-true">TRUE</td></tr>
+<tr class="cb"><td>4</td><td>Černá</td><td class="sep">… WHERE g.student_id = 4</td><td class="num">0</td><td class="t-false">FALSE</td></tr>
+<tr class="cn"><td>5</td><td>Malý</td><td class="sep">… WHERE g.student_id = 5</td><td class="num">1</td><td class="t-true">TRUE</td></tr>
+</table></div>
+<p class="muted" style="margin-top:.6rem">Korelovaný poddotaz: pro každého žáka se „dosadí“ jeho <span class="code">s.id</span>. Výsledek: Novák, Svobodová, Dvořák, Malý.</p>
+</div>
+</div>
+
+<div class="grid2" style="margin-top:1.8rem">
+<div>
+<h3>NOT EXISTS: hledání chybějících</h3>
+<div class="sqlwrap"><pre class="sql">-- předměty, ze kterých nikdo nemá známku
+SELECT sub.code
+FROM subjects AS sub
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM grades AS g
+    WHERE g.subject_id = sub.id
+);
+-- ANJ</pre></div>
+</div>
+<div>
+<h3>Podmínka může být libovolně složitá</h3>
+<div class="sqlwrap"><pre class="sql">-- třídy, kde má někdo jedničku
+SELECT c.name
+FROM classes AS c
+WHERE EXISTS (
+    SELECT 1
+    FROM students AS s
+    JOIN grades AS g ON g.student_id = s.id
+    WHERE s.class_id = c.id
+      AND g.grade = 1
+);
+-- 2.A</pre></div>
+</div>
+</div>
+
+<h3 style="margin-top:2.2rem">EXISTS + ALL: „všechny“ jen tam, kde něco je</h3>
+<p>Úloha: <strong>žáci, kteří mají ze všech předmětů jedničku.</strong> První nápad:</p>
+<div class="grid2">
+<div><span class="badge b-red">Chybně</span>
+<div class="sqlwrap"><pre class="sql">SELECT s.name
+FROM students AS s
+WHERE 1 = ALL (
+    SELECT grade FROM grades AS g
+    WHERE g.student_id = s.id
+);
+-- Novák, Černá  ← Černá nemá žádnou známku!</pre></div></div>
+<div><span class="badge b-green">Správně</span>
+<div class="sqlwrap"><pre class="sql">SELECT s.name
+FROM students AS s
+WHERE EXISTS (SELECT 1 FROM grades AS g
+              WHERE g.student_id = s.id)
+  AND 1 = ALL (SELECT grade FROM grades AS g
+               WHERE g.student_id = s.id);
+-- Novák</pre></div></div>
+</div>
+<div class="callout yellow">Pro Černou vrátí poddotaz prázdnou množinu a <span class="code">ALL</span> nad prázdnou množinou je TRUE. Kdykoli píšeš „všechny“, zeptej se: <em>„A co když tam není nic?“</em> Pokud to nechceš, přidej <span class="code">EXISTS</span>.</div>
+</section>
+
+<!-- 10 COMPARE -->
+<section id="compare">
+<div class="eyebrow">10 • SROVNÁNÍ</div><h2>IN, EXISTS, nebo JOIN?</h2>
+<p class="lead">Mnoho úloh jde vyřešit více způsoby. Rozdíl je hlavně v tom, <strong>co dotaz vrací</strong> a jak se chová k <span class="code">NULL</span>.</p>
+<div class="grid3">
+<div><span class="badge b-blue">JOIN</span>
+<div class="sqlwrap"><pre class="sql">SELECT s.name
+FROM students s
+JOIN grades g
+  ON g.student_id = s.id
+WHERE g.grade = 1;
+-- Novák, Novák, Svobodová</pre></div></div>
+<div><span class="badge b-yellow">IN</span>
+<div class="sqlwrap"><pre class="sql">SELECT s.name
+FROM students s
+WHERE s.id IN (
+  SELECT student_id
+  FROM grades
+  WHERE grade = 1);
+-- Novák, Svobodová</pre></div></div>
+<div><span class="badge b-green">EXISTS</span>
+<div class="sqlwrap"><pre class="sql">SELECT s.name
+FROM students s
+WHERE EXISTS (
+  SELECT 1 FROM grades g
+  WHERE g.student_id = s.id
+    AND g.grade = 1);
+-- Novák, Svobodová</pre></div></div>
+</div>
+<div class="callout"><strong>JOIN násobí řádky</strong> (Novák má dvě jedničky, proto je tam dvakrát – znáš z minulé kapitoly). <strong>IN a EXISTS jen filtrují</strong>: každý žák projde nejvýše jednou. Když chceš jen „kteří žáci…“, je poddotaz přirozenější; když potřebuješ i sloupce z druhé tabulky (předmět, známku), použij JOIN.</div>
+<div class="panel" style="margin-top:1.5rem">
+<h3>Tahák ekvivalencí</h3>
+<div class="table-wrap"><table class="compare">
+<tr><th>Zápis</th><th>Totéž jako</th><th>Pozor</th></tr>
+<tr><td><span class="code">x IN (poddotaz)</span></td><td><span class="code">x = ANY (poddotaz)</span></td><td>—</td></tr>
+<tr><td><span class="code">x NOT IN (poddotaz)</span></td><td><span class="code">x &lt;&gt; ALL (poddotaz)</span></td><td>NULL v poddotazu → nic</td></tr>
+<tr><td><span class="code">x &gt; ANY (poddotaz)</span></td><td><span class="code">x &gt; (SELECT MIN(…) …)</span></td><td>liší se u prázdné množiny a NULL</td></tr>
+<tr><td><span class="code">x &gt; ALL (poddotaz)</span></td><td><span class="code">x &gt; (SELECT MAX(…) …)</span></td><td>prázdná množina: ALL → TRUE, MAX → NULL → nic</td></tr>
+<tr><td><span class="code">NOT IN</span> / <span class="code">LEFT JOIN … IS NULL</span></td><td><span class="code">NOT EXISTS</span></td><td>NOT EXISTS je odolné vůči NULL</td></tr>
+</table></div>
+</div>
+<div class="grid3" style="margin-top:1.5rem">
+<div class="card accent-yellow"><h3>IN</h3><p>Krátké seznamy hodnot a jednoduché „je v množině?“ s nekorelovaným poddotazem.</p></div>
+<div class="card accent-green"><h3>EXISTS / NOT EXISTS</h3><p>„Má k sobě nějaký záznam?“ a hlavně <strong>negace</strong> – je bezpečná i při NULL.</p></div>
+<div class="card accent-blue"><h3>ANY / ALL</h3><p>Porovnání <span class="code">&lt; &gt; &lt;= &gt;=</span> s celou množinou: „lepší než všechny“, „horší než aspoň jeden“.</p></div>
+</div>
+<div class="callout green"><strong>A výkon?</strong> Moderní MySQL i MariaDB převádějí IN a EXISTS interně na podobné plány (semi-join), takže u běžných dotazů nemusíš volit podle rychlosti. Vybírej podle <strong>čitelnosti a správnosti</strong>.</div>
+</section>
+
+<!-- 11 PITFALLS -->
+<section id="pitfalls">
+<div class="eyebrow">11 • NA CO POZOR</div><h2>Časté chyby a jak je poznat</h2>
+<div class="grid2">
+<div class="card accent-red"><h3>Poddotaz vrací více řádků</h3>
+<div class="sqlwrap"><pre class="sql">WHERE id = (SELECT student_id FROM grades
+            WHERE subject_id = 1);</pre></div>
+<p><span class="code">ERROR 1242: Subquery returns more than 1 row</span>. Operátor <span class="code">=</span> čeká jednu hodnotu. Použij <span class="code">IN</span> nebo <span class="code">= ANY</span>.</p></div>
+<div class="card accent-red"><h3>Poddotaz vrací více sloupců</h3>
+<div class="sqlwrap"><pre class="sql">WHERE id IN (SELECT student_id, grade
+             FROM grades);</pre></div>
+<p><span class="code">ERROR 1241: Operand should contain 1 column(s)</span>. Pro IN, ANY i ALL musí poddotaz vracet <strong>jeden sloupec</strong>.</p></div>
+<div class="card accent-red"><h3>NOT IN a NULL</h3><p>Jediné <span class="code">NULL</span> ve výsledku poddotazu = prázdný výsledek celého dotazu. Bez chybové hlášky! Proto je tak zrádné.</p></div>
+<div class="card accent-red"><h3>ALL nad prázdnou množinou</h3><p>Je vždy TRUE. „Všechny známky jsou 1“ splní i žák bez známek. Doplň <span class="code">EXISTS</span>.</p></div>
+<div class="card accent-yellow"><h3><span class="code">&lt;&gt; ANY</span> místo „žádný“</h3><p>Je TRUE téměř vždy. Pro „nerovná se žádné“ piš <span class="code">NOT IN</span> nebo <span class="code">&lt;&gt; ALL</span>.</p></div>
+<div class="card accent-yellow"><h3>LIMIT v poddotazu pro IN/ANY/ALL</h3>
+<div class="sqlwrap"><pre class="sql">WHERE id IN (SELECT student_id FROM grades
+             ORDER BY grade LIMIT 3);</pre></div>
+<p>MySQL i MariaDB odpoví <span class="code">ERROR 1235: … doesn't yet support 'LIMIT &amp; IN/ALL/ANY/SOME subquery'</span>. Řešení: obalit poddotaz do odvozené tabulky <span class="code">FROM (… LIMIT 3) AS t</span>.</p></div>
+<div class="card accent-yellow"><h3>ANY se seznamem hodnot</h3><p><span class="code">grade = ANY (1, 2)</span> v MySQL/MariaDB neprojde. ANY/ALL vyžadují poddotaz, seznam patří do IN.</p></div>
+<div class="card accent-blue"><h3>Zapomenutá korelace</h3><p><span class="code">WHERE EXISTS (SELECT 1 FROM grades)</span> bez <span class="code">g.student_id = s.id</span> je TRUE pro všechny řádky – tabulka grades přece není prázdná.</p></div>
+</div>
+</section>
+
+<!-- 12 PRACTICE -->
+<section id="practice">
+<div class="eyebrow">12 • PROCVIČ SI</div><h2>Úlohy nad databází školy</h2>
+<p class="lead">Nejdřív zkus napsat dotaz sám, pak rozbal řešení. Všechna řešení jsou ověřená na ukázkových datech.</p>
+<details><summary>1. Žáci ze třídy 2.A – pomocí IN a poddotazu do tabulky classes (bez JOIN).</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT name
+FROM students
+WHERE class_id IN (SELECT id FROM classes WHERE name = '2.A');</pre></div>
+<p class="result-label">Výsledek: Novák, Svobodová</p></div></details>
+<details><summary>2. Žáci, kteří nemají známku z matematiky (kód MAT).</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT name
+FROM students
+WHERE id NOT IN (
+    SELECT student_id FROM grades
+    WHERE subject_id = (SELECT id FROM subjects WHERE code = 'MAT')
+);</pre></div>
+<p class="result-label">Výsledek: Černá, Malý</p>
+<p class="muted">NOT IN je tu bezpečné: <span class="code">grades.student_id</span> je NOT NULL. Všimni si i skalárního poddotazu <span class="code">(SELECT id … 'MAT')</span>, který vrací jedinou hodnotu, proto stačí <span class="code">=</span>.</p></div></details>
+<details><summary>3. Známky, které jsou horší než všechny známky z databází (DAT). Vypiš jméno, předmět a známku.</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT s.name, sub.code, g.grade
+FROM grades AS g
+JOIN students AS s   ON s.id = g.student_id
+JOIN subjects AS sub ON sub.id = g.subject_id
+WHERE g.grade &gt; ALL (
+    SELECT grade FROM grades
+    WHERE subject_id = (SELECT id FROM subjects WHERE code = 'DAT')
+);</pre></div>
+<p class="result-label">Výsledek: Svobodová MAT 3, Dvořák MAT 4</p></div></details>
+<details><summary>4. Třídy, ve kterých má aspoň jeden žák známku 1.</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT c.name
+FROM classes AS c
+WHERE EXISTS (
+    SELECT 1
+    FROM students AS s
+    JOIN grades AS g ON g.student_id = s.id
+    WHERE s.class_id = c.id AND g.grade = 1
+);</pre></div>
+<p class="result-label">Výsledek: 2.A</p></div></details>
+<details><summary>5. Které třídy nemají žádného žáka? Napiš dvě správné varianty.</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">-- a) NOT EXISTS
+SELECT c.name FROM classes AS c
+WHERE NOT EXISTS (SELECT 1 FROM students AS s WHERE s.class_id = c.id);
+
+-- b) NOT IN s vyřazením NULL
+SELECT name FROM classes
+WHERE id NOT IN (SELECT class_id FROM students WHERE class_id IS NOT NULL);</pre></div>
+<p class="result-label">Výsledek: 3.C</p></div></details>
+<details><summary>6. Žáci, kteří mají aspoň jednu známku a všechny jejich známky jsou lepší než 3.</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT s.name
+FROM students AS s
+WHERE EXISTS (SELECT 1 FROM grades AS g WHERE g.student_id = s.id)
+  AND 3 &gt; ALL (SELECT grade FROM grades AS g WHERE g.student_id = s.id);</pre></div>
+<p class="result-label">Výsledek: Novák, Malý</p>
+<p class="muted">Bez EXISTS by ve výsledku byla i Černá (ALL nad prázdnou množinou).</p></div></details>
+<details><summary>7. Předměty, ze kterých existuje známka a nikdo z nich nedostal horší známku než 2.</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT sub.code
+FROM subjects AS sub
+WHERE EXISTS (SELECT 1 FROM grades AS g WHERE g.subject_id = sub.id)
+  AND 2 &gt;= ALL (SELECT grade FROM grades AS g WHERE g.subject_id = sub.id);</pre></div>
+<p class="result-label">Výsledek: CJL, DAT</p></div></details>
+<details><summary>8. Proč dotaz <span class="code">SELECT name FROM students WHERE id &lt;&gt; ANY (SELECT student_id FROM grades)</span> vrátí všechny žáky? Oprav ho, aby vrátil žáky bez známky.</summary><div class="sol">
+<p><span class="code">&lt;&gt; ANY</span> je TRUE, když se id liší aspoň od jedné hodnoty – a to platí pro každého. Správně:</p>
+<div class="sqlwrap"><pre class="sql">SELECT name FROM students
+WHERE id &lt;&gt; ALL (SELECT student_id FROM grades);   -- = NOT IN</pre></div>
+<p class="result-label">Výsledek: Černá</p></div></details>
+</section>
+
+<!-- 13 SUMMARY -->
+<section id="summary">
+<div class="eyebrow">13 • SHRNUTÍ</div><h2>Co si odnést</h2>
+<div class="grid2">
+<div class="card"><h3>① Poddotaz</h3><p>SELECT v závorkách. Pro IN/ANY/ALL vrací <strong>jeden sloupec</strong>, pro EXISTS na sloupcích nezáleží.</p></div>
+<div class="card"><h3>② IN</h3><p>„Rovná se některé hodnotě?“ Seznam i poddotaz. <span class="code">IN</span> = <span class="code">= ANY</span>.</p></div>
+<div class="card"><h3>③ ANY / SOME</h3><p>„Platí aspoň pro jednu?“ → spojení přes OR. Prázdná množina = FALSE.</p></div>
+<div class="card"><h3>④ ALL</h3><p>„Platí pro všechny?“ → spojení přes AND. Prázdná množina = TRUE!</p></div>
+<div class="card"><h3>⑤ EXISTS</h3><p>„Vrátí poddotaz aspoň řádek?“ Jen TRUE/FALSE, NULL mu nevadí. Typicky korelovaný.</p></div>
+<div class="card"><h3>⑥ NULL</h3><p>NOT IN a ALL s NULL v poddotazu dávají UNKNOWN → prázdný výsledek. Pro negace preferuj <strong>NOT EXISTS</strong>.</p></div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<p class="question">Tři otázky před každým poddotazem:</p>
+<div class="answer"><strong>1.</strong> Co přesně poddotaz vrací? (spusť ho samostatně) <strong>2.</strong> Může v tom být <span class="code">NULL</span>? <strong>3.</strong> Co když bude prázdný? – Odpovědi rozhodují mezi <strong>IN</strong>, <strong>ALL</strong> a <strong>EXISTS</strong>.</div>
+</div>
+</section>
+
+<footer>VOŠ, SPŠ a SOŠ Varnsdorf • Výukový materiál — SQL – operátory IN, ANY/SOME, ALL a EXISTS • Navazuje na prezentaci „SQL – spojování relací (JOIN)“.</footer>
+</main>
+<script>
+// navigace
+const links=[...document.querySelectorAll('nav a')], sections=[...document.querySelectorAll('main section[id]')];
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}}),{rootMargin:'-25% 0px -65% 0px'});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=991)document.querySelector('aside').style.display='none'}));
+
+// zvýraznění SQL
+const KW=/\b(SELECT|FROM|WHERE|GROUP|BY|HAVING|ORDER|LIMIT|AS|AND|OR|IN|NOT|NULL|IS|DISTINCT|DESC|ASC|JOIN|INNER|LEFT|RIGHT|OUTER|ON|UNION|ANY|SOME|ALL|EXISTS|BETWEEN|LIKE|CREATE|TABLE|INSERT|INTO|VALUES|PRIMARY|FOREIGN|REFERENCES|KEY|AUTO_INCREMENT|INT|VARCHAR|CHAR|TINYINT)\b/g;
+const FN=/\b(COUNT|SUM|AVG|MIN|MAX|ROUND|COALESCE)(?=\s*\()/g;
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function hl(raw){
+  return raw.split(/(--[^\n]*|'[^']*')/g).map(p=>{
+    if(p.startsWith('--'))return '<span class="c">'+esc(p)+'</span>';
+    if(p.startsWith("'"))return '<span class="s">'+esc(p)+'</span>';
+    return esc(p).replace(FN,'<span class="f">$1</span>').replace(KW,'<span class="k">$1</span>').replace(/\b(\d+)\b/g,'<span class="n">$1</span>');
+  }).join('');
+}
+function addCopy(pre,getText){
+  const b=document.createElement('button');b.className='copy';b.textContent='KOPÍROVAT';
+  b.onclick=()=>{navigator.clipboard.writeText(getText()).then(()=>{b.textContent='ZKOPÍROVÁNO';setTimeout(()=>b.textContent='KOPÍROVAT',1500)})};
+  pre.parentElement.appendChild(b);
+}
+document.querySelectorAll('pre.sql:not(#evsql)').forEach(pre=>{const raw=pre.textContent;pre.innerHTML=hl(raw);addCopy(pre,()=>raw);});
+
+// číselná osa pro ANY / ALL
+document.querySelectorAll('.numline').forEach(el=>{
+  const set=el.dataset.set.split(',').map(Number), mode=el.dataset.mode;
+  const W=640,H=96,x0=40,x1=W-30,lo=0,hi=5.5,X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
+  const mx=Math.max(...set);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="číselná osa">`;
+  const yA=50;
+  if(mode==='any'){s+=`<rect x="${X(lo)}" y="${yA-9}" width="${X(mx)-X(lo)}" height="18" fill="rgba(166,206,57,.32)"/>`;}
+  else{s+=`<rect x="${X(mx)}" y="${yA-9}" width="${X(hi)-X(mx)}" height="18" fill="rgba(166,206,57,.32)"/>`;}
+  s+=`<line x1="${X(lo)}" y1="${yA}" x2="${X(hi)}" y2="${yA}" stroke="rgba(255,255,255,.6)" stroke-width="2"/>`;
+  for(let v=0;v<=5;v++){s+=`<line x1="${X(v)}" y1="${yA-5}" x2="${X(v)}" y2="${yA+5}" stroke="rgba(255,255,255,.6)"/><text x="${X(v)}" y="${yA+26}" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="14" font-family="Consolas,monospace">${v}</text>`;}
+  set.forEach(v=>{s+=`<circle cx="${X(v)}" cy="${yA}" r="7" fill="#ffd400"/>`;});
+  s+=`<circle cx="${X(mx)}" cy="${yA}" r="11" fill="none" stroke="#ffd400" stroke-width="2"/>`;
+  const lab=mode==='any'?`x < ANY (${set.join(', ')})  ⇔  x < ${mx}`:`x > ALL (${set.join(', ')})  ⇔  x > ${mx}`;
+  s+=`<text x="${mode==='any'?X(lo):X(hi)}" y="20" text-anchor="${mode==='any'?'start':'end'}" fill="#a6ce39" font-size="15" font-weight="700" font-family="Consolas,monospace">${esc(lab)}</text>`;
+  s+=`</svg>`;
+  el.innerHTML=s+`<p class="muted" style="margin:.3rem 0 0">Žluté body = hodnoty z poddotazu, zelený pás = hodnoty x, pro které je podmínka TRUE.</p>`;
+});
+
+// vyhodnocovač
+const SETS={
+ mat:{label:'známky z MAT',sql:'SELECT grade FROM grades WHERE subject_id = 1',vals:[1,3,4]},
+ dat:{label:'známky z DAT',sql:'SELECT grade FROM grades WHERE subject_id = 3',vals:[1,2]},
+ anj:{label:'známky z ANJ (prázdné)',sql:'SELECT grade FROM grades WHERE subject_id = 4',vals:[]},
+ cls:{label:'class_id žáků (s NULL)',sql:'SELECT class_id FROM students',vals:[1,1,2,2,null]}
+};
+const OPS=['IN','NOT IN','ANY','ALL'], CMPS=['=','<>','<','<=','>','>='], XS=[1,2,3,4,5,null];
+const st={set:'mat',op:'IN',cmp:'<',x:3};
+const T='TRUE',F='FALSE',U='UNKNOWN';
+const tcls={TRUE:'t-true',FALSE:'t-false',UNKNOWN:'t-unk'};
+function cmp(a,c,b){if(a===null||b===null)return U;const r={'=':a===b,'<>':a!==b,'<':a<b,'<=':a<=b,'>':a>b,'>=':a>=b}[c];return r?T:F;}
+function fmt(v){return v===null?'NULL':String(v);}
+function btns(id,items,key,label){
+  const el=document.getElementById(id);
+  el.innerHTML=items.map(i=>`<button data-v="${i===null?'null':i}">${esc(label?label(i):fmt(i))}</button>`).join('');
+  el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.v;st[key]=key==='x'?(v==='null'?null:Number(v)):v;evRender();}));
+}
+btns('evSet',Object.keys(SETS),'set',k=>SETS[k].label);
+btns('evOp',OPS,'op');
+btns('evCmp',CMPS,'cmp');
+btns('evX',XS,'x');
+function evRender(){
+  const mark=(id,val)=>document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===(val===null?'null':String(val))));
+  mark('evSet',st.set);mark('evOp',st.op);mark('evCmp',st.cmp);mark('evX',st.x);
+  const quant=st.op==='ALL'||st.op==='NOT IN'?'ALL':'ANY';
+  const c=st.op==='IN'?'=':st.op==='NOT IN'?'<>':st.cmp;
+  document.getElementById('evCmpRow').style.opacity=(st.op==='ANY'||st.op==='ALL')?1:.35;
+  const S=SETS[st.set];
+  const opTxt=(st.op==='IN'||st.op==='NOT IN')?st.op:`${c} ${st.op}`;
+  const sql=`WHERE ${fmt(st.x)} ${opTxt} (\n    ${S.sql}\n)`+((st.op==='IN'||st.op==='NOT IN')?`\n-- ${st.op} je totéž co ${c} ${quant}`:'');
+  document.getElementById('evsql').innerHTML=hl(sql);
+  const rows=S.vals.map(v=>({v,r:cmp(st.x,c,v)}));
+  const join=quant==='ANY'?'OR':'AND';
+  document.getElementById('evTable').innerHTML='<tr><th>hodnota z poddotazu</th><th>porovnání</th><th>výsledek</th></tr>'+
+    (rows.length?rows.map((o,i)=>`<tr><td class="num">${o.v===null?'<span class="null">NULL</span>':o.v}</td><td>${(i?join+' ':'')}${esc(fmt(st.x)+' '+c+' '+fmt(o.v))}</td><td class="${tcls[o.r]}">${o.r}</td></tr>`).join('')
+      :'<tr><td colspan="3" class="muted" style="font-family:Raleway,sans-serif">poddotaz nevrátil žádný řádek</td></tr>');
+  let res,why;
+  const has=r=>rows.some(o=>o.r===r);
+  if(quant==='ANY'){
+    if(has(T)){res=T;why='Aspoň jedno porovnání je TRUE – u ANY (OR) to stačí.';}
+    else if(has(U)){res=U;why='Žádné porovnání není TRUE, ale aspoň jedno je UNKNOWN (kvůli NULL). Nevíme, zda by neznámá hodnota nevyhověla.';}
+    else if(!rows.length){res=F;why='Prázdná množina: není žádná hodnota, se kterou by porovnání mohlo platit. ANY nad prázdnou množinou je vždy FALSE.';}
+    else{res=F;why='Žádné porovnání není TRUE.';}
+  }else{
+    if(has(F)){res=F;why='Aspoň jedno porovnání je FALSE – u ALL (AND) to stačí k neúspěchu.';}
+    else if(has(U)){res=U;why='Žádné porovnání není FALSE, ale aspoň jedno je UNKNOWN (kvůli NULL). Proto nelze říct, že platí pro všechny.';}
+    else if(!rows.length){res=T;why='Prázdná množina: neexistuje hodnota, která by podmínku porušila. ALL nad prázdnou množinou je vždy TRUE!';}
+    else{res=T;why='Všechna porovnání jsou TRUE.';}
+  }
+  if(st.x===null&&rows.length)why='Testovaná hodnota je NULL – každé porovnání s ní je UNKNOWN. '+why;
+  document.getElementById('evRes').innerHTML=`<div class="ev-big ${tcls[res]}">${res}</div><p style="margin-top:.8rem">${why}</p>`+
+   `<p class="${res===T?'okline':'noline'}">${res===T?'✓ Řádek s touto hodnotou by ve WHERE <strong>prošel</strong> do výsledku.':'✗ Řádek by ve WHERE <strong>neprošel</strong> – WHERE propouští jen TRUE.'}</p>`;
+}
+evRender();
+addCopy(document.getElementById('evsql'),()=>document.getElementById('evsql').textContent);
+</script>
+
+</body>
+</html>

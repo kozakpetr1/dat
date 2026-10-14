@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Databáze jednoduše — VOŠ, SPŠ a SOŠ Varnsdorf</title>
+<meta name="description" content="Výuková one-page prezentace o databázích, databázových modelech, DBMS a nejběžnějších databázových systémech.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,200;0,400;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-top:#003b4b;--bg-bottom:#006783;--text:#fff;
+  --yellow:#ffd400;--yellow2:#ffea80;--blue:#41d7ff;--blue2:#00c0f3;
+  --green:#a6ce39;--green2:#c2dd78;--panel:rgba(0,27,34,.48);
+  --panel2:rgba(0,27,34,.68);--muted:rgba(255,255,255,.62);
+  --sidebar:280px;--danger:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Raleway,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg-top),var(--bg-bottom)) fixed;line-height:1.6}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ radial-gradient(circle at 78% 8%,rgba(65,215,255,.10),transparent 25%),
+ radial-gradient(circle at 18% 70%,rgba(166,206,57,.07),transparent 25%)}
+a{color:inherit}
+aside{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:2rem 1.5rem;background:rgba(0,20,26,.76);backdrop-filter:blur(20px);z-index:10}
+main{margin-left:var(--sidebar);max-width:1250px;padding:3.5rem 3rem 5rem}
+.logo{display:flex;align-items:center;gap:1rem;text-decoration:none;margin-bottom:2.6rem}
+.logo svg{width:50px;height:43px;flex:none}.logo b{font-size:.84rem;line-height:1.25;letter-spacing:.05em}.logo span{color:var(--blue)}
+.nav-title{font-size:.72rem;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:1rem}
+nav ul{list-style:none}nav li{margin-bottom:.35rem}
+nav a{display:flex;gap:.75rem;align-items:center;text-decoration:none;color:rgba(255,255,255,.68);padding:.72rem .9rem;font-weight:600;font-size:.9rem;border-left:3px solid transparent;transition:.2s}
+nav a:hover,nav a.active{color:#fff;background:rgba(65,215,255,.09);border-left-color:var(--blue)}
+nav svg{width:18px;height:18px;fill:currentColor;flex:none}
+.side-note{position:absolute;bottom:1.5rem;color:var(--muted);font-size:.72rem}
+section{scroll-margin-top:2rem;margin-bottom:5.5rem}
+.eyebrow{color:var(--blue);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.16em}
+h1{font-size:clamp(2.7rem,6vw,5.2rem);line-height:1.02;letter-spacing:-.045em;margin:.6rem 0 1.4rem}
+h1 em{font-style:normal;color:var(--yellow)}
+h2{font-size:clamp(1.9rem,4vw,2.7rem);line-height:1.15;margin:.35rem 0 1.2rem;letter-spacing:-.025em}
+h3{font-size:1.35rem;line-height:1.25;margin-bottom:.65rem}
+h4{font-size:1rem;margin-bottom:.4rem}
+p{margin-bottom:1rem}strong{font-weight:700}.muted{color:var(--muted)}
+.lead{font-size:1.18rem;font-weight:200;line-height:1.7}
+.hero{min-height:78vh;display:flex;align-items:center}
+.hero-inner{max-width:940px}
+.hero-kicker{display:inline-flex;align-items:center;gap:.55rem;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:.76rem}
+.hero-kicker:before{content:"";width:28px;height:3px;background:var(--green)}
+.hero-sub{max-width:780px;font-size:1.28rem;color:rgba(255,255,255,.84);font-weight:200}
+.chips{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.8rem}.chip{padding:.42rem .75rem;background:rgba(255,255,255,.07);font-size:.8rem;font-weight:600}
+.panel{background:var(--panel);backdrop-filter:blur(12px);box-shadow:0 12px 35px rgba(0,0,0,.22);padding:2rem}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.card{background:rgba(0,20,26,.34);padding:1.45rem;min-height:100%}
+.card.accent-blue{border-top:3px solid var(--blue)}.card.accent-yellow{border-top:3px solid var(--yellow)}.card.accent-green{border-top:3px solid var(--green)}
+.icon{font-size:1.7rem;margin-bottom:.7rem}.card p:last-child{margin-bottom:0}
+.question{font-size:1.55rem;font-weight:600;line-height:1.3}.answer{margin-top:1.1rem;padding-left:1rem;border-left:3px solid var(--yellow)}
+.timeline{position:relative;display:grid;gap:1rem;margin-top:1.4rem}.step{display:grid;grid-template-columns:50px 1fr;gap:1rem;align-items:start}
+.step-num{width:42px;height:42px;display:grid;place-items:center;background:var(--blue2);color:#002d38;font-weight:700}
+.step h3{margin:.1rem 0 .2rem}.step p{color:rgba(255,255,255,.75)}
+.compare{width:100%;border-collapse:collapse;font-size:.92rem}.compare th{text-align:left;color:var(--blue);font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;background:rgba(0,20,26,.75);padding:1rem}.compare td{padding:1rem;background:rgba(0,20,26,.25);vertical-align:top}.compare tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.badge{display:inline-block;padding:.18rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.b-blue{background:rgba(65,215,255,.14);color:var(--blue)}.b-yellow{background:rgba(255,212,0,.14);color:var(--yellow)}.b-green{background:rgba(166,206,57,.14);color:var(--green)}
+.equation{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.8rem;align-items:center;margin:1.6rem 0}
+.eqbox{padding:1.4rem;text-align:center;background:rgba(0,20,26,.55);font-size:1.15rem;font-weight:700}.eqbox small{display:block;font-size:.7rem;color:var(--muted);font-weight:400;margin-top:.25rem}.plus{font-size:1.6rem;color:var(--yellow)}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.7rem;align-items:center;margin:1.5rem 0}.flowbox{padding:1rem;text-align:center;background:rgba(0,20,26,.5);font-weight:700}.arrow{color:var(--yellow);font-size:1.4rem}
+.callout{margin-top:1.4rem;padding:1.1rem 1.25rem;border-left:4px solid var(--blue);background:rgba(65,215,255,.07)}.callout.yellow{border-left-color:var(--yellow);background:rgba(255,212,0,.07)}.callout.green{border-left-color:var(--green);background:rgba(166,206,57,.07)}
+ul{list-style:none;margin:.7rem 0}li{padding:.28rem 0 .28rem 1.35rem;position:relative}li:before{content:"";position:absolute;left:0;top:.78em;width:.72em;height:.72em;background:var(--yellow);clip-path:polygon(0 0,100% 50%,0 100%,20% 50%)}
+.code{font-family:Consolas,monospace;background:rgba(0,0,0,.3);padding:.12rem .35rem;color:var(--yellow2)}
+footer{padding:2rem 0;color:var(--muted);font-size:.75rem;border-top:1px solid rgba(255,255,255,.08)}
+.mobile{display:none}
+@media(max-width:991px){
+ aside{display:none}.mobile{display:flex;position:sticky;top:0;z-index:20;background:rgba(0,20,26,.92);backdrop-filter:blur(15px);padding:.8rem 1rem;justify-content:space-between;align-items:center}.mobile .logo{margin:0}.mobile button{background:none;border:0;color:#fff;font-size:1.5rem}main{margin:0;padding:2rem 1.2rem}.hero{min-height:75vh}.grid2,.grid3{grid-template-columns:1fr}.equation,.flow{grid-template-columns:1fr;gap:.5rem}.plus,.arrow{transform:rotate(90deg);text-align:center}.panel{padding:1.35rem}.compare{min-width:720px}.table-wrap{overflow:auto}}
+</style>
+</head>
+<body>
+<div class="mobile"><a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a><button onclick="document.querySelector('aside').style.display='block'">☰</button></div>
+<aside>
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a>
+<div class="nav-title">DATABÁZE • VÝUKA</div>
+<nav><ul>
+<li><a class="active" href="#start">⌂ <span>Proč databáze?</span></a></li>
+<li><a href="#models">▦ <span>Databázové modely</span></a></li>
+<li><a href="#dbs">◇ <span>DBS = DB + DBMS</span></a></li>
+<li><a href="#dbms">⚙ <span>Co dělá DBMS?</span></a></li>
+<li><a href="#types">◈ <span>Typy systémů</span></a></li>
+<li><a href="#map">→ <span>Jak se rozhodnout?</span></a></li>
+</ul></nav>
+<div class="side-note">Databáze • Informatika<br>Výuková one-page prezentace</div>
+</aside>
+
+<main>
+<section id="start" class="hero">
+<div class="hero-inner">
+<div class="hero-kicker">Informatika • Databáze</div>
+<h1>Proč vůbec vznikly <em>databáze?</em></h1>
+<p class="hero-sub">Protože ukládat data do souborů nestačí. Jakmile dat přibývá, potřebujeme je <strong>rychle hledat, měnit, sdílet, chránit a udržet konzistentní.</strong></p>
+<div class="chips"><span class="chip">data</span><span class="chip">struktura</span><span class="chip">dotazy</span><span class="chip">více uživatelů</span><span class="chip">bezpečnost</span></div>
+<div class="callout yellow"><strong>Myšlenka:</strong> databáze není jen „místo, kam se uloží tabulka“. Je to způsob, jak data organizovat a pracovat s nimi jako s celkem.</div>
+</div>
+</section>
+
+<section id="why">
+<div class="eyebrow">01 • PROBLÉM</div><h2>Od souborů k databázi</h2>
+<p class="lead">Představ si školu, e-shop nebo banku. Informace nejsou izolované — souvisejí spolu a současně s nimi pracuje mnoho operací i uživatelů.</p>
+<div class="grid3">
+<div class="card accent-yellow"><div class="icon">📄</div><h3>Jen soubory</h3><p>Data mohou být rozházená v CSV, Excelu nebo textových souborech. Stejná informace se často opakuje.</p></div>
+<div class="card accent-blue"><div class="icon">🔎</div><h3>Potřebujeme dotazy</h3><p>„Najdi všechny žáky 3.KC, kteří mají praxi v Praze.“ Ruční hledání není řešení pro tisíce záznamů.</p></div>
+<div class="card accent-green"><div class="icon">🔐</div><h3>Potřebujeme pravidla</h3><p>Kdo smí data měnit? Co když dva lidé upravují stejný záznam? Co při výpadku během zápisu?</p></div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<p class="question">Databáze řeší problém <span style="color:var(--yellow)">organizace + dostupnosti + konzistence + bezpečnosti dat.</span></p>
+</div>
+</section>
+
+<section id="models">
+<div class="eyebrow">02 • MODELY</div><h2>Databázový model = způsob, jak data uspořádáme</h2>
+<p class="lead">Databázový model určuje, jak jsou data strukturována, jak mezi sebou souvisejí a jak s nimi lze pracovat.</p>
+<div class="grid2">
+<div class="card accent-blue"><span class="badge b-blue">Klasické / relační</span><h3>Relační model</h3><p>Data jsou v <strong>tabulkách</strong>. Tabulky propojují klíče a vztahy. Pracujeme typicky pomocí SQL.</p><p class="muted">Příklad: <span class="code">students</span> ↔ <span class="code">classes</span> ↔ <span class="code">internships</span></p></div>
+<div class="card accent-yellow"><span class="badge b-yellow">NoSQL</span><h3>Dokumentový model</h3><p>Data jsou uložena jako dokumenty, často podobné JSON. Struktura dokumentů může být flexibilnější.</p><p class="muted">Příklad: <span class="code">{ name: "Jan", skills: [...] }</span></p></div>
+<div class="card accent-green"><span class="badge b-green">NoSQL</span><h3>Klíč–hodnota</h3><p>Velmi jednoduchý princip: ke <strong>klíči</strong> patří <strong>hodnota</strong>. Vhodné například pro cache nebo rychlé lookupy.</p><p class="muted">Příklad: <span class="code">user:42 → "Petr"</span></p></div>
+<div class="card accent-blue"><span class="badge b-blue">NoSQL</span><h3>Grafový model</h3><p>Data tvoří <strong>uzly a hrany</strong>. Hodí se tam, kde jsou zásadní vztahy mezi objekty.</p><p class="muted">Příklad: osoby → pracují_v → firmách</p></div>
+</div>
+<div class="callout"><strong>Pozor na pojmy:</strong> SQL/NoSQL není totéž co „typ databáze“. SQL je jazyk a relační databáze je model. NoSQL označuje skupinu nerelačních přístupů.</div>
+</section>
+
+<section id="dbs">
+<div class="eyebrow">03 • ZÁKLADNÍ POJEM</div><h2>DBS = DB + DBMS</h2>
+<p class="lead">Tady se často pletou tři pojmy. Zapamatuj si rozdíl mezi <strong>daty</strong>, <strong>databází</strong> a <strong>systémem, který databázi spravuje</strong>.</p>
+<div class="equation">
+<div class="eqbox">DB<small>Database<br>databáze</small></div><div class="plus">+</div>
+<div class="eqbox">DBMS<small>Database Management System<br>software pro správu</small></div><div class="plus">=</div>
+<div class="eqbox" style="border-top:3px solid var(--green)">DBS<small>Database System<br>databázový systém</small></div>
+</div>
+<div class="grid3">
+<div class="card"><h3>DB</h3><p>Samotná <strong>organizovaná data</strong> — například tabulky, indexy, vazby a uložené informace.</p></div>
+<div class="card"><h3>DBMS</h3><p><strong>Programové vybavení</strong>, které databázi vytváří, spravuje a zpřístupňuje aplikacím a uživatelům.</p></div>
+<div class="card"><h3>DBS</h3><p>Celé řešení: <strong>databáze + DBMS</strong> (v praxi také lidé, aplikace, hardware a další části prostředí).</p></div>
+</div>
+</section>
+
+<section id="dbms">
+<div class="eyebrow">04 • DBMS</div><h2>Co vlastně DBMS dělá?</h2>
+<div class="grid2">
+<div class="panel">
+<div class="timeline">
+<div class="step"><div class="step-num">01</div><div><h3>Ukládá a organizuje</h3><p>Spravuje data, tabulky, indexy, metadata a struktury databáze.</p></div></div>
+<div class="step"><div class="step-num">02</div><div><h3>Vyhledává</h3><p>Vyhodnocuje dotazy a používá například indexy, aby data našel efektivně.</p></div></div>
+<div class="step"><div class="step-num">03</div><div><h3>Hlídá pravidla</h3><p>Kontroluje datové typy, klíče, omezení a integritu dat.</p></div></div>
+<div class="step"><div class="step-num">04</div><div><h3>Řeší více uživatelů</h3><p>Řídí souběžné operace a transakce, aby nedocházelo k nekonzistentním stavům.</p></div></div>
+</div>
+</div>
+<div class="panel">
+<div class="timeline">
+<div class="step"><div class="step-num">05</div><div><h3>Zajišťuje bezpečnost</h3><p>Účty, role a oprávnění určují, kdo může data číst nebo měnit.</p></div></div>
+<div class="step"><div class="step-num">06</div><div><h3>Zvládá výpadky</h3><p>Mechanismy transakcí, logování a obnovy pomáhají zachovat konzistenci.</p></div></div>
+<div class="step"><div class="step-num">07</div><div><h3>Komunikuje s aplikací</h3><p>Aplikace posílá DBMS požadavky — například SQL dotazy — a získává výsledky.</p></div></div>
+<div class="step"><div class="step-num">08</div><div><h3>Optimalizuje práci</h3><p>DBMS rozhoduje, jak dotaz provést co nejefektivněji.</p></div></div>
+</div>
+</div>
+</div>
+<div class="flow">
+<div class="flowbox">👤 Uživatel</div><div class="arrow">→</div><div class="flowbox">💻 Aplikace</div><div class="arrow">→</div><div class="flowbox">⚙ DBMS → 🗄 DB</div>
+</div>
+</section>
+
+<section id="types">
+<div class="eyebrow">05 • CO POTKÁŠ V PRAXI</div><h2>Ne každý databázový systém funguje stejně</h2>
+<p class="lead">Některé systémy jsou plnohodnotné serverové DBMS, jiné jsou zabudované přímo do aplikace a další používají jiný databázový model.</p>
+<div class="table-wrap">
+<table class="compare">
+<thead><tr><th>Systém</th><th>Model</th><th>Jak funguje</th><th>Typické použití</th></tr></thead>
+<tbody>
+<tr><td><strong>MySQL</strong></td><td>relační / SQL</td><td>Serverový DBMS</td><td>webové aplikace, informační systémy</td></tr>
+<tr><td><strong>MariaDB</strong></td><td>relační / SQL</td><td>Serverový DBMS</td><td>web, školy, firmy, aplikace</td></tr>
+<tr><td><strong>PostgreSQL</strong></td><td>relační / SQL</td><td>Serverový DBMS</td><td>robustní aplikace, analytika, GIS</td></tr>
+<tr><td><strong>SQLite</strong></td><td>relační / SQL</td><td><strong>embedded</strong> — knihovna přímo v aplikaci</td><td>mobilní/desktop aplikace, malé lokální databáze</td></tr>
+<tr><td><strong>MongoDB</strong></td><td>dokumentový / NoSQL</td><td>Serverový databázový systém</td><td>aplikace s dokumentovými daty, flexibilní schéma</td></tr>
+<tr><td><strong>Redis</strong></td><td>klíč–hodnota / NoSQL</td><td>server, primárně in-memory</td><td>cache, rychlé datové struktury, fronty</td></tr>
+</tbody>
+</table>
+</div>
+<div class="grid2" style="margin-top:1.5rem">
+<div class="callout blue"><strong>MySQL ≈ MariaDB:</strong> oba jsou klasické serverové relační DBMS a používají SQL. Nejde tedy o „databázi“ jako takovou, ale o software, který databáze spravuje.</div>
+<div class="callout yellow"><strong>SQLite je jiný způsob nasazení:</strong> nemá typický samostatný databázový server. Databázový engine je součástí aplikace a databáze bývá v jednom souboru.</div>
+</div>
+</section>
+
+<section id="map">
+<div class="eyebrow">06 • ORIENTACE</div><h2>Jak si to všechno poskládat?</h2>
+<div class="panel">
+<div class="grid3">
+<div class="card accent-yellow"><h3>1. Co ukládám?</h3><p>Rozhoduje charakter dat: tabulková data, dokumenty, vztahy, klíč–hodnota…</p></div>
+<div class="card accent-blue"><h3>2. Jak s nimi pracuji?</h3><p>Potřebuji SQL? Složité vazby? Rychlé čtení? Flexibilní strukturu?</p></div>
+<div class="card accent-green"><h3>3. Kde systém poběží?</h3><p>Lokálně v aplikaci? Na serveru? Pro jednoho uživatele nebo tisíce současně?</p></div>
+</div>
+<div class="callout" style="margin-top:2rem"><strong>Praktická mapa:</strong> Školní informační systém → často relační DBMS (např. MariaDB/PostgreSQL). Mobilní aplikace s lokálními daty → často SQLite. Aplikace pracující s dokumenty → může použít MongoDB. Rychlá cache → může využít Redis.</div>
+</div>
+</section>
+
+<section id="summary">
+<div class="eyebrow">07 • CO SI ODNÉST</div><h2>Šest vět, které bys měl umět vysvětlit</h2>
+<div class="grid2">
+<div class="card"><h3>① Proč databáze?</h3><p>Protože potřebujeme efektivně a bezpečně spravovat větší množství souvisejících dat.</p></div>
+<div class="card"><h3>② Co je databázový model?</h3><p>Pravidla, podle kterých jsou data strukturována a propojena.</p></div>
+<div class="card"><h3>③ Co je DB?</h3><p>Organizovaná kolekce dat a souvisejících struktur.</p></div>
+<div class="card"><h3>④ Co je DBMS?</h3><p>Software, který databázi spravuje a poskytuje k ní rozhraní.</p></div>
+<div class="card"><h3>⑤ Co znamená DBS?</h3><p><strong>DBS = DB + DBMS</strong> — databáze a systém pro její správu.</p></div>
+<div class="card"><h3>⑥ Proč existuje tolik systémů?</h3><p>Protože různé aplikace mají různé požadavky na strukturu, výkon, škálování a způsob práce s daty.</p></div>
+</div>
+</section>
+
+<footer>VOŠ, SPŠ a SOŠ Varnsdorf • Výukový materiál — Databáze • Design vychází z přiloženého školního Design Systemu.</footer>
+</main>
+<script>
+const links=[...document.querySelectorAll('nav a')], sections=[...document.querySelectorAll('main section[id]')];
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}}),{rootMargin:'-25% 0px -65% 0px'});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=991)document.querySelector('aside').style.display='none'}));
+</script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konceptuální návrh databáze — případová studie SCHOOL</title>
+<meta name="description" content="Výuková webová prezentace: krok za krokem konceptuální návrh databáze school pomocí ER modelu.">
+<style>
+:root{
+  --bg:#062b35;--bg2:#08495a;--panel:rgba(2,22,28,.58);--panel2:rgba(3,31,39,.82);
+  --text:#f7fbfc;--muted:rgba(247,251,252,.68);--cyan:#49dfff;--yellow:#ffd447;
+  --green:#a8d65c;--purple:#c99aff;--red:#ff7d7d;--sidebar:285px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(160deg,var(--bg),var(--bg2)) fixed;line-height:1.62}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+radial-gradient(circle at 78% 5%,rgba(73,223,255,.12),transparent 28%),
+radial-gradient(circle at 15% 72%,rgba(168,214,92,.08),transparent 26%)}
+aside{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:28px 22px;background:rgba(1,16,21,.82);backdrop-filter:blur(16px);z-index:10}
+main{margin-left:var(--sidebar);max-width:1320px;padding:42px 48px 70px}
+.logo{display:flex;align-items:center;gap:13px;text-decoration:none;color:#fff;margin-bottom:35px}
+.logo svg{width:48px;height:42px}.logo b{font-size:13px;line-height:1.25;letter-spacing:.04em}.logo span{color:var(--cyan)}
+.nav-title{font-size:11px;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:13px}
+nav ul{list-style:none}nav li{margin-bottom:4px}
+nav a{display:flex;gap:10px;align-items:center;text-decoration:none;color:rgba(255,255,255,.67);padding:9px 10px;border-left:3px solid transparent;font-size:13px;font-weight:700}
+nav a:hover,nav a.active{color:#fff;background:rgba(73,223,255,.09);border-left-color:var(--cyan)}
+.side-note{position:absolute;bottom:25px;color:rgba(255,255,255,.42);font-size:11px}
+section{scroll-margin-top:25px;margin-bottom:82px}
+.hero{min-height:76vh;display:flex;align-items:center}.hero-inner{max-width:1000px}
+.eyebrow{color:var(--cyan);font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:800}
+h1{font-size:clamp(42px,6vw,78px);line-height:1.02;letter-spacing:-.045em;margin:9px 0 22px}
+h1 em{font-style:normal;color:var(--yellow)}
+h2{font-size:clamp(30px,4vw,46px);line-height:1.12;letter-spacing:-.03em;margin:6px 0 18px}
+h3{font-size:21px;line-height:1.25;margin-bottom:9px}
+h4{font-size:16px;margin-bottom:6px}
+p{margin-bottom:14px}.lead{font-size:20px;line-height:1.7;font-weight:300;max-width:980px}
+.muted{color:var(--muted)}strong{font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:25px}.chip{padding:7px 12px;background:rgba(255,255,255,.07);font-size:12px;font-weight:700}
+.panel{background:var(--panel);backdrop-filter:blur(10px);padding:27px;box-shadow:0 14px 38px rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.05)}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:rgba(1,20,26,.42);padding:20px;border-top:3px solid var(--cyan);height:100%}
+.card.yellow{border-color:var(--yellow)}.card.green{border-color:var(--green)}.card.purple{border-color:var(--purple)}.card.red{border-color:var(--red)}
+.callout{margin-top:20px;padding:15px 18px;border-left:4px solid var(--cyan);background:rgba(73,223,255,.065)}
+.callout.yellow{border-color:var(--yellow);background:rgba(255,212,71,.07)}
+.callout.green{border-color:var(--green);background:rgba(168,214,92,.07)}
+.callout.purple{border-color:var(--purple);background:rgba(201,154,255,.07)}
+.badge{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;padding:4px 7px;margin-bottom:8px;background:rgba(73,223,255,.12);color:var(--cyan)}
+.badge.yellow{color:var(--yellow);background:rgba(255,212,71,.12)}.badge.green{color:var(--green);background:rgba(168,214,92,.12)}
+ul{list-style:none;margin:8px 0}li{position:relative;padding:5px 0 5px 22px}li:before{content:"";position:absolute;left:2px;top:14px;width:8px;height:8px;background:var(--yellow);clip-path:polygon(0 0,100% 50%,0 100%,22% 50%)}
+code,.code{font-family:Consolas,monospace;color:#ffe98d;background:rgba(0,0,0,.25);padding:2px 5px}
+.flow{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr 40px 1fr;align-items:center;gap:5px;margin:25px 0}.flowbox{text-align:center;padding:15px 8px;background:rgba(0,15,20,.56);border-top:3px solid var(--cyan);font-weight:800}.arrow{text-align:center;color:var(--yellow);font-size:25px}
+.step-list{display:grid;gap:14px}.step{display:grid;grid-template-columns:54px 1fr;gap:16px;align-items:start}.num{width:45px;height:45px;display:grid;place-items:center;background:var(--cyan);color:#03303a;font-weight:900;font-size:19px}
+.requirement{display:grid;grid-template-columns:45px 1fr;gap:13px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.08)}.reqno{color:var(--yellow);font-weight:900;font-family:Consolas,monospace}
+.entity{background:rgba(2,22,28,.72);border:2px solid var(--cyan);padding:16px;text-align:center;font-weight:900;min-width:175px}
+.diamond{width:120px;height:88px;padding:0 14px;background:rgba(255,212,71,.12);border:2px solid var(--yellow);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);display:grid;place-items:center;margin:auto}.diamond span{font-weight:900;text-align:center;font-size:14px;line-height:1.15}
+.er-line{display:grid;grid-template-columns:1fr 140px 1fr;gap:18px;align-items:center;margin:26px 0}.cardlabel{text-align:center;color:var(--yellow);font-family:Consolas,monospace;font-size:14px;margin-top:6px}
+.occur{display:grid;grid-template-columns:1fr 80px 1fr;gap:12px;align-items:center;margin:13px 0}.occur .person,.occur .thing{padding:9px 11px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);text-align:center;font-size:13px}.occur .rel{text-align:center;color:var(--yellow);font-size:12px;font-weight:800}
+.minmax{font-family:Consolas,monospace;color:var(--green);font-weight:800;text-align:center}
+.entity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:18px}.entity-card{background:rgba(0,20,26,.52);padding:18px;border-top:3px solid var(--cyan)}.entity-card h3{color:var(--cyan)}.entity-card.yellow{border-color:var(--yellow)}.entity-card.yellow h3{color:var(--yellow)}.entity-card.green{border-color:var(--green)}.entity-card.green h3{color:var(--green)}
+.attr{display:grid;grid-template-columns:1fr auto;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);font-family:Consolas,monospace;font-size:13px}.pk{color:var(--yellow)}.fk{color:var(--cyan)}.required{color:var(--green)}
+table{width:100%;border-collapse:collapse;font-size:14px}th{background:rgba(0,15,20,.78);color:var(--cyan);text-align:left;text-transform:uppercase;letter-spacing:.08em;font-size:11px;padding:12px}td{padding:12px;background:rgba(255,255,255,.025);vertical-align:top;border-bottom:1px solid rgba(255,255,255,.06)}
+.final-model{display:grid;grid-template-columns:1fr 140px 1fr;gap:18px;align-items:center;margin:22px 0}.final-rel{text-align:center}.final-note{margin-top:20px}
+footer{padding:24px 0;color:var(--muted);font-size:11px;border-top:1px solid rgba(255,255,255,.08)}
+.mobile{display:none}
+@media(max-width:1000px){
+ aside{display:none}.mobile{display:flex;position:sticky;top:0;z-index:20;background:rgba(1,16,21,.94);padding:12px 15px;justify-content:space-between;align-items:center}.mobile .logo{margin:0}.mobile button{background:none;border:0;color:#fff;font-size:25px}
+ main{margin:0;padding:25px 15px 55px}.grid2,.grid3,.entity-grid{grid-template-columns:1fr}.flow{grid-template-columns:1fr;gap:7px}.arrow{transform:rotate(90deg)}.er-line,.occur,.final-model{grid-template-columns:1fr;gap:9px}.diamond{width:105px;height:78px;padding:0 10px}.panel{padding:18px}.hero{min-height:72vh}.table-wrap{overflow:auto}.table-wrap table{min-width:750px}
+}
+</style>
+</head>
+<body>
+<div class="mobile">
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd447"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffe98d"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#49dfff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c5ee"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#bfe083"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a8d65c"/></svg><b>SCHOOL<br><span>ER MODEL</span></b></a><button onclick="document.querySelector('aside').style.display='block'">☰</button>
+</div>
+
+<aside>
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd447"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffe98d"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#49dfff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c5ee"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#bfe083"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a8d65c"/></svg><b>SCHOOL<br><span>ER MODEL</span></b></a>
+<div class="nav-title">KONCEPTUÁLNÍ NÁVRH</div>
+<nav><ul>
+<li><a class="active" href="#start">⌂ <span>Výchozí situace</span></a></li>
+<li><a href="#requirements">▤ <span>Zadání požadavků</span></a></li>
+<li><a href="#overview">→ <span>Mapa postupu</span></a></li>
+<li><a href="#step1">1 <span>Entitní typy</span></a></li>
+<li><a href="#step2">2 <span>Vztahové typy</span></a></li>
+<li><a href="#cardinality">↔ <span>Kardinalita a parcialita</span></a></li>
+<li><a href="#step3">3 <span>Atributy</span></a></li>
+<li><a href="#step4">4 <span>Integritní omezení</span></a></li>
+<li><a href="#final">★ <span>Výsledný ER model</span></a></li>
+<li><a href="#check">✓ <span>Kontrola návrhu</span></a></li>
+</ul></nav>
+<div class="side-note">Databáze • ER model<br>Případová studie SCHOOL</div>
+</aside>
+
+<main>
+<section id="start" class="hero">
+<div class="hero-inner">
+<div class="eyebrow">Databáze • konceptuální návrh • případová studie</div>
+<h1>Nejdřív pochop.<br><em>Teprve potom modeluj.</em></h1>
+<p class="lead">V této prezentaci projdeme jeden konkrétní návrh databáze <strong>school</strong> krok za krokem. Nebudeme začínat tabulkami ani SQL. Začneme požadavky, z nich postupně odvodíme entitní typy, vztahové typy, atributy a integritní omezení.</p>
+<div class="chips"><span class="chip">school</span><span class="chip">class</span><span class="chip">pupil</span><span class="chip">subject</span><span class="chip">ER model</span><span class="chip">kardinalita</span><span class="chip">parcialita</span></div>
+<div class="callout yellow"><strong>Cíl:</strong> na konci musí být možné vysvětlit každý prvek ER modelu větou typu „Tento prvek je zde proto, že…“</div>
+</div>
+</section>
+
+<section id="requirements">
+<div class="eyebrow">00 • VÝCHOZÍ PODKLAD</div><h2>Nejdřív si přečteme požadavky</h2>
+<p class="lead">Představme si, že škola potřebuje jednoduchou databázi pro evidenci tříd, žáků a vyučovaných předmětů. Zadání je schválně dostatečně podrobné, aby z něj bylo možné odvodit celý konceptuální model.</p>
+<div class="panel">
+<h3>Zadání případové studie</h3>
+<div class="requirement"><div class="reqno">R1</div><div>Škola eviduje <strong>třídy</strong>. Každá třída má jednoznačný identifikátor, označení (např. 2.A) a rok, ve kterém vznikla.</div></div>
+<div class="requirement"><div class="reqno">R2</div><div>Škola eviduje <strong>žáky</strong>. Každý žák má jednoznačný identifikátor, jméno, příjmení a datum narození.</div></div>
+<div class="requirement"><div class="reqno">R3</div><div>Každý žák je v daném školním roce zařazen <strong>právě do jedné třídy</strong>. Jedna třída může obsahovat více žáků.</div></div>
+<div class="requirement"><div class="reqno">R4</div><div>Škola eviduje <strong>předměty</strong>. Každý předmět má jednoznačný identifikátor, kód a název.</div></div>
+<div class="requirement"><div class="reqno">R5</div><div>Každá třída má ve svém učebním plánu <strong>jeden nebo více předmětů</strong>. Jeden předmět může být vyučován ve více třídách.</div></div>
+<div class="requirement"><div class="reqno">R6</div><div>Žák se účastní předmětů, které jsou vyučovány v jeho třídě. U každého takového vztahu škola eviduje, zda je předmět <strong>povinný nebo volitelný</strong>.</div></div>
+<div class="requirement"><div class="reqno">R7</div><div>Vztah žáka a předmětu může mít také <strong>známku</strong>. Známka nemusí být v okamžiku založení vztahu ještě známá.</div></div>
+<div class="requirement"><div class="reqno">R8</div><div>Model má zachytit pouze informace uvedené v zadání. Co zadání neříká, to nebudeme bezdůvodně domýšlet.</div></div>
+</div>
+<div class="callout green"><strong>Metodická zásada:</strong> požadavky jsou náš zdroj pravdy. Při každém kroku se k nim vracíme a hledáme důkaz, proč jsme daný prvek modelu vytvořili.</div>
+</section>
+
+<section id="overview">
+<div class="eyebrow">MAPA NÁVRHU</div><h2>Čtyři kroky od textu k ER modelu</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY</div><div class="arrow">→</div><div class="flowbox">4<br>OMEZENÍ</div></div>
+<div class="grid2">
+<div class="card"><h3>Nejdříve význam</h3><p>Rozhodujeme, <strong>co v realitě existuje</strong> a co je pro informační systém důležité.</p></div>
+<div class="card yellow"><h3>Potom pravidla</h3><p>Teprve když máme objekty a jejich vazby, zpřesňujeme počty, povinnost účasti, vlastnosti a integritní pravidla.</p></div>
+</div>
+<div class="callout">Všimni si: <strong>atributy nejsou první krok</strong>. Kdybychom začali seznamem polí, mohli bychom přehlédnout důležitou vazbu nebo ji chybně považovat za atribut.</div>
+</section>
+
+<section id="step1">
+<div class="eyebrow">KROK 1 • ENTITNÍ TYPY</div><h2>Co vlastně evidujeme?</h2>
+<p class="lead">Hledáme objekty nebo koncepty, které mají v systému vlastní význam a o kterých potřebujeme uchovávat údaje. Pomáhá otázka: <strong>„O čem potřebujeme něco vědět?“</strong></p>
+<div class="entity-grid">
+<div class="entity-card"><h3>class</h3><p>Požadavky R1 a R3 mluví o třídách, jejich označení a zařazení žáků.</p></div>
+<div class="entity-card yellow"><h3>pupil</h3><p>Požadavky R2 a R3 popisují žáky jako samostatně evidované objekty.</p></div>
+<div class="entity-card green"><h3>subject</h3><p>Požadavky R4–R6 vyžadují evidenci předmětů jako samostatných objektů.</p></div>
+</div>
+<div class="panel" style="margin-top:20px">
+<h3>Co zatím víme?</h3>
+<table><tr><th>Entitní typ</th><th>Proč existuje?</th><th>Co zatím neřešíme?</th></tr>
+<tr><td><strong>class</strong></td><td>Třída má vlastní identitu a údaje.</td><td>konkrétní atributy a datové typy</td></tr>
+<tr><td><strong>pupil</strong></td><td>Žák je samostatně evidovaný objekt.</td><td>způsob identifikace v SQL</td></tr>
+<tr><td><strong>subject</strong></td><td>Předmět může být společný pro více tříd i žáků.</td><td>tabulku, indexy, FK</td></tr></table>
+</div>
+<div class="callout yellow"><strong>Kontrola proti zadání:</strong> máme tři hlavní podstatná jména, která mají vlastní identitu a vlastní údaje. Proto je modelujeme jako <strong>entitní typy</strong>.</div>
+</section>
+
+<section id="step2">
+<div class="eyebrow">KROK 2 • VZTAHOVÉ TYPY</div><h2>Jak spolu entity souvisejí?</h2>
+<p class="lead">Teď se ptáme: <strong>„Jaká významová vazba existuje mezi dvěma entitními typy?“</strong> Z požadavků odvodíme tři různé vztahové typy.</p>
+
+<div class="panel">
+<div class="er-line"><div class="entity">pupil</div><div class="diamond"><span>belongs_to</span></div><div class="entity">class</div></div>
+<p class="muted" style="text-align:center">R3: žák je zařazen do třídy.</p>
+<div class="er-line"><div class="entity">class</div><div class="diamond"><span>teaches</span></div><div class="entity">subject</div></div>
+<p class="muted" style="text-align:center">R5: třída má předmět ve svém učebním plánu.</p>
+<div class="er-line"><div class="entity">pupil</div><div class="diamond"><span>attends</span></div><div class="entity">subject</div></div>
+<p class="muted" style="text-align:center">R6–R7: žák se účastní předmětu a vztah může nést známku.</p>
+</div>
+
+<div class="grid3" style="margin-top:18px">
+<div class="card"><h3>belongs_to</h3><p>Vazba mezi <strong>pupil</strong> a <strong>class</strong>.</p><p class="muted">Směr významu: „Žák patří do třídy.“</p></div>
+<div class="card yellow"><h3>teaches</h3><p>Vazba mezi <strong>class</strong> a <strong>subject</strong>.</p><p class="muted">Směr významu: „Třída má předmět.“</p></div>
+<div class="card green"><h3>attends</h3><p>Vazba mezi <strong>pupil</strong> a <strong>subject</strong>.</p><p class="muted">Směr významu: „Žák navštěvuje předmět.“</p></div>
+</div>
+<div class="callout">Vztah <strong>attends</strong> není jen „spojovací čára“. Podle R6–R7 má vlastní významové vlastnosti — povinný/volitelný a případně známku. To je důvod, proč je důležité nejprve rozpoznat vztah a teprve potom řešit atributy.</div>
+</section>
+
+<section id="cardinality">
+<div class="eyebrow">KROK 2B • KARDINALITA A PARCIALITA</div><h2>Kolik? A musí vůbec?</h2>
+<p class="lead">Kardinalita a parcialita nejsou totéž. Kardinalita odpovídá na otázku <strong>„kolik?“</strong>, parcialita na otázku <strong>„musí být účast?“</strong></p>
+
+<div class="panel">
+<h3>Diagram výskytu: pupil ↔ class</h3>
+<p class="muted">Z konkrétních výskytů je dobře vidět, že více žáků může patřit do stejné třídy.</p>
+<div class="occur"><div class="person">Petr</div><div class="rel">belongs_to</div><div class="thing">2.A</div></div>
+<div class="occur"><div class="person">Jana</div><div class="rel">belongs_to</div><div class="thing">2.A</div></div>
+<div class="occur"><div class="person">David</div><div class="rel">belongs_to</div><div class="thing">3.B</div></div>
+<div class="grid2" style="margin-top:18px">
+<div class="card"><h3>pupil → class</h3><p><span class="minmax">1..1</span></p><p>R3 říká, že každý žák je zařazen právě do jedné třídy.</p></div>
+<div class="card yellow"><h3>class → pupil</h3><p><span class="minmax">0..N</span></p><p>Zadání říká, že třída může mít více žáků, ale neříká, že musí mít alespoň jednoho. Proto minimální účast nedoplňujeme.</p></div>
+</div>
+<p class="muted" style="margin-top:14px"><strong>Poznámka k R3:</strong> zadání mluví o zařazení „v daném školním roce“. Model níže zjednodušeně předpokládá jeden aktuální školní rok a školní rok jako samostatný atribut nezavádí — to je vědomé zjednodušení případové studie, ne přehlédnutí požadavku.</p>
+</div>
+
+<div class="panel" style="margin-top:20px">
+<h3>Diagram výskytu: class ↔ subject</h3>
+<div class="occur"><div class="person">2.A</div><div class="rel">teaches</div><div class="thing">Matematika</div></div>
+<div class="occur"><div class="person">2.A</div><div class="rel">teaches</div><div class="thing">Čeština</div></div>
+<div class="occur"><div class="person">3.B</div><div class="rel">teaches</div><div class="thing">Matematika</div></div>
+<div class="grid2" style="margin-top:18px">
+<div class="card green"><h3>class → subject</h3><p><span class="minmax">1..N</span></p><p>R5: každá třída má ve svém učebním plánu jeden nebo více předmětů.</p></div>
+<div class="card"><h3>subject → class</h3><p><span class="minmax">0..N</span></p><p>Jeden předmět může být vyučován ve více třídách. Zadání ale neříká, že každý evidovaný předmět musí být právě teď zařazen v nějaké třídě.</p></div>
+</div>
+</div>
+
+<div class="panel" style="margin-top:20px">
+<h3>Diagram výskytu: pupil ↔ subject</h3>
+<div class="occur"><div class="person">Petr</div><div class="rel">attends</div><div class="thing">Matematika</div></div>
+<div class="occur"><div class="person">Petr</div><div class="rel">attends</div><div class="thing">Čeština</div></div>
+<div class="occur"><div class="person">Jana</div><div class="rel">attends</div><div class="thing">Matematika</div></div>
+<div class="callout green"><strong>Zde vidíme M:N.</strong> Jeden žák může navštěvovat více předmětů a jeden předmět může navštěvovat více žáků. Podle zadání navíc každý žák navštěvuje předměty své třídy, ale přesný minimální počet předmětů u žáka není výslovně stanoven — proto ho nebudeme domýšlet.</div>
+</div>
+
+<div class="callout yellow"><strong>Výsledek kroku 2:</strong> <code>pupil 1..1 — belongs_to — 0..N class</code>, <code>class 1..N — teaches — 0..N subject</code> a <code>pupil ?..N — attends — ?..N subject</code>, kde otazníky znamenají „zadání minimální účast neurčuje“.</div>
+</section>
+
+<section id="step3">
+<div class="eyebrow">KROK 3 • ATRIBUTY</div><h2>Co o entitách a vztazích potřebujeme vědět?</h2>
+<p class="lead">Až nyní přiřazujeme vlastnosti. Atribut musí mít jasného „vlastníka“: entitu nebo vztah. Současně rozlišujeme identifikační, povinné a nepovinné atributy.</p>
+
+<div class="entity-grid">
+<div class="entity-card">
+<h3>class</h3>
+<div class="attr"><span class="pk">id</span><span>identifikátor</span></div>
+<div class="attr"><span>code</span><span>označení</span></div>
+<div class="attr"><span>established_year</span><span>rok vzniku</span></div>
+</div>
+<div class="entity-card yellow">
+<h3>pupil</h3>
+<div class="attr"><span class="pk">id</span><span>identifikátor</span></div>
+<div class="attr"><span>first_name</span><span>jméno</span></div>
+<div class="attr"><span>last_name</span><span>příjmení</span></div>
+<div class="attr"><span>birth_date</span><span>datum narození</span></div>
+</div>
+<div class="entity-card green">
+<h3>subject</h3>
+<div class="attr"><span class="pk">id</span><span>identifikátor</span></div>
+<div class="attr"><span>code</span><span>kód</span></div>
+<div class="attr"><span>name</span><span>název</span></div>
+</div>
+</div>
+
+<div class="panel" style="margin-top:20px">
+<h3>A co atributy vztahů?</h3>
+<div class="grid2">
+<div class="card yellow"><h3>attends</h3><p>R6 říká, že vztah může nést informaci, zda je předmět <strong>povinný nebo volitelný</strong>. R7 přidává známku.</p><p><code>attendance_type</code> · <code>grade</code></p></div>
+<div class="card"><h3>belongs_to a teaches</h3><p>Zadání jim žádný další vlastní údaj nepřiděluje. Proto je zatím nerozšiřujeme o atributy, které by nebyly podloženy požadavky.</p></div>
+</div>
+</div>
+
+<div class="callout"><strong>Důležitý rozdíl:</strong> „předmět“ je entita typu <code>subject</code>. „Známka žáka z předmětu“ patří ke konkrétní vazbě <code>attends</code>, protože stejný žák může mít z různých předmětů různé známky.</div>
+</section>
+
+<section id="step4">
+<div class="eyebrow">KROK 4 • INTEGRITNÍ OMEZENÍ</div><h2>Jaká pravidla musí model vždy dodržet?</h2>
+<p class="lead">Teď z explicitních požadavků formulujeme pravidla, která brání tomu, aby databáze dovolila nesmyslný stav.</p>
+<div class="grid2">
+<div class="card"><span class="badge">Entitní integrita</span><h3>Jednoznačná identita</h3><p><code>class.id</code>, <code>pupil.id</code> a <code>subject.id</code> jednoznačně identifikují konkrétní entitu.</p></div>
+<div class="card yellow"><span class="badge yellow">Kardinalita</span><h3>Zařazení žáka</h3><p>Každý žák má právě jedno zařazení do třídy: <strong>1..1</strong>.</p></div>
+<div class="card green"><span class="badge green">Doména</span><h3>Známka</h3><p>Pokud je známka zadána, musí pocházet z povolené množiny známek. R7 zároveň dovoluje, aby zatím známá nebyla.</p></div>
+<div class="card purple"><span class="badge" style="color:var(--purple);background:rgba(201,154,255,.12)">Business pravidlo</span><h3>Attends navazuje na učební plán</h3><p>Žák se účastní pouze předmětu, který je vyučován v jeho třídě. Toto pravidlo propojuje vztahy <code>belongs_to</code>, <code>teaches</code> a <code>attends</code>.</p></div>
+</div>
+
+<div class="panel" style="margin-top:20px">
+<h3>Kontrolní seznam omezení</h3>
+<table>
+<tr><th>Pravidlo</th><th>Zdroj</th><th>Vyjádření v modelu</th></tr>
+<tr><td>Každá entita má identitu.</td><td>R1, R2, R4</td><td>identifikační atribut <code>id</code></td></tr>
+<tr><td>Žák je právě v jedné třídě.</td><td>R3</td><td><code>pupil 1..1 — belongs_to — class 0..N</code></td></tr>
+<tr><td>Třída má alespoň jeden předmět.</td><td>R5</td><td><code>class 1..N — teaches — subject 0..N</code></td></tr>
+<tr><td>Žák může mít známku, ale nemusí ji ještě mít.</td><td>R7</td><td><code>grade</code> je nepovinný atribut vztahu</td></tr>
+<tr><td>Žák navštěvuje předmět své třídy.</td><td>R6</td><td>odvozené business pravidlo mezi třemi vztahy</td></tr>
+</table>
+</div>
+<div class="callout yellow"><strong>Pozor na hranici modelu:</strong> integritní omezení není jen „PK a FK“. Na konceptuální úrovni zapisujeme také významová pravidla reality, která později můžeme implementovat různými mechanismy.</div>
+</section>
+
+<section id="final">
+<div class="eyebrow">VÝSLEDNÝ ER MODEL</div><h2>Teď už můžeme model poskládat</h2>
+<p class="lead">Každý prvek má svůj původ v požadavcích a prošel předchozími kroky. ER diagram je proto až <strong>výsledkem analýzy</strong>, nikoli jejím začátkem.</p>
+
+<div class="panel">
+<div class="final-model">
+<div>
+<div class="entity">pupil</div>
+<p class="cardlabel">1..1</p>
+</div>
+<div class="final-rel">
+<div class="diamond"><span>belongs_to</span></div>
+</div>
+<div>
+<div class="entity">class</div>
+<p class="cardlabel">0..N</p>
+</div>
+</div>
+
+<div class="final-model">
+<div>
+<div class="entity">class</div>
+<p class="cardlabel">1..N</p>
+</div>
+<div class="final-rel">
+<div class="diamond"><span>teaches</span></div>
+</div>
+<div>
+<div class="entity">subject</div>
+<p class="cardlabel">0..N</p>
+</div>
+</div>
+
+<div class="final-model">
+<div>
+<div class="entity">pupil</div>
+<p class="cardlabel">?..N</p>
+</div>
+<div class="final-rel">
+<div class="diamond"><span>attends</span></div>
+</div>
+<div>
+<div class="entity">subject</div>
+<p class="cardlabel">?..N</p>
+</div>
+</div>
+<p class="muted final-note">Otazník u <code>attends</code> shrnuje výsledek kroku 2b: zadání minimální účast na této vazbě neurčuje, proto ji nedomýšlíme (viz „Kolik? A musí vůbec?“).</p>
+</div>
+
+<div class="grid3" style="margin-top:20px">
+<div class="card"><h3>class</h3><p><code>id</code>, <code>code</code>, <code>established_year</code></p></div>
+<div class="card yellow"><h3>pupil</h3><p><code>id</code>, <code>first_name</code>, <code>last_name</code>, <code>birth_date</code></p></div>
+<div class="card green"><h3>subject</h3><p><code>id</code>, <code>code</code>, <code>name</code></p></div>
+</div>
+
+<div class="panel" style="margin-top:20px">
+<span class="badge" style="color:var(--purple);background:rgba(201,154,255,.12)">Atributy vztahu</span>
+<h3>attends: pupil ↔ subject</h3>
+<div class="grid2" style="margin-top:10px">
+<div class="attr"><span class="required">attendance_type</span><span>povinný</span></div>
+<div class="attr"><span>grade</span><span>nepovinný</span></div>
+</div>
+<p class="muted" style="margin-top:10px">R6: každý vztah <code>attends</code> nese informaci, zda je předmět povinný nebo volitelný — proto je <code>attendance_type</code> povinný atribut. R7: známka nemusí být v okamžiku založení vztahu ještě známá — proto je <code>grade</code> nepovinný.</p>
+</div>
+</section>
+
+<section id="check">
+<div class="eyebrow">ZÁVĚREČNÁ KONTROLA</div><h2>Umíme návrh obhájit?</h2>
+<div class="step-list">
+<div class="step"><div class="num">1</div><div><h3>Každý entitní typ má důvod.</h3><p class="muted">class, pupil a subject vycházejí přímo z požadavků.</p></div></div>
+<div class="step"><div class="num">2</div><div><h3>Každý vztah má význam.</h3><p class="muted">belongs_to, teaches a attends nejsou technické konstrukce, ale modelují pravidla reality.</p></div></div>
+<div class="step"><div class="num">3</div><div><h3>Kardinalita a parcialita jsou odvozené ze zadání.</h3><p class="muted">Kde zadání minimální účast neurčuje, nepřidáváme ji „protože to tak obvykle bývá“.</p></div></div>
+<div class="step"><div class="num">4</div><div><h3>Atribut patří tam, kam významově patří.</h3><p class="muted">Identifikační údaje patří entitám; známka a typ účasti patří vztahu attends.</p></div></div>
+<div class="step"><div class="num">5</div><div><h3>Omezení odpovídají pravidlům reality.</h3><p class="muted">Model není jen obrázek. Je to soubor tvrzení o tom, co je a není v systému přípustné.</p></div></div>
+</div>
+<div class="callout green" style="margin-top:25px"><strong>Čtyřkroková metoda:</strong> <code>1. entitní typy → 2. vztahové typy + kardinalita/parcialita → 3. atributy → 4. integritní omezení</code>.</div>
+<div class="callout yellow"><strong>Až nyní</strong> dává smysl pokračovat k logickému návrhu relační databáze, kde budeme řešit tabulky, primární a cizí klíče, datové typy a SQL.</div>
+</section>
+
+<footer>Výukový materiál • Konceptuální návrh databáze • Případová studie SCHOOL • ER model</footer>
+</main>
+<script>
+const links=[...document.querySelectorAll('nav a')], sections=[...document.querySelectorAll('main section[id]')];
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{
+ if(e.isIntersecting) links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));
+}),{rootMargin:'-22% 0px -68% 0px'});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=1000)document.querySelector('aside').style.display='none'}));
+</script>
+</body>
+</html>

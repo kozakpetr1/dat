@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL – seskupování a agregační funkce — VOŠ, SPŠ a SOŠ Varnsdorf</title>
+<meta name="description" content="Výuková one-page prezentace: agregační funkce COUNT, SUM, AVG, MIN, MAX, seskupování GROUP BY, filtrování skupin HAVING, GROUP_CONCAT a WITH ROLLUP v MySQL / MariaDB.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,200;0,400;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-top:#003b4b;--bg-bottom:#006783;--text:#fff;
+  --yellow:#ffd400;--yellow2:#ffea80;--blue:#41d7ff;--blue2:#00c0f3;
+  --green:#a6ce39;--green2:#c2dd78;--panel:rgba(0,27,34,.48);
+  --panel2:rgba(0,27,34,.68);--muted:rgba(255,255,255,.62);
+  --sidebar:280px;--danger:#ef4444;--pink:#ff8fb1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Raleway,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg-top),var(--bg-bottom)) fixed;line-height:1.6}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ radial-gradient(circle at 78% 8%,rgba(65,215,255,.10),transparent 25%),
+ radial-gradient(circle at 18% 70%,rgba(166,206,57,.07),transparent 25%)}
+a{color:inherit}
+aside{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:2rem 1.5rem;background:rgba(0,20,26,.76);backdrop-filter:blur(20px);z-index:10;overflow-y:auto}
+main{margin-left:var(--sidebar);max-width:1250px;padding:3.5rem 3rem 5rem}
+.logo{display:flex;align-items:center;gap:1rem;text-decoration:none;margin-bottom:2.6rem}
+.logo svg{width:50px;height:43px;flex:none}.logo b{font-size:.84rem;line-height:1.25;letter-spacing:.05em}.logo span{color:var(--blue)}
+.nav-title{font-size:.72rem;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:1rem}
+nav ul{list-style:none;margin:0}nav li{margin-bottom:.2rem;padding:0}nav li:before{display:none}
+nav a{display:flex;gap:.75rem;align-items:center;text-decoration:none;color:rgba(255,255,255,.68);padding:.6rem .9rem;font-weight:600;font-size:.88rem;border-left:3px solid transparent;transition:.2s}
+nav a:hover,nav a.active{color:#fff;background:rgba(65,215,255,.09);border-left-color:var(--blue)}
+.side-note{margin-top:2rem;color:var(--muted);font-size:.72rem}
+section{scroll-margin-top:2rem;margin-bottom:5.5rem}
+.eyebrow{color:var(--blue);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.16em}
+h1{font-size:clamp(2.7rem,6vw,5.2rem);line-height:1.02;letter-spacing:-.045em;margin:.6rem 0 1.4rem}
+h1 em{font-style:normal;color:var(--yellow)}
+h2{font-size:clamp(1.9rem,4vw,2.7rem);line-height:1.15;margin:.35rem 0 1.2rem;letter-spacing:-.025em}
+h3{font-size:1.35rem;line-height:1.25;margin-bottom:.65rem}
+h4{font-size:1rem;margin-bottom:.4rem}
+p{margin-bottom:1rem}strong{font-weight:700}.muted{color:var(--muted)}
+.lead{font-size:1.18rem;font-weight:200;line-height:1.7}
+.hero{min-height:78vh;display:flex;align-items:center}
+.hero-inner{max-width:940px}
+.hero-kicker{display:inline-flex;align-items:center;gap:.55rem;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:.76rem}
+.hero-kicker:before{content:"";width:28px;height:3px;background:var(--green)}
+.hero-sub{max-width:780px;font-size:1.28rem;color:rgba(255,255,255,.84);font-weight:200}
+.chips{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.8rem}.chip{padding:.42rem .75rem;background:rgba(255,255,255,.07);font-size:.8rem;font-weight:600;font-family:Consolas,monospace}
+.panel{background:var(--panel);backdrop-filter:blur(12px);box-shadow:0 12px 35px rgba(0,0,0,.22);padding:2rem}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem}
+.grid2>*,.grid3>*,.grid5>*,.groupviz>*{min-width:0}
+.card{background:rgba(0,20,26,.34);padding:1.45rem;min-height:100%}
+.card.accent-blue{border-top:3px solid var(--blue)}.card.accent-yellow{border-top:3px solid var(--yellow)}.card.accent-green{border-top:3px solid var(--green)}.card.accent-red{border-top:3px solid var(--danger)}
+.icon{font-size:1.7rem;margin-bottom:.7rem}.card p:last-child{margin-bottom:0}
+.question{font-size:1.55rem;font-weight:600;line-height:1.3}.answer{margin-top:1.1rem;padding-left:1rem;border-left:3px solid var(--yellow)}
+.badge{display:inline-block;padding:.18rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.b-blue{background:rgba(65,215,255,.14);color:var(--blue)}.b-yellow{background:rgba(255,212,0,.14);color:var(--yellow)}.b-green{background:rgba(166,206,57,.14);color:var(--green)}.b-red{background:rgba(239,68,68,.16);color:#ff8a8a}
+.callout{margin-top:1.4rem;padding:1.1rem 1.25rem;border-left:4px solid var(--blue);background:rgba(65,215,255,.07)}.callout.yellow{border-left-color:var(--yellow);background:rgba(255,212,0,.07)}.callout.green{border-left-color:var(--green);background:rgba(166,206,57,.07)}.callout.red{border-left-color:var(--danger);background:rgba(239,68,68,.08)}
+ul{list-style:none;margin:.7rem 0}li{padding:.28rem 0 .28rem 1.35rem;position:relative}li:before{content:"";position:absolute;left:0;top:.78em;width:.72em;height:.72em;background:var(--yellow);clip-path:polygon(0 0,100% 50%,0 100%,20% 50%)}
+.code{font-family:Consolas,monospace;background:rgba(0,0,0,.3);padding:.12rem .35rem;color:var(--yellow2)}
+/* SQL bloky */
+.sqlwrap{position:relative;margin:1rem 0}
+pre.sql{font-family:Consolas,monospace;font-size:.95rem;display:block;padding:1.3rem 1.5rem;line-height:1.75;white-space:pre;color:#fff;background:rgba(0,0,0,.38);overflow-x:auto}
+pre.sql .k{color:var(--yellow);font-weight:700}pre.sql .f{color:var(--blue)}pre.sql .s{color:var(--green2)}pre.sql .n{color:var(--pink)}pre.sql .c{color:var(--muted);font-style:italic}
+.copy{position:absolute;top:.5rem;right:.5rem;background:rgba(255,255,255,.08);border:0;color:var(--muted);font:600 .72rem Raleway,sans-serif;padding:.3rem .6rem;cursor:pointer;letter-spacing:.05em}
+.copy:hover{color:#fff;background:rgba(65,215,255,.18)}
+/* tabulky s daty / výsledky */
+.table-wrap{overflow-x:auto}
+table.data{border-collapse:collapse;font-size:.9rem;width:100%}
+table.data th{text-align:left;color:var(--blue);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;background:rgba(0,20,26,.75);padding:.6rem .8rem;font-family:Consolas,monospace}
+table.data td{padding:.5rem .8rem;background:rgba(0,20,26,.25);font-family:Consolas,monospace}
+table.data tr:nth-child(even) td{background:rgba(255,255,255,.035)}
+table.data td.num{text-align:right}
+table.data .null{color:var(--pink);font-style:italic}
+table.data tr.g-a td:first-child{box-shadow:inset 4px 0 var(--yellow)}table.data tr.g-b td:first-child{box-shadow:inset 4px 0 var(--blue)}
+table.data tr.total td{color:var(--yellow);font-weight:700}
+.result-label{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green);font-weight:700;margin:.4rem 0 .4rem}
+.compare{width:100%;border-collapse:collapse;font-size:.92rem}.compare th{text-align:left;color:var(--blue);font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;background:rgba(0,20,26,.75);padding:1rem}.compare td{padding:1rem;background:rgba(0,20,26,.25);vertical-align:top}.compare tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+/* agregační funkce */
+.fn{background:rgba(0,20,26,.45);padding:1.2rem;text-align:center;border-top:3px solid var(--blue)}
+.fn b{display:block;font-family:Consolas,monospace;font-size:1.25rem;color:var(--yellow)}
+.fn .val{font-size:2rem;font-weight:700;margin:.3rem 0}
+.fn small{color:var(--muted);font-size:.78rem;line-height:1.4;display:block}
+/* vizualizace GROUP BY */
+.groupviz{display:grid;grid-template-columns:1.2fr auto 1fr;gap:1.2rem;align-items:center}
+.rows{display:grid;gap:.35rem}
+.row{display:flex;justify-content:space-between;gap:.8rem;padding:.45rem .8rem;font-family:Consolas,monospace;font-size:.85rem;transition:transform .5s,opacity .5s,background .5s}
+.row.a{background:rgba(255,212,0,.13);border-left:4px solid var(--yellow)}.row.b{background:rgba(65,215,255,.13);border-left:4px solid var(--blue)}
+.groups{display:grid;gap:1rem}
+.group{padding:1rem 1.1rem;font-family:Consolas,monospace;transition:opacity .5s,transform .5s}
+.group.a{background:rgba(255,212,0,.16);border-left:4px solid var(--yellow)}.group.b{background:rgba(65,215,255,.16);border-left:4px solid var(--blue)}
+.group .gname{font-size:1.15rem;font-weight:700}.group .gval{color:rgba(255,255,255,.85);font-size:.85rem}
+.bigarrow{font-size:2.2rem;color:var(--yellow);text-align:center}
+.groupviz.collapsed .groups .group{opacity:1;transform:none}
+.groupviz .groups .group{opacity:.25;transform:translateX(-10px)}
+.vizbtn{margin-top:1.2rem;background:var(--yellow);color:#002d38;border:0;font:700 .85rem Raleway,sans-serif;padding:.65rem 1.1rem;cursor:pointer;letter-spacing:.04em}
+.vizbtn:hover{background:var(--yellow2)}
+/* pořadí vyhodnocení */
+.pipeline{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin:1.5rem 0;counter-reset:st}
+.pstep{background:rgba(0,20,26,.5);padding:1rem .6rem;text-align:center;position:relative}
+.pstep b{display:block;font-family:Consolas,monospace;font-size:.95rem;color:var(--yellow)}
+.pstep small{display:block;color:var(--muted);font-size:.72rem;line-height:1.35;margin-top:.35rem}
+.pstep:before{counter-increment:st;content:counter(st);display:block;font-size:.7rem;color:var(--blue);font-weight:700;margin-bottom:.2rem}
+.pstep.hl{background:rgba(255,212,0,.14);outline:1px solid rgba(255,212,0,.5)}
+/* procvičování */
+details{background:rgba(0,20,26,.34);margin-bottom:1rem;border-left:3px solid var(--green)}
+summary{cursor:pointer;padding:1.1rem 1.3rem;font-weight:600;font-size:1.05rem;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:before{content:"▸";color:var(--green);margin-right:.6rem;display:inline-block;transition:transform .2s}
+details[open] summary:before{transform:rotate(90deg)}
+details .sol{padding:0 1.3rem 1.2rem}
+footer{padding:2rem 0;color:var(--muted);font-size:.75rem;border-top:1px solid rgba(255,255,255,.08)}
+.mobile{display:none}
+@media(max-width:1200px){.grid5{grid-template-columns:repeat(3,1fr)}.pipeline{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:991px){
+ aside{display:none}.mobile{display:flex;position:sticky;top:0;z-index:20;background:rgba(0,20,26,.92);backdrop-filter:blur(15px);padding:.8rem 1rem;justify-content:space-between;align-items:center}.mobile .logo{margin:0}.mobile button{background:none;border:0;color:#fff;font-size:1.5rem}main{margin:0;padding:2rem 1.2rem}.hero{min-height:75vh}.grid2,.grid3{grid-template-columns:1fr}.grid5{grid-template-columns:repeat(2,1fr)}.pipeline{grid-template-columns:repeat(2,1fr)}.panel{padding:1.35rem}.groupviz{grid-template-columns:1fr}.bigarrow{transform:rotate(90deg)}.compare{min-width:640px}}
+</style>
+</head>
+<body>
+<div class="mobile"><a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a><button onclick="document.querySelector('aside').style.display='block'">☰</button></div>
+
+<aside>
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a>
+<div class="nav-title">SQL • SESKUPOVÁNÍ</div>
+<nav><ul>
+<li><a class="active" href="#start">⌂ <span>Z řádků souhrn</span></a></li>
+<li><a href="#data">▤ <span>Ukázková data</span></a></li>
+<li><a href="#agg">Σ <span>Agregační funkce</span></a></li>
+<li><a href="#null">∅ <span>COUNT a NULL</span></a></li>
+<li><a href="#groupby">▦ <span>GROUP BY</span></a></li>
+<li><a href="#having">⧩ <span>HAVING</span></a></li>
+<li><a href="#order">⇢ <span>Pořadí vyhodnocení</span></a></li>
+<li><a href="#extras">✚ <span>GROUP_CONCAT, ROLLUP</span></a></li>
+<li><a href="#pitfalls">⚠ <span>Na co pozor?</span></a></li>
+<li><a href="#practice">✎ <span>Procvič si</span></a></li>
+<li><a href="#summary">→ <span>Co si odnést</span></a></li>
+</ul></nav>
+<div class="side-note">MySQL / MariaDB<br>Navazuje na: DCL – GRANT a REVOKE</div>
+</aside>
+
+<main>
+<!-- HERO -->
+<section id="start" class="hero">
+<div class="hero-inner">
+<div class="hero-kicker">SQL • DQL • MySQL / MariaDB</div>
+<h1>Ze stovek řádků <em>jedno číslo.</em></h1>
+<p class="hero-sub">Zatím jsme dotazem <span class="code">SELECT</span> vybírali jednotlivé řádky. Často ale nepotřebujeme řádky, nýbrž <strong>souhrn</strong>: kolik jich je, jaký je průměr, nejvyšší hodnota… A ne za celou tabulku, ale <strong>za každou skupinu zvlášť</strong>.</p>
+<div class="chips"><span class="chip">COUNT</span><span class="chip">SUM</span><span class="chip">AVG</span><span class="chip">MIN</span><span class="chip">MAX</span><span class="chip">GROUP BY</span><span class="chip">HAVING</span></div>
+<div class="callout yellow"><strong>Kde jsme:</strong> v minulé kapitole jsme pomocí DCL (<span class="code">GRANT</span>, <span class="code">REVOKE</span>) řešili, <em>kdo</em> smí s daty pracovat. Teď se vracíme k tomu, <em>co</em> z dat umíme vyčíst – k dotazovací části SQL.</div>
+</div>
+</section>
+
+<!-- 01 DATA -->
+<section id="data">
+<div class="eyebrow">01 • UKÁZKOVÁ DATA</div><h2>Tabulka známek</h2>
+<p class="lead">Všechny příklady v prezentaci počítají nad touto malou tabulkou. Všimni si, že žák Dvořák zatím nemá známku z DAT – hodnota je <span class="code">NULL</span>.</p>
+<div class="grid2">
+<div class="table-wrap">
+<table class="data">
+<tr><th>id</th><th>student</th><th>class_name</th><th>subject</th><th>grade</th></tr>
+<tr class="g-a"><td>1</td><td>Novák</td><td>2.A</td><td>MAT</td><td class="num">1</td></tr>
+<tr class="g-a"><td>2</td><td>Novák</td><td>2.A</td><td>CJL</td><td class="num">2</td></tr>
+<tr class="g-a"><td>3</td><td>Novák</td><td>2.A</td><td>DAT</td><td class="num">1</td></tr>
+<tr class="g-a"><td>4</td><td>Svobodová</td><td>2.A</td><td>MAT</td><td class="num">3</td></tr>
+<tr class="g-a"><td>5</td><td>Svobodová</td><td>2.A</td><td>CJL</td><td class="num">1</td></tr>
+<tr class="g-a"><td>6</td><td>Svobodová</td><td>2.A</td><td>DAT</td><td class="num">2</td></tr>
+<tr class="g-b"><td>7</td><td>Dvořák</td><td>2.B</td><td>MAT</td><td class="num">4</td></tr>
+<tr class="g-b"><td>8</td><td>Dvořák</td><td>2.B</td><td>CJL</td><td class="num">3</td></tr>
+<tr class="g-b"><td>9</td><td>Dvořák</td><td>2.B</td><td>DAT</td><td class="num null">NULL</td></tr>
+<tr class="g-b"><td>10</td><td>Černá</td><td>2.B</td><td>MAT</td><td class="num">2</td></tr>
+<tr class="g-b"><td>11</td><td>Černá</td><td>2.B</td><td>CJL</td><td class="num">2</td></tr>
+<tr class="g-b"><td>12</td><td>Černá</td><td>2.B</td><td>DAT</td><td class="num">1</td></tr>
+</table>
+</div>
+<div>
+<p class="result-label">Skript pro vytvoření – zkopíruj a vyzkoušej</p>
+<div class="sqlwrap"><pre class="sql">CREATE TABLE grades (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  student    VARCHAR(50) NOT NULL,
+  class_name VARCHAR(10) NOT NULL,
+  subject    CHAR(3)     NOT NULL,
+  grade      TINYINT     NULL
+);
+
+INSERT INTO grades (student, class_name, subject, grade) VALUES
+('Novák','2.A','MAT',1), ('Novák','2.A','CJL',2), ('Novák','2.A','DAT',1),
+('Svobodová','2.A','MAT',3), ('Svobodová','2.A','CJL',1), ('Svobodová','2.A','DAT',2),
+('Dvořák','2.B','MAT',4), ('Dvořák','2.B','CJL',3), ('Dvořák','2.B','DAT',NULL),
+('Černá','2.B','MAT',2), ('Černá','2.B','CJL',2), ('Černá','2.B','DAT',1);</pre></div>
+</div>
+</div>
+</section>
+
+<!-- 02 AGREGAČNÍ FUNKCE -->
+<section id="agg">
+<div class="eyebrow">02 • AGREGAČNÍ FUNKCE</div><h2>Pět funkcí, které z mnoha řádků udělají jednu hodnotu</h2>
+<p class="lead">Agregační funkce vezme hodnoty z <strong>více řádků</strong> a vrátí <strong>jediný výsledek</strong>. Bez <span class="code">GROUP BY</span> tvoří všechny řádky tabulky jednu velkou skupinu.</p>
+<div class="grid5">
+<div class="fn"><b>COUNT</b><div class="val">11</div><small>počet hodnot<br><span class="code">COUNT(grade)</span></small></div>
+<div class="fn"><b>SUM</b><div class="val">22</div><small>součet<br><span class="code">SUM(grade)</span></small></div>
+<div class="fn"><b>AVG</b><div class="val">2.0000</div><small>průměr<br><span class="code">AVG(grade)</span></small></div>
+<div class="fn"><b>MIN</b><div class="val">1</div><small>nejmenší hodnota<br><span class="code">MIN(grade)</span></small></div>
+<div class="fn"><b>MAX</b><div class="val">4</div><small>největší hodnota<br><span class="code">MAX(grade)</span></small></div>
+</div>
+<div class="grid2" style="margin-top:1.5rem">
+<div>
+<div class="sqlwrap"><pre class="sql">SELECT COUNT(grade)          AS pocet,
+       SUM(grade)            AS soucet,
+       AVG(grade)            AS prumer,
+       ROUND(AVG(grade), 2)  AS prumer_2dm,
+       MIN(grade)            AS nejlepsi,
+       MAX(grade)            AS nejhorsi
+FROM grades;</pre></div>
+</div>
+<div>
+<p class="result-label">Výsledek – jediný řádek</p>
+<div class="table-wrap"><table class="data">
+<tr><th>pocet</th><th>soucet</th><th>prumer</th><th>prumer_2dm</th><th>nejlepsi</th><th>nejhorsi</th></tr>
+<tr><td class="num">11</td><td class="num">22</td><td class="num">2.0000</td><td class="num">2.00</td><td class="num">1</td><td class="num">4</td></tr>
+</table></div>
+<div class="callout"><strong>MIN a MAX</strong> fungují i pro text (abecedně) a datum (nejstarší / nejnovější). <strong>SUM a AVG</strong> dávají smysl jen pro čísla.</div>
+</div>
+</div>
+</section>
+
+<!-- 03 COUNT a NULL -->
+<section id="null">
+<div class="eyebrow">03 • COUNT A NULL</div><h2>Tři podoby COUNT a jedna záludnost</h2>
+<div class="grid3">
+<div class="card accent-yellow"><span class="badge b-yellow">COUNT(*)</span><h3>Počet řádků</h3><p>Počítá <strong>všechny řádky</strong>, ať je v nich cokoli – i <span class="code">NULL</span>.</p><p><span class="code">COUNT(*)</span> → <strong>12</strong></p></div>
+<div class="card accent-blue"><span class="badge b-blue">COUNT(sloupec)</span><h3>Počet hodnot</h3><p>Počítá jen řádky, kde sloupec <strong>není NULL</strong>.</p><p><span class="code">COUNT(grade)</span> → <strong>11</strong></p></div>
+<div class="card accent-green"><span class="badge b-green">COUNT(DISTINCT sloupec)</span><h3>Počet různých hodnot</h3><p>Každou hodnotu započítá jen jednou.</p><p><span class="code">COUNT(DISTINCT student)</span> → <strong>4</strong></p></div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<p class="question">Jaký je průměr známek: 22 / 12, nebo 22 / 11?</p>
+<div class="answer"><strong>22 / 11 = 2.0000.</strong> Všechny agregační funkce kromě <span class="code">COUNT(*)</span> hodnoty <span class="code">NULL</span> <strong>přeskakují</strong>. Chybějící známka se tedy do průměru nepočítá – nepočítá se ani jako nula. Pokud bys chtěl chybějící známky počítat jako 5, musíš to říct výslovně: <span class="code">AVG(COALESCE(grade, 5))</span>.</div>
+</div>
+<div class="callout yellow"><strong>Prázdná množina:</strong> když filtru <span class="code">WHERE</span> nevyhoví žádný řádek, <span class="code">COUNT</span> vrátí <strong>0</strong>, ale <span class="code">SUM</span>, <span class="code">AVG</span>, <span class="code">MIN</span> a <span class="code">MAX</span> vrátí <strong>NULL</strong>. Pro nulu místo NULL použij <span class="code">COALESCE(SUM(x), 0)</span>.</div>
+</section>
+
+<!-- 04 GROUP BY -->
+<section id="groupby">
+<div class="eyebrow">04 • GROUP BY</div><h2>GROUP BY: souhrn za každou skupinu</h2>
+<p class="lead"><span class="code">GROUP BY</span> rozdělí řádky do skupin podle shodné hodnoty sloupce. Agregační funkce se pak spočítá <strong>pro každou skupinu zvlášť</strong> a každá skupina dá ve výsledku <strong>jeden řádek</strong>.</p>
+
+<div class="panel">
+<div class="groupviz" id="groupviz">
+<div class="rows">
+<div class="row a"><span>2.A · Novák · MAT</span><span>1</span></div>
+<div class="row a"><span>2.A · Novák · CJL</span><span>2</span></div>
+<div class="row a"><span>2.A · Novák · DAT</span><span>1</span></div>
+<div class="row a"><span>2.A · Svobodová · MAT</span><span>3</span></div>
+<div class="row a"><span>2.A · Svobodová · CJL</span><span>1</span></div>
+<div class="row a"><span>2.A · Svobodová · DAT</span><span>2</span></div>
+<div class="row b"><span>2.B · Dvořák · MAT</span><span>4</span></div>
+<div class="row b"><span>2.B · Dvořák · CJL</span><span>3</span></div>
+<div class="row b"><span>2.B · Dvořák · DAT</span><span class="null" style="color:var(--pink)">NULL</span></div>
+<div class="row b"><span>2.B · Černá · MAT</span><span>2</span></div>
+<div class="row b"><span>2.B · Černá · CJL</span><span>2</span></div>
+<div class="row b"><span>2.B · Černá · DAT</span><span>1</span></div>
+</div>
+<div class="bigarrow">⟹</div>
+<div class="groups">
+<div class="group a"><div class="gname">2.A</div><div class="gval">6 řádků → COUNT(grade) = 6<br>AVG(grade) = 1.6667</div></div>
+<div class="group b"><div class="gname">2.B</div><div class="gval">6 řádků → COUNT(grade) = 5<br>AVG(grade) = 2.4000</div></div>
+</div>
+</div>
+<button class="vizbtn" id="vizbtn">▶ Seskupit podle class_name</button>
+</div>
+
+<div class="grid2" style="margin-top:1.5rem">
+<div>
+<div class="sqlwrap"><pre class="sql">SELECT class_name,
+       COUNT(*)             AS radku,
+       COUNT(grade)         AS znamek,
+       ROUND(AVG(grade), 2) AS prumer,
+       MIN(grade)           AS nejlepsi,
+       MAX(grade)           AS nejhorsi
+FROM grades
+GROUP BY class_name;</pre></div>
+</div>
+<div>
+<p class="result-label">Výsledek – jeden řádek za každou třídu</p>
+<div class="table-wrap"><table class="data">
+<tr><th>class_name</th><th>radku</th><th>znamek</th><th>prumer</th><th>nejlepsi</th><th>nejhorsi</th></tr>
+<tr class="g-a"><td>2.A</td><td class="num">6</td><td class="num">6</td><td class="num">1.67</td><td class="num">1</td><td class="num">3</td></tr>
+<tr class="g-b"><td>2.B</td><td class="num">6</td><td class="num">5</td><td class="num">2.40</td><td class="num">1</td><td class="num">4</td></tr>
+</table></div>
+</div>
+</div>
+
+<h3 style="margin-top:2.5rem">Seskupení podle více sloupců</h3>
+<p>Skupinu tvoří každá <strong>kombinace</strong> hodnot – zde každá dvojice třída + předmět.</p>
+<div class="grid2">
+<div><div class="sqlwrap"><pre class="sql">SELECT class_name, subject,
+       AVG(grade) AS prumer
+FROM grades
+GROUP BY class_name, subject
+ORDER BY class_name, subject;</pre></div></div>
+<div><div class="table-wrap"><table class="data">
+<tr><th>class_name</th><th>subject</th><th>prumer</th></tr>
+<tr class="g-a"><td>2.A</td><td>CJL</td><td class="num">1.5000</td></tr>
+<tr class="g-a"><td>2.A</td><td>DAT</td><td class="num">1.5000</td></tr>
+<tr class="g-a"><td>2.A</td><td>MAT</td><td class="num">2.0000</td></tr>
+<tr class="g-b"><td>2.B</td><td>CJL</td><td class="num">2.5000</td></tr>
+<tr class="g-b"><td>2.B</td><td>DAT</td><td class="num">1.0000</td></tr>
+<tr class="g-b"><td>2.B</td><td>MAT</td><td class="num">3.0000</td></tr>
+</table></div></div>
+</div>
+
+<div class="callout green"><strong>Zlaté pravidlo GROUP BY:</strong> v <span class="code">SELECT</span> smí být jen <strong>sloupce, podle kterých seskupuješ</strong>, a <strong>agregační funkce</strong>. Jakýkoli jiný sloupec nemá ve skupině jednoznačnou hodnotu – viz <a href="#pitfalls">Na co pozor</a>.</div>
+</section>
+
+<!-- 05 HAVING -->
+<section id="having">
+<div class="eyebrow">05 • HAVING</div><h2>HAVING: filtr pro skupiny</h2>
+<p class="lead"><span class="code">WHERE</span> filtruje <strong>řádky před seskupením</strong>. <span class="code">HAVING</span> filtruje <strong>hotové skupiny</strong> – a proto v něm můžeš použít agregační funkce.</p>
+<div class="grid2">
+<div class="card accent-blue"><span class="badge b-blue">WHERE</span><h3>Které řádky vstoupí do skupin?</h3><p>Pracuje s hodnotami jednotlivých řádků. Agregační funkci v něm <strong>použít nelze</strong>.</p><p><span class="code">WHERE subject = 'MAT'</span></p></div>
+<div class="card accent-yellow"><span class="badge b-yellow">HAVING</span><h3>Které skupiny zůstanou ve výsledku?</h3><p>Pracuje s výsledky skupin, typicky s agregační funkcí.</p><p><span class="code">HAVING AVG(grade) &lt; 2</span></p></div>
+</div>
+
+<h3 style="margin-top:2.2rem">Žáci s průměrem lepším než 2</h3>
+<div class="grid2">
+<div><div class="sqlwrap"><pre class="sql">SELECT student,
+       ROUND(AVG(grade), 2) AS prumer
+FROM grades
+GROUP BY student
+HAVING AVG(grade) &lt; 2
+ORDER BY prumer;</pre></div></div>
+<div>
+<p class="result-label">Výsledek</p>
+<div class="table-wrap"><table class="data">
+<tr><th>student</th><th>prumer</th></tr>
+<tr><td>Novák</td><td class="num">1.33</td></tr>
+<tr><td>Černá</td><td class="num">1.67</td></tr>
+</table></div>
+<p class="muted" style="margin-top:.8rem">Svobodová (2.00) a Dvořák (3.50) podmínku nesplnili – jejich skupiny HAVING vyřadil.</p>
+</div>
+</div>
+
+<h3 style="margin-top:2.2rem">WHERE a HAVING v jednom dotazu</h3>
+<p>Průměr jen z technických předmětů (MAT a DAT) po třídách, a jen třídy s průměrem horším než 2:</p>
+<div class="grid2">
+<div><div class="sqlwrap"><pre class="sql">SELECT class_name,
+       COUNT(grade)         AS znamek,
+       ROUND(AVG(grade), 2) AS prumer
+FROM grades
+WHERE subject IN ('MAT', 'DAT')   -- 1) vyber řádky
+GROUP BY class_name               -- 2) seskup
+HAVING AVG(grade) &gt; 2;            -- 3) vyber skupiny</pre></div></div>
+<div>
+<p class="result-label">Výsledek</p>
+<div class="table-wrap"><table class="data">
+<tr><th>class_name</th><th>znamek</th><th>prumer</th></tr>
+<tr class="g-b"><td>2.B</td><td class="num">3</td><td class="num">2.33</td></tr>
+</table></div>
+<p class="muted" style="margin-top:.8rem">Třída 2.A má z MAT a DAT průměr 1.75, a proto ve výsledku není.</p>
+</div>
+</div>
+<div class="callout"><strong>Tip:</strong> co jde odfiltrovat už ve <span class="code">WHERE</span>, odfiltruj tam. Databáze pak seskupuje méně řádků. <span class="code">HAVING</span> nech na podmínky, které potřebují výsledek agregace.</div>
+</section>
+
+<!-- 06 POŘADÍ -->
+<section id="order">
+<div class="eyebrow">06 • POŘADÍ VYHODNOCENÍ</div><h2>Píšeme SELECT první, databáze ho počítá skoro naposled</h2>
+<p class="lead">Pořadí, ve kterém klauzule <strong>píšeme</strong>, není pořadí, ve kterém je databáze (logicky) <strong>vyhodnocuje</strong>. Když tomu porozumíš, pochopíš, proč některé věci fungují a jiné ne.</p>
+<div class="pipeline">
+<div class="pstep"><b>FROM</b><small>odkud bereme řádky</small></div>
+<div class="pstep"><b>WHERE</b><small>filtr řádků</small></div>
+<div class="pstep hl"><b>GROUP BY</b><small>vytvoření skupin</small></div>
+<div class="pstep hl"><b>HAVING</b><small>filtr skupin</small></div>
+<div class="pstep"><b>SELECT</b><small>výpočet sloupců a aliasů</small></div>
+<div class="pstep"><b>ORDER BY</b><small>seřazení</small></div>
+<div class="pstep"><b>LIMIT</b><small>omezení počtu</small></div>
+</div>
+<div class="table-wrap"><table class="compare">
+<tr><th>Situace</th><th>Proč to tak je</th></tr>
+<tr><td>Ve <span class="code">WHERE</span> nelze použít <span class="code">AVG()</span> → chyba <em>Invalid use of group function</em></td><td>V kroku WHERE ještě neexistují skupiny, takže není z čeho průměr spočítat.</td></tr>
+<tr><td>V <span class="code">ORDER BY</span> lze použít alias ze SELECT (<span class="code">ORDER BY prumer</span>)</td><td>ORDER BY se vyhodnocuje až po SELECT, alias už existuje.</td></tr>
+<tr><td>Ve <span class="code">WHERE</span> alias ze SELECT použít nelze</td><td>WHERE běží dřív než SELECT. MySQL/MariaDB navíc jako rozšíření povolují alias v <span class="code">HAVING</span>, standardní SQL ne – opakovat výraz (<span class="code">HAVING AVG(grade) &lt; 2</span>) funguje všude.</td></tr>
+</table></div>
+</section>
+
+<!-- 07 EXTRAS -->
+<section id="extras">
+<div class="eyebrow">07 • NAVÍC V MYSQL / MARIADB</div><h2>GROUP_CONCAT a WITH ROLLUP</h2>
+<div class="grid2">
+<div class="card accent-blue">
+<span class="badge b-blue">GROUP_CONCAT</span><h3>Spojení textů ze skupiny</h3>
+<p>Agregační funkce pro text: hodnoty skupiny spojí do jednoho řetězce.</p>
+<div class="sqlwrap"><pre class="sql">SELECT student,
+       GROUP_CONCAT(subject
+         ORDER BY subject
+         SEPARATOR ', ') AS jednicky
+FROM grades
+WHERE grade = 1
+GROUP BY student
+ORDER BY student;</pre></div>
+<div class="table-wrap"><table class="data">
+<tr><th>student</th><th>jednicky</th></tr>
+<tr><td>Černá</td><td>DAT</td></tr>
+<tr><td>Novák</td><td>DAT, MAT</td></tr>
+<tr><td>Svobodová</td><td>CJL</td></tr>
+</table></div>
+<p class="muted" style="margin-top:.8rem">Dvořák ve výsledku chybí – nemá žádnou jedničku, takže WHERE nepustil do skupin ani jeden jeho řádek.</p>
+</div>
+<div class="card accent-yellow">
+<span class="badge b-yellow">WITH ROLLUP</span><h3>Mezisoučty a celkový součet</h3>
+<p>Za skupiny přidá řádek se souhrnem za všechny. V seskupovaném sloupci je u něj <span class="code">NULL</span>.</p>
+<div class="sqlwrap"><pre class="sql">SELECT class_name,
+       COUNT(grade)         AS znamek,
+       ROUND(AVG(grade), 2) AS prumer
+FROM grades
+GROUP BY class_name WITH ROLLUP;</pre></div>
+<div class="table-wrap"><table class="data">
+<tr><th>class_name</th><th>znamek</th><th>prumer</th></tr>
+<tr class="g-a"><td>2.A</td><td class="num">6</td><td class="num">1.67</td></tr>
+<tr class="g-b"><td>2.B</td><td class="num">5</td><td class="num">2.40</td></tr>
+<tr class="total"><td class="null">NULL</td><td class="num">11</td><td class="num">2.00</td></tr>
+</table></div>
+<p class="muted" style="margin-top:.8rem">Pro hezčí popisek: <span class="code">COALESCE(class_name, 'Celkem')</span>.</p>
+</div>
+</div>
+<div class="callout"><strong>Pozor na rozdíl:</strong> celkový průměr 2.00 <strong>není</strong> průměr průměrů tříd ((1.67 + 2.40) / 2 = 2.03). ROLLUP počítá znovu ze všech 11 známek.</div>
+</section>
+
+<!-- 08 PITFALLS -->
+<section id="pitfalls">
+<div class="eyebrow">08 • POZOR</div><h2>Časté chyby a důležité nuance</h2>
+<div class="grid2">
+<div class="card accent-red">
+<span class="badge b-red">Chyba</span><h3>Sloupec, který není v GROUP BY</h3>
+<div class="sqlwrap"><pre class="sql">SELECT student, subject, AVG(grade)
+FROM grades
+GROUP BY student;</pre></div>
+<p>Žák má tři předměty – který z nich má databáze vypsat? <strong>MySQL</strong> (od 5.7, režim <span class="code">ONLY_FULL_GROUP_BY</span>) dotaz odmítne. <strong>MariaDB</strong> ho ve výchozím nastavení provede a vrátí <em>libovolný</em> předmět – výsledek je zavádějící.</p>
+</div>
+<div class="card accent-red">
+<span class="badge b-red">Chyba</span><h3>Agregační funkce ve WHERE</h3>
+<div class="sqlwrap"><pre class="sql">SELECT student FROM grades
+WHERE AVG(grade) &lt; 2      -- ✗ chyba
+GROUP BY student;</pre></div>
+<p>Podmínku na výsledek agregace patří do <span class="code">HAVING</span>. Ve WHERE ještě skupiny neexistují.</p>
+</div>
+<div class="card accent-yellow"><h3>NULL tvoří vlastní skupinu</h3><p>Při <span class="code">GROUP BY grade</span> by všechny řádky s <span class="code">NULL</span> spadly do <strong>jedné společné skupiny</strong>. Pro seskupování se NULL považují za shodné, i když jinak <span class="code">NULL = NULL</span> neplatí.</p></div>
+<div class="card accent-blue"><h3>GROUP BY neřadí</h3><p>V MySQL 8 a novějších verzích už GROUP BY výsledek <strong>neřadí</strong>. Pokud potřebuješ pořadí, vždy přidej <span class="code">ORDER BY</span>.</p></div>
+<div class="card accent-green"><h3>AVG vrací desetinné číslo</h3><p>Průměr celých čísel vrací typ DECIMAL se 4 desetinnými místy (<span class="code">2.0000</span>). Na zobrazení použij <span class="code">ROUND(AVG(x), 2)</span>.</p></div>
+<div class="card accent-blue"><h3>COUNT(*) vs. COUNT(sloupec)</h3><p>Když chceš počet řádků, piš <span class="code">COUNT(*)</span>. <span class="code">COUNT(sloupec)</span> použij jen tehdy, když vědomě nechceš počítat NULL.</p></div>
+</div>
+</section>
+
+<!-- 09 PROCVIČ -->
+<section id="practice">
+<div class="eyebrow">09 • PROCVIČ SI</div><h2>Úlohy nad tabulkou grades</h2>
+<p class="lead">Nejdřív zkus dotaz napsat sám, teprve potom rozbal řešení.</p>
+
+<details><summary>1. Kolik známek má každý předmět a jaký je jeho průměr?</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT subject, COUNT(grade) AS znamek, ROUND(AVG(grade), 2) AS prumer
+FROM grades
+GROUP BY subject
+ORDER BY subject;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>subject</th><th>znamek</th><th>prumer</th></tr>
+<tr><td>CJL</td><td class="num">4</td><td class="num">2.00</td></tr>
+<tr><td>DAT</td><td class="num">3</td><td class="num">1.33</td></tr>
+<tr><td>MAT</td><td class="num">4</td><td class="num">2.50</td></tr></table></div>
+</div></details>
+
+<details><summary>2. Kolik žáků je v každé třídě?</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT class_name, COUNT(DISTINCT student) AS zaku
+FROM grades
+GROUP BY class_name;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>class_name</th><th>zaku</th></tr>
+<tr><td>2.A</td><td class="num">2</td></tr><tr><td>2.B</td><td class="num">2</td></tr></table></div>
+<p class="muted" style="margin-top:.8rem">Bez <span class="code">DISTINCT</span> bys dostal 6 – každý žák má v tabulce tři řádky.</p>
+</div></details>
+
+<details><summary>3. Které předměty mají průměr horší než 2?</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT subject, ROUND(AVG(grade), 2) AS prumer
+FROM grades
+GROUP BY subject
+HAVING AVG(grade) &gt; 2;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>subject</th><th>prumer</th></tr>
+<tr><td>MAT</td><td class="num">2.50</td></tr></table></div>
+<p class="muted" style="margin-top:.8rem">CJL má průměr přesně 2.00, a podmínku <span class="code">&gt; 2</span> proto nesplní.</p>
+</div></details>
+
+<details><summary>4. Kolik známek v tabulce chybí?</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT COUNT(*) - COUNT(grade) AS chybi
+FROM grades;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>chybi</th></tr><tr><td class="num">1</td></tr></table></div>
+<p class="muted" style="margin-top:.8rem">Využíváme rozdíl mezi COUNT(*) (počítá i NULL) a COUNT(grade) (NULL přeskakuje).</p>
+</div></details>
+
+<details><summary>5. Nejlepší a nejhorší známka každého žáka, seřazeno od nejhorší</summary><div class="sol">
+<div class="sqlwrap"><pre class="sql">SELECT student, MIN(grade) AS nejlepsi, MAX(grade) AS nejhorsi
+FROM grades
+GROUP BY student
+ORDER BY nejhorsi DESC, student;</pre></div>
+<div class="table-wrap"><table class="data"><tr><th>student</th><th>nejlepsi</th><th>nejhorsi</th></tr>
+<tr><td>Dvořák</td><td class="num">3</td><td class="num">4</td></tr>
+<tr><td>Svobodová</td><td class="num">1</td><td class="num">3</td></tr>
+<tr><td>Černá</td><td class="num">1</td><td class="num">2</td></tr>
+<tr><td>Novák</td><td class="num">1</td><td class="num">2</td></tr></table></div>
+<p class="muted" style="margin-top:.8rem">Černá a Novák mají stejnou nejhorší známku; o jejich pořadí rozhoduje druhé kritérium řazení (jméno, podle collation databáze).</p>
+</div></details>
+</section>
+
+<!-- 10 SHRNUTÍ -->
+<section id="summary">
+<div class="eyebrow">10 • SHRNUTÍ</div><h2>Co si odnést</h2>
+<div class="grid2">
+<div class="card"><h3>① Agregační funkce</h3><p><span class="code">COUNT, SUM, AVG, MIN, MAX</span> – z mnoha řádků jedna hodnota.</p></div>
+<div class="card"><h3>② NULL</h3><p>Agregace hodnoty NULL přeskakují. Výjimkou je <span class="code">COUNT(*)</span>.</p></div>
+<div class="card"><h3>③ GROUP BY</h3><p>Rozdělí řádky do skupin; každá skupina dá jeden řádek výsledku.</p></div>
+<div class="card"><h3>④ Pravidlo SELECTu</h3><p>Jen seskupované sloupce a agregační funkce.</p></div>
+<div class="card"><h3>⑤ WHERE vs. HAVING</h3><p>WHERE filtruje řádky <strong>před</strong> seskupením, HAVING skupiny <strong>po</strong> něm.</p></div>
+<div class="card"><h3>⑥ Pořadí</h3><p><span class="code">FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT</span></p></div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<p class="question">Jedna věta na závěr:</p>
+<div class="answer">GROUP BY řekne, <strong>za co</strong> chceme souhrn, agregační funkce řekne, <strong>jaký</strong> souhrn, a HAVING řekne, <strong>které</strong> souhrny nás zajímají.</div>
+</div>
+</section>
+
+<footer>VOŠ, SPŠ a SOŠ Varnsdorf • Výukový materiál — SQL – seskupování a agregační funkce • Navazuje na prezentaci „DCL – GRANT a REVOKE“.</footer>
+</main>
+<script>
+// navigace
+const links=[...document.querySelectorAll('nav a')], sections=[...document.querySelectorAll('main section[id]')];
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}}),{rootMargin:'-25% 0px -65% 0px'});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=991)document.querySelector('aside').style.display='none'}));
+
+// zvýraznění SQL syntaxe + tlačítko Kopírovat
+const KW=/\b(SELECT|FROM|WHERE|GROUP|BY|HAVING|ORDER|LIMIT|AS|AND|OR|IN|NOT|NULL|DISTINCT|DESC|ASC|WITH|ROLLUP|CREATE|TABLE|INSERT|INTO|VALUES|PRIMARY|KEY|AUTO_INCREMENT|INT|VARCHAR|CHAR|TINYINT|SEPARATOR)\b/g;
+const FN=/\b(COUNT|SUM|AVG|MIN|MAX|ROUND|COALESCE|GROUP_CONCAT)(?=\s*\()/g;
+document.querySelectorAll('pre.sql').forEach(pre=>{
+  const raw=pre.textContent;
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // rozdělení na komentáře, řetězce a zbytek
+  const parts=raw.split(/(--[^\n]*|'[^']*')/g);
+  pre.innerHTML=parts.map(p=>{
+    if(p.startsWith('--'))return '<span class="c">'+esc(p)+'</span>';
+    if(p.startsWith("'"))return '<span class="s">'+esc(p)+'</span>';
+    return esc(p).replace(FN,'<span class="f">$1</span>').replace(KW,'<span class="k">$1</span>').replace(/\b(\d+)\b/g,'<span class="n">$1</span>');
+  }).join('');
+  const b=document.createElement('button');b.className='copy';b.textContent='KOPÍROVAT';
+  b.onclick=()=>{navigator.clipboard.writeText(raw).then(()=>{b.textContent='ZKOPÍROVÁNO';setTimeout(()=>b.textContent='KOPÍROVAT',1500)})};
+  pre.parentElement.appendChild(b);
+});
+
+// vizualizace GROUP BY
+const viz=document.getElementById('groupviz'),vb=document.getElementById('vizbtn');
+vb.addEventListener('click',()=>{const c=viz.classList.toggle('collapsed');vb.textContent=c?'↺ Zpět na jednotlivé řádky':'▶ Seskupit podle class_name';});
+</script>
+</body>
+</html>

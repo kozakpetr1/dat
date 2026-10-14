@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-R diagram — případová studie SCHOOL</title>
+<meta name="description" content="Výuková webová prezentace: vyjádření konceptuálního návrhu databáze school pomocí E-R diagramu (entity jako obdélník s atributy, vztahy v notaci Crow's foot), datové typy a integritní omezení.">
+<style>
+:root{
+  --bg:#062b35;--bg2:#08495a;--panel:rgba(2,22,28,.58);--panel2:rgba(3,31,39,.82);
+  --text:#f7fbfc;--muted:rgba(247,251,252,.68);--cyan:#49dfff;--yellow:#ffd447;
+  --green:#a8d65c;--purple:#c99aff;--red:#ff7d7d;--sidebar:285px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(160deg,var(--bg),var(--bg2)) fixed;line-height:1.62}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+radial-gradient(circle at 78% 5%,rgba(73,223,255,.12),transparent 28%),
+radial-gradient(circle at 15% 72%,rgba(168,214,92,.08),transparent 26%)}
+aside{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:28px 22px;background:rgba(1,16,21,.82);backdrop-filter:blur(16px);z-index:10;overflow-y:auto}
+main{margin-left:var(--sidebar);max-width:1320px;padding:42px 48px 70px}
+.logo{display:flex;align-items:center;gap:13px;text-decoration:none;color:#fff;margin-bottom:30px}
+.logo svg{width:48px;height:42px}.logo b{font-size:13px;line-height:1.25;letter-spacing:.04em}.logo span{color:var(--cyan)}
+.nav-title{font-size:11px;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:13px}
+nav ul{list-style:none}nav li{margin-bottom:2px}
+nav a{display:flex;gap:10px;align-items:center;text-decoration:none;color:rgba(255,255,255,.67);padding:6px 10px;border-left:3px solid transparent;font-size:13px;font-weight:700}
+nav a:hover,nav a.active{color:#fff;background:rgba(73,223,255,.09);border-left-color:var(--cyan)}
+nav a .ic{width:18px;text-align:center;flex:none}
+.side-note{margin-top:22px;color:rgba(255,255,255,.42);font-size:11px}
+section{scroll-margin-top:25px;margin-bottom:82px}
+.hero{min-height:76vh;display:flex;align-items:center}.hero-inner{max-width:1000px}
+.eyebrow{color:var(--cyan);font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:800}
+h1{font-size:clamp(42px,6vw,78px);line-height:1.02;letter-spacing:-.045em;margin:9px 0 22px}
+h1 em{font-style:normal;color:var(--yellow)}
+h2{font-size:clamp(30px,4vw,46px);line-height:1.12;letter-spacing:-.03em;margin:6px 0 18px}
+h3{font-size:21px;line-height:1.25;margin-bottom:9px}
+h4{font-size:16px;margin-bottom:6px}
+p{margin-bottom:14px}.lead{font-size:20px;line-height:1.7;font-weight:300;max-width:980px}
+.muted{color:var(--muted)}strong{font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:25px}.chip{padding:7px 12px;background:rgba(255,255,255,.07);font-size:12px;font-weight:700}
+.panel{background:var(--panel);backdrop-filter:blur(10px);padding:27px;box-shadow:0 14px 38px rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.05)}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:rgba(1,20,26,.42);padding:20px;border-top:3px solid var(--cyan);height:100%}
+.card.yellow{border-color:var(--yellow)}.card.green{border-color:var(--green)}.card.purple{border-color:var(--purple)}.card.red{border-color:var(--red)}
+.callout{margin-top:20px;padding:15px 18px;border-left:4px solid var(--cyan);background:rgba(73,223,255,.065)}
+.callout.yellow{border-color:var(--yellow);background:rgba(255,212,71,.07)}
+.callout.green{border-color:var(--green);background:rgba(168,214,92,.07)}
+.callout.purple{border-color:var(--purple);background:rgba(201,154,255,.07)}
+.callout.red{border-color:var(--red);background:rgba(255,125,125,.07)}
+.badge{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;padding:4px 7px;margin-bottom:8px;background:rgba(73,223,255,.12);color:var(--cyan)}
+.badge.yellow{color:var(--yellow);background:rgba(255,212,71,.12)}.badge.green{color:var(--green);background:rgba(168,214,92,.12)}.badge.purple{color:var(--purple);background:rgba(201,154,255,.12)}.badge.red{color:var(--red);background:rgba(255,125,125,.12)}
+ul{list-style:none;margin:8px 0}li{position:relative;padding:5px 0 5px 22px}li:before{content:"";position:absolute;left:2px;top:14px;width:8px;height:8px;background:var(--yellow);clip-path:polygon(0 0,100% 50%,0 100%,22% 50%)}
+nav li{padding:0}nav li:before{display:none}
+code,.code{font-family:Consolas,monospace;color:#ffe98d;background:rgba(0,0,0,.25);padding:2px 5px}
+.flow{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr 40px 1fr;align-items:center;gap:5px;margin:25px 0}.flowbox{text-align:center;padding:15px 8px;background:rgba(0,15,20,.56);border-top:3px solid var(--cyan);font-weight:800}.flowbox small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:4px}.flowbox.on{background:rgba(73,223,255,.16);border-top-color:var(--yellow)}.arrow{text-align:center;color:var(--yellow);font-size:25px}
+.step-list{display:grid;gap:14px}.step{display:grid;grid-template-columns:54px 1fr;gap:16px;align-items:start}.num{width:45px;height:45px;display:grid;place-items:center;background:var(--cyan);color:#03303a;font-weight:900;font-size:19px}
+.minmax{font-family:Consolas,monospace;color:var(--green);font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:14px}th{background:rgba(0,15,20,.78);color:var(--cyan);text-align:left;text-transform:uppercase;letter-spacing:.08em;font-size:11px;padding:12px}td{padding:12px;background:rgba(255,255,255,.025);vertical-align:top;border-bottom:1px solid rgba(255,255,255,.06)}
+td.num-col{font-family:Consolas,monospace;white-space:nowrap}
+.table-wrap{overflow-x:auto}
+footer{padding:24px 0;color:var(--muted);font-size:11px;border-top:1px solid rgba(255,255,255,.08)}
+/* ER diagramy */
+.diagram{overflow-x:auto;margin:18px 0;border:1px solid rgba(255,255,255,.07)}
+.diagram svg{display:block;width:100%;height:auto;min-width:720px}
+.erd text{font-family:Arial,Helvetica,sans-serif}.erd .mono{font-family:Consolas,monospace}
+.grid2>*,.grid3>*,.grid4>*{min-width:0}
+.diagram-cap{font-size:13px;color:var(--muted);margin-top:-8px;margin-bottom:14px}
+/* kód */
+pre{font-family:Consolas,monospace;background:rgba(0,0,0,.34);padding:16px 18px;overflow:auto;font-size:13.5px;line-height:1.55;color:#e8f6f9;border-left:3px solid var(--cyan);margin:12px 0}
+pre.bad{border-left-color:var(--red)}pre.good{border-left-color:var(--green)}
+pre .k{color:var(--cyan);font-weight:700}pre .c{color:rgba(247,251,252,.48)}pre .s{color:var(--green)}pre .e{color:var(--red)}pre .n{color:var(--yellow)}pre .ok{color:var(--green)}
+.flag{display:inline-block;font-family:Consolas,monospace;font-weight:800;font-size:12px;padding:2px 7px;margin:1px 2px 1px 0;background:rgba(255,255,255,.07)}
+.f-pk{color:var(--yellow)}.f-fk{color:var(--cyan)}.f-nn{color:var(--green)}.f-uq{color:var(--purple)}.f-un{color:var(--cyan)}.f-ai{color:var(--cyan)}.f-zf{color:var(--cyan)}.f-chk{color:var(--red)}
+.sym{font-family:Consolas,monospace;font-weight:900;color:var(--yellow);font-size:18px;letter-spacing:.06em}
+.yes{color:var(--green);font-weight:800}.no{color:var(--red);font-weight:800}.half{color:var(--yellow);font-weight:800}
+details{margin-top:14px;background:rgba(0,15,20,.45);padding:14px 18px;border-left:3px solid var(--yellow)}
+summary{cursor:pointer;font-weight:800;color:var(--yellow)}
+details[open] summary{margin-bottom:10px}
+.prop{background:rgba(1,20,26,.42);padding:22px;border-top:3px solid var(--cyan);margin-bottom:18px}
+.prop h3{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.prop h3 .flag{font-size:13px}
+.prop .grid2{gap:14px}
+.mobile{display:none}
+@media(max-width:1000px){
+ aside{display:none}.mobile{display:flex;position:sticky;top:0;z-index:20;background:rgba(1,16,21,.94);padding:12px 15px;justify-content:space-between;align-items:center}.mobile .logo{margin:0}.mobile button{background:none;border:0;color:#fff;font-size:25px}
+ main{margin:0;padding:25px 15px 55px}.grid2,.grid3,.grid4{grid-template-columns:1fr}.flow{grid-template-columns:1fr;gap:7px}.arrow{transform:rotate(90deg)}.panel{padding:18px}.hero{min-height:72vh}.table-wrap table{min-width:700px}
+ .lead{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="mobile">
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd447"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffe98d"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#49dfff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c5ee"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#bfe083"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a8d65c"/></svg><b>SCHOOL<br><span>E-R DIAGRAM</span></b></a><button onclick="document.querySelector('aside').style.display='block'" aria-label="Menu">☰</button>
+</div>
+
+<aside>
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd447"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffe98d"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#49dfff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c5ee"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#bfe083"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a8d65c"/></svg><b>SCHOOL<br><span>E-R DIAGRAM</span></b></a>
+<div class="nav-title">E-R DIAGRAM</div>
+<nav><ul>
+<li><a class="active" href="#start"><span class="ic">⌂</span><span>Navazujeme</span></a></li>
+<li><a href="#recap"><span class="ic">↺</span><span>Co už máme</span></a></li>
+<li><a href="#erd"><span class="ic">◫</span><span>Co je E-R diagram</span></a></li>
+<li><a href="#n-entity"><span class="ic">▭</span><span>Notace entitního typu</span></a></li>
+<li><a href="#n-rel"><span class="ic">⋔</span><span>Notace Crow's foot</span></a></li>
+<li><a href="#reading"><span class="ic">↔</span><span>Jak číst vztah</span></a></li>
+<li><a href="#step1"><span class="ic">1</span><span>Krok 1: entitní typy</span></a></li>
+<li><a href="#step2"><span class="ic">2</span><span>Krok 2: vztahové typy</span></a></li>
+<li><a href="#step3"><span class="ic">3</span><span>Krok 3: atributy</span></a></li>
+<li><a href="#datatypes"><span class="ic">T</span><span>Datové typy</span></a></li>
+<li><a href="#constraints"><span class="ic">4</span><span>Integritní omezení</span></a></li>
+<li><a href="#props"><span class="ic">⚙</span><span>Vlastnosti sloupce</span></a></li>
+<li><a href="#check"><span class="ic">✓</span><span>CHECK</span></a></li>
+<li><a href="#step4"><span class="ic">★</span><span>Výsledný E-R diagram</span></a></li>
+<li><a href="#mn"><span class="ic">⇄</span><span>M:N s atributy</span></a></li>
+<li><a href="#sql"><span class="ic">{}</span><span>Náhled v SQL</span></a></li>
+<li><a href="#mistakes"><span class="ic">!</span><span>Časté chyby</span></a></li>
+<li><a href="#task"><span class="ic">✎</span><span>Úkol</span></a></li>
+</ul></nav>
+<div class="side-note">Databáze • E-R diagram<br>Případová studie SCHOOL</div>
+</aside>
+
+<main>
+<!-- ================================================================ START -->
+<section id="start" class="hero">
+<div class="hero-inner">
+<div class="eyebrow">Databáze • konceptuální návrh • E-R diagram</div>
+<h1>Návrh už máme.<br><em>Teď ho nakreslíme.</em></h1>
+<p class="lead">Minule jsme z požadavků na databázi <strong>school</strong> odvodili entitní typy, vztahové typy, atributy a integritní omezení — zatím slovy a tabulkami. Dnes stejný návrh vyjádříme <strong>E-R diagramem</strong>: obrázkem, ze kterého je celý model čitelný na první pohled.</p>
+<div class="chips"><span class="chip">entitní typ = obdélník s atributy</span><span class="chip">vztah = čára Crow's foot</span><span class="chip">datové typy</span><span class="chip">NOT NULL</span><span class="chip">UNIQUE</span><span class="chip">UNSIGNED</span><span class="chip">ZEROFILL</span><span class="chip">AUTO_INCREMENT</span><span class="chip">CHECK</span></div>
+<div class="callout yellow"><strong>Cíl:</strong> umět diagram nakreslit ve čtyřech krocích a u každého symbolu umět říct, <strong>co znamená</strong> a <strong>z kterého požadavku vychází</strong>.</div>
+</div>
+</section>
+
+<!-- ================================================================ RECAP -->
+<section id="recap">
+<div class="eyebrow">00 • NAVÁZÁNÍ</div><h2>Co už máme z minulé hodiny</h2>
+<p class="lead">Diagram nevymýšlíme znovu. Je to jen <strong>jiný zápis</strong> téhož konceptuálního návrhu. Všechno, co nakreslíme, už máme odvozené ze zadání R1–R8.</p>
+<div class="grid2">
+<div class="panel">
+<h3>Entitní typy a atributy</h3>
+<div class="table-wrap"><table>
+<tr><th>Entitní typ</th><th>Atributy</th><th>Zdroj</th></tr>
+<tr><td><strong>class</strong></td><td><code>id</code>, <code>code</code>, <code>established_year</code></td><td>R1</td></tr>
+<tr><td><strong>pupil</strong></td><td><code>id</code>, <code>first_name</code>, <code>last_name</code>, <code>birth_date</code></td><td>R2</td></tr>
+<tr><td><strong>subject</strong></td><td><code>id</code>, <code>code</code>, <code>name</code></td><td>R4</td></tr>
+</table></div>
+</div>
+<div class="panel">
+<h3>Vztahové typy</h3>
+<div class="table-wrap"><table>
+<tr><th>Vztah</th><th>Kardinalita a parcialita</th><th>Zdroj</th></tr>
+<tr><td><strong>belongs_to</strong></td><td>pupil → class <span class="minmax">1..1</span><br>class → pupil <span class="minmax">0..N</span></td><td>R3</td></tr>
+<tr><td><strong>teaches</strong></td><td>class → subject <span class="minmax">1..N</span><br>subject → class <span class="minmax">0..N</span></td><td>R5</td></tr>
+<tr><td><strong>attends</strong></td><td>pupil → subject <span class="minmax">?..N</span><br>subject → pupil <span class="minmax">?..N</span><br><span class="muted">atributy: attendance_type, grade</span></td><td>R6, R7</td></tr>
+</table></div>
+</div>
+</div>
+<div class="callout"><strong>Připomenutí zápisu <code>min..max</code>:</strong> první číslo je <strong>parcialita</strong> (musí být účast? 0 = nemusí, 1 = musí), druhé číslo je <strong>kardinalita</strong> (kolik nejvýše? 1 nebo N). Přesně tyto dvě informace teď budeme kreslit symboly.</div>
+</section>
+
+<!-- ================================================================ ERD -->
+<section id="erd">
+<div class="eyebrow">01 • E-R DIAGRAM</div><h2>Co je E-R diagram a jakou notaci použijeme</h2>
+<p class="lead"><strong>E-R diagram</strong> (Entity–Relationship) je grafické vyjádření E-R modelu. Notace je „abeceda“ diagramu — dohoda, jakým symbolem kreslíme entitní typ, vztah, atribut a omezení.</p>
+<div class="grid3">
+<div class="card"><span class="badge">Entitní typ</span><h3>Obdélník se seznamem atributů</h3><p>Nahoře název, pod ním atributy. Identifikátor, povinnost, datový typ i omezení jsou přímo v obdélníku.</p></div>
+<div class="card yellow"><span class="badge yellow">Vztahový typ</span><h3>Čára se symboly Crow's foot</h3><p>„Vraní stopa“ na konci čáry říká, <strong>kolik</strong> výskytů se může účastnit a zda <strong>musí</strong>.</p></div>
+<div class="card green"><span class="badge green">Název vztahu</span><h3>Sloveso u čáry</h3><p><code>belongs_to</code>, <code>teaches</code>, <code>attends</code> — z obou entit a slovesa musí jít složit smysluplná věta.</p></div>
+</div>
+<div class="callout yellow"><strong>Proč ne kosočtverec?</strong> V minulé prezentaci jsme vztahy kreslili kosočtvercem (Chenova notace) — dobře ukazuje, že vztah je samostatný pojem. Crow's foot je kompaktnější, počty jsou vidět přímo na čáře a používá ji většina nástrojů (MySQL Workbench, draw.io, dbdiagram.io). <strong>V jednom diagramu ale notace nemícháme.</strong></div>
+</section>
+
+<!-- ================================================================ N-ENTITY -->
+<section id="n-entity">
+<div class="eyebrow">02 • NOTACE ENTITNÍHO TYPU</div><h2>Jak se kreslí entitní typ</h2>
+<p class="lead">Entitní typ kreslíme jako <strong>obdélník</strong>. Záhlaví nese název, tělo seznam atributů. Podle toho, jak daleko jsme v návrhu, obdélník postupně „roste“: nejdřív jen název, pak atributy, nakonec datové typy a omezení.</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 980 246" role="img" aria-label="Anatomie entitního typu" xmlns="http://www.w3.org/2000/svg"><rect width="980" height="246" fill="#04252e"/>
+<rect x="300" y="40" width="340" height="166" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="300" y="40" width="340" height="34" fill="#ffd447" fill-opacity=".2"/>
+<line x1="300" y1="74" x2="640" y2="74" stroke="#ffd447" stroke-width="1.5"/>
+<text x="470.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">pupil</text>
+<text x="310" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="340" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="490" y="98" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="630" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="608" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="586" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="310" y="122" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="340" y="122" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="490" y="122" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="630" y="122" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="310" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="340" y="146" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<text x="490" y="146" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="630" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="310" y="170" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="340" y="170" font-size="13" class="mono" fill="#f7fbfc">birth_date</text>
+<text x="490" y="170" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="630" y="170" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="310" y="194" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="340" y="194" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">nickname</text>
+<text x="490" y="194" font-size="12" class="mono" fill="#49dfff">VARCHAR(30)</text>
+<line x1="294" y1="57" x2="260" y2="57" stroke="rgba(247,251,252,.6)" stroke-width="1"/>
+<circle cx="294" cy="57" r="3" fill="rgba(247,251,252,.6)"/>
+<text x="252" y="55" font-size="13" fill="#f7fbfc" text-anchor="end" font-weight="700">název entitního typu</text>
+<text x="252" y="71" font-size="11.5" fill="rgba(247,251,252,.6)" text-anchor="end" font-weight="400">jednotné číslo, anglicky, snake_case</text>
+<line x1="294" y1="94" x2="260" y2="94" stroke="rgba(247,251,252,.6)" stroke-width="1"/>
+<circle cx="294" cy="94" r="3" fill="rgba(247,251,252,.6)"/>
+<text x="252" y="92" font-size="13" fill="#f7fbfc" text-anchor="end" font-weight="700">PK = identifikátor</text>
+<text x="252" y="108" font-size="11.5" fill="rgba(247,251,252,.6)" text-anchor="end" font-weight="400">podtržený, jednoznačně určuje výskyt</text>
+<line x1="294" y1="142" x2="260" y2="142" stroke="rgba(247,251,252,.6)" stroke-width="1"/>
+<circle cx="294" cy="142" r="3" fill="rgba(247,251,252,.6)"/>
+<text x="252" y="140" font-size="13" fill="#f7fbfc" text-anchor="end" font-weight="700">* = povinný atribut</text>
+<text x="252" y="156" font-size="11.5" fill="rgba(247,251,252,.6)" text-anchor="end" font-weight="400">hodnota musí být vždy známa</text>
+<line x1="294" y1="190" x2="260" y2="190" stroke="rgba(247,251,252,.6)" stroke-width="1"/>
+<circle cx="294" cy="190" r="3" fill="rgba(247,251,252,.6)"/>
+<text x="252" y="188" font-size="13" fill="#f7fbfc" text-anchor="end" font-weight="700">o = nepovinný atribut</text>
+<text x="252" y="204" font-size="11.5" fill="rgba(247,251,252,.6)" text-anchor="end" font-weight="400">hodnota může chybět (NULL)</text>
+<line x1="646" y1="118" x2="680" y2="118" stroke="rgba(247,251,252,.6)" stroke-width="1"/>
+<circle cx="646" cy="118" r="3" fill="rgba(247,251,252,.6)"/>
+<text x="688" y="116" font-size="13" fill="#f7fbfc" text-anchor="start" font-weight="700">datový typ (sloupec 3)</text>
+<text x="688" y="132" font-size="11.5" fill="rgba(247,251,252,.6)" text-anchor="start" font-weight="400">jaké hodnoty atribut smí mít</text>
+<line x1="646" y1="166" x2="680" y2="166" stroke="rgba(247,251,252,.6)" stroke-width="1"/>
+<circle cx="646" cy="166" r="3" fill="rgba(247,251,252,.6)"/>
+<text x="688" y="164" font-size="13" fill="#f7fbfc" text-anchor="start" font-weight="700">omezení sloupce (vpravo)</text>
+<text x="688" y="180" font-size="11.5" fill="rgba(247,251,252,.6)" text-anchor="start" font-weight="400">NN · UQ · UN · AI · CHK …</text>
+</svg></div>
+<p class="diagram-cap">Plně rozpracovaný entitní typ <code>pupil</code> (atribut <code>nickname</code> je zde jen pro ukázku nepovinného atributu — v našem zadání není).</p>
+<div class="table-wrap"><table>
+<tr><th>Prvek</th><th>Jak ho kreslíme</th><th>Co znamená</th></tr>
+<tr><td><strong>Název</strong></td><td>záhlaví obdélníku</td><td>Typ objektu, který evidujeme. Jednotné číslo, anglicky, malými písmeny, <code>snake_case</code>: <code>pupil</code>, ne <code>Pupils</code>.</td></tr>
+<tr><td><strong>Identifikátor</strong></td><td><span class="flag f-pk">PK</span> a podtržený název</td><td>Atribut, jehož hodnota jednoznačně určuje jeden výskyt (jednoho konkrétního žáka).</td></tr>
+<tr><td><strong>Povinný atribut</strong></td><td><span class="flag f-nn">*</span></td><td>Každý výskyt musí mít hodnotu vyplněnou.</td></tr>
+<tr><td><strong>Nepovinný atribut</strong></td><td><span class="flag">o</span>, kurzíva</td><td>Hodnota může chybět (v databázi <code>NULL</code>).</td></tr>
+<tr><td><strong>Datový typ</strong></td><td>třetí sloupec</td><td>Jaké hodnoty atribut smí obsahovat: číslo, text, datum… (viz kapitola Datové typy).</td></tr>
+<tr><td><strong>Omezení</strong></td><td>zkratky vpravo</td><td><span class="flag f-nn">NN</span> NOT NULL, <span class="flag f-uq">UQ</span> UNIQUE, <span class="flag f-un">UN</span> UNSIGNED, <span class="flag f-ai">AI</span> AUTO_INCREMENT, <span class="flag f-chk">CHK</span> CHECK. Zkratky odpovídají zaškrtávacím políčkům v MySQL Workbench.</td></tr>
+</table></div>
+</div>
+<div class="callout"><strong>Klasická notace vs. Chenova:</strong> v Chenově notaci se atributy kreslí jako elipsy připojené k obdélníku. U větších modelů je to nepřehledné, proto atributy píšeme <strong>dovnitř obdélníku</strong> jako seznam.</div>
+</section>
+
+<!-- ================================================================ N-REL -->
+<section id="n-rel">
+<div class="eyebrow">03 • NOTACE VZTAHOVÉHO TYPU</div><h2>Crow's foot: čtyři symboly stačí</h2>
+<p class="lead">Vztah je <strong>čára</strong> mezi dvěma entitními typy. Na každém konci čáry je symbol složený ze <strong>dvou částí</strong>: jedna říká maximum, druhá minimum.</p>
+<div class="panel">
+<h3>Ze dvou značek se skládá jeden symbol</h3>
+<div class="diagram"><svg class="erd" style="max-width:720px;min-width:0;margin:0 auto" viewBox="0 0 680 152" role="img" aria-label="Dvě části symbolu Crow's foot" xmlns="http://www.w3.org/2000/svg"><rect width="680" height="152" fill="#04252e"/>
+<rect x="470" y="40" width="120" height="60" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<text x="530" y="76" font-size="17" fill="#f7fbfc" text-anchor="middle" font-weight="800">class</text>
+<polyline points="60.0,70.0 470.0,70.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="453.0" y1="70.0" x2="470.0" y2="80.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="453.0" y1="70.0" x2="470.0" y2="60.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="453.0" y1="70.0" x2="470.0" y2="70.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="447.0" y1="78.0" x2="447.0" y2="62.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="462" y1="56" x2="462" y2="22" stroke="rgba(247,251,252,.6)"/>
+<text x="462" y="16" font-size="13" fill="#f7fbfc" text-anchor="middle" font-weight="700">u entity: MAXIMUM (kardinalita)</text>
+<line x1="447" y1="82" x2="447" y2="122" stroke="rgba(247,251,252,.6)"/>
+<text x="447" y="138" font-size="13" fill="#f7fbfc" text-anchor="middle" font-weight="700">dál od entity: MINIMUM (parcialita)</text>
+</svg></div>
+<div class="grid3" style="margin-top:6px">
+<div class="card"><h4>Značka u entity = maximum</h4><p><strong>|</strong> čárka = nejvýše jeden<br><strong>&lt;</strong> vraní stopa = mnoho (N)</p></div>
+<div class="card yellow"><h4>Značka dál od entity = minimum</h4><p><strong>o</strong> kroužek = nula (účast nepovinná)<br><strong>|</strong> čárka = jeden (účast povinná)</p></div>
+<div class="card green"><h4>Pomůcka</h4><p>Kroužek připomíná nulu, čárka jedničku a vraní stopa „rozvětvení“ na mnoho výskytů.</p></div>
+</div>
+</div>
+<div class="panel" style="margin-top:20px">
+<h3>Všechny čtyři kombinace</h3>
+<div class="diagram"><svg class="erd" style="max-width:820px;min-width:0;margin:0 auto" viewBox="0 0 760 310" role="img" aria-label="Symboly Crow's foot" xmlns="http://www.w3.org/2000/svg"><rect width="760" height="310" fill="#04252e"/>
+<rect x="330" y="30" width="90" height="40" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<text x="375" y="56" font-size="16" fill="#f7fbfc" text-anchor="middle" font-weight="800">B</text>
+<rect x="20" y="30" width="90" height="40" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<text x="65" y="56" font-size="16" fill="#f7fbfc" text-anchor="middle" font-weight="800">A</text>
+<polyline points="110.0,50.0 330.0,50.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="320.0" y1="58.0" x2="320.0" y2="42.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="312.0" y1="58.0" x2="312.0" y2="42.0" stroke="#ffd447" stroke-width="2"/>
+<text x="450" y="47" font-size="16" fill="#ffd447" text-anchor="start" font-weight="800">právě jeden</text>
+<text x="450" y="66" font-size="13" fill="rgba(247,251,252,.6)" text-anchor="start" font-weight="400" class="mono">1..1 · povinně, nejvýše jeden</text>
+<rect x="330" y="100" width="90" height="40" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<text x="375" y="126" font-size="16" fill="#f7fbfc" text-anchor="middle" font-weight="800">B</text>
+<rect x="20" y="100" width="90" height="40" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<text x="65" y="126" font-size="16" fill="#f7fbfc" text-anchor="middle" font-weight="800">A</text>
+<polyline points="110.0,120.0 330.0,120.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="320.0" y1="128.0" x2="320.0" y2="112.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="306.0" cy="120.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<text x="450" y="117" font-size="16" fill="#ffd447" text-anchor="start" font-weight="800">nula nebo jeden</text>
+<text x="450" y="136" font-size="13" fill="rgba(247,251,252,.6)" text-anchor="start" font-weight="400" class="mono">0..1 · nepovinně, nejvýše jeden</text>
+<rect x="330" y="170" width="90" height="40" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<text x="375" y="196" font-size="16" fill="#f7fbfc" text-anchor="middle" font-weight="800">B</text>
+<rect x="20" y="170" width="90" height="40" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<text x="65" y="196" font-size="16" fill="#f7fbfc" text-anchor="middle" font-weight="800">A</text>
+<polyline points="110.0,190.0 330.0,190.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="313.0" y1="190.0" x2="330.0" y2="200.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="313.0" y1="190.0" x2="330.0" y2="180.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="313.0" y1="190.0" x2="330.0" y2="190.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="307.0" y1="198.0" x2="307.0" y2="182.0" stroke="#ffd447" stroke-width="2"/>
+<text x="450" y="187" font-size="16" fill="#ffd447" text-anchor="start" font-weight="800">jeden nebo více</text>
+<text x="450" y="206" font-size="13" fill="rgba(247,251,252,.6)" text-anchor="start" font-weight="400" class="mono">1..N · povinně, libovolně mnoho</text>
+<rect x="330" y="240" width="90" height="40" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<text x="375" y="266" font-size="16" fill="#f7fbfc" text-anchor="middle" font-weight="800">B</text>
+<rect x="20" y="240" width="90" height="40" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<text x="65" y="266" font-size="16" fill="#f7fbfc" text-anchor="middle" font-weight="800">A</text>
+<polyline points="110.0,260.0 330.0,260.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="313.0" y1="260.0" x2="330.0" y2="270.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="313.0" y1="260.0" x2="330.0" y2="250.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="313.0" y1="260.0" x2="330.0" y2="260.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="302.0" cy="260.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<text x="450" y="257" font-size="16" fill="#ffd447" text-anchor="start" font-weight="800">nula nebo více</text>
+<text x="450" y="276" font-size="13" fill="rgba(247,251,252,.6)" text-anchor="start" font-weight="400" class="mono">0..N · nepovinně, libovolně mnoho</text>
+</svg></div>
+<div class="table-wrap"><table>
+<tr><th>Symbol</th><th>min..max</th><th>Význam</th><th>Typická věta</th></tr>
+<tr><td class="sym">||</td><td class="num-col">1..1</td><td>právě jeden</td><td>„…patří do <strong>právě jedné</strong> třídy“</td></tr>
+<tr><td class="sym">o|</td><td class="num-col">0..1</td><td>nejvýše jeden, nemusí být žádný</td><td>„…je třídním učitelem <strong>nejvýše jedné</strong> třídy“</td></tr>
+<tr><td class="sym">|&lt;</td><td class="num-col">1..N</td><td>alespoň jeden, může jich být mnoho</td><td>„…má <strong>jeden nebo více</strong> předmětů“</td></tr>
+<tr><td class="sym">o&lt;</td><td class="num-col">0..N</td><td>libovolný počet včetně žádného</td><td>„…<strong>může</strong> mít více žáků“</td></tr>
+</table></div>
+</div>
+<div class="panel" style="margin-top:20px">
+<h3>Typy vztahů podle maxima</h3>
+<p class="muted">Podle maxim na obou koncích rozlišujeme vztahy 1:1, 1:N a M:N. (Vztah učitele a třídy je tu jen pro ukázku 1:1 — vrátíme se k němu v úkolu.)</p>
+<div class="diagram"><svg class="erd" viewBox="0 0 1140 275" role="img" aria-label="Typy vztahů 1:1, 1:N, M:N" xmlns="http://www.w3.org/2000/svg"><rect width="1140" height="275" fill="#04252e"/>
+<text x="20" y="50" font-size="20" fill="#ffd447" text-anchor="start" font-weight="900">1 : 1</text>
+<rect x="110" y="20" width="130" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="110" y="20" width="130" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="175.0" y="51.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">class</text>
+<rect x="520" y="20" width="130" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="520" y="20" width="130" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="585.0" y="51.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">teacher</text>
+<polyline points="240.0,45.0 520.0,45.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="250.0" y1="37.0" x2="250.0" y2="53.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="264.0" cy="45.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="510.0" y1="53.0" x2="510.0" y2="37.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="502.0" y1="53.0" x2="502.0" y2="37.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="306.7" y="20.6" width="146.6" height="18.8" fill="#04252e"/>
+<text x="380.0" y="34.6" text-anchor="middle" font-size="13" font-weight="800" font-style="italic" fill="#ffd447">has_class_teacher</text>
+<text x="670" y="42" font-size="12.5" fill="#f7fbfc" text-anchor="start" font-weight="400">Třída má právě jednoho třídního učitele;</text>
+<text x="670" y="60" font-size="12.5" fill="rgba(247,251,252,.6)" text-anchor="start" font-weight="400">učitel je třídním nejvýše jedné třídy.</text>
+<text x="20" y="135" font-size="20" fill="#ffd447" text-anchor="start" font-weight="900">1 : N</text>
+<rect x="110" y="105" width="130" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="110" y="105" width="130" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="175.0" y="136.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">class</text>
+<rect x="520" y="105" width="130" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="520" y="105" width="130" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="585.0" y="136.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">pupil</text>
+<polyline points="240.0,130.0 520.0,130.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="250.0" y1="122.0" x2="250.0" y2="138.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="258.0" y1="122.0" x2="258.0" y2="138.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="503.0" y1="130.0" x2="520.0" y2="140.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="503.0" y1="130.0" x2="520.0" y2="120.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="503.0" y1="130.0" x2="520.0" y2="130.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="492.0" cy="130.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="341.8" y="105.7" width="76.4" height="18.8" fill="#04252e"/>
+<text x="380.0" y="119.6" text-anchor="middle" font-size="13" font-weight="800" font-style="italic" fill="#ffd447">contains</text>
+<text x="670" y="127" font-size="12.5" fill="#f7fbfc" text-anchor="start" font-weight="400">Třída má 0..N žáků;</text>
+<text x="670" y="145" font-size="12.5" fill="rgba(247,251,252,.6)" text-anchor="start" font-weight="400">žák je právě v jedné třídě.</text>
+<text x="20" y="220" font-size="20" fill="#ffd447" text-anchor="start" font-weight="900">M : N</text>
+<rect x="110" y="190" width="130" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="110" y="190" width="130" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="175.0" y="221.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">pupil</text>
+<rect x="520" y="190" width="130" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="520" y="190" width="130" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="585.0" y="221.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">subject</text>
+<polyline points="240.0,215.0 520.0,215.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="257.0" y1="215.0" x2="240.0" y2="205.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="257.0" y1="215.0" x2="240.0" y2="225.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="257.0" y1="215.0" x2="240.0" y2="215.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="268.0" cy="215.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="503.0" y1="215.0" x2="520.0" y2="225.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="503.0" y1="215.0" x2="520.0" y2="205.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="503.0" y1="215.0" x2="520.0" y2="215.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="492.0" cy="215.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="345.7" y="190.7" width="68.6" height="18.8" fill="#04252e"/>
+<text x="380.0" y="204.6" text-anchor="middle" font-size="13" font-weight="800" font-style="italic" fill="#ffd447">attends</text>
+<text x="670" y="212" font-size="12.5" fill="#f7fbfc" text-anchor="start" font-weight="400">Žák navštěvuje více předmětů;</text>
+<text x="670" y="230" font-size="12.5" fill="rgba(247,251,252,.6)" text-anchor="start" font-weight="400">předmět navštěvuje více žáků.</text>
+</svg></div>
+</div>
+</section>
+
+<!-- ================================================================ READING -->
+<section id="reading">
+<div class="eyebrow">04 • ČTENÍ VZTAHU</div><h2>Symbol čteme na <em style="font-style:normal;color:var(--yellow)">protější</em> straně</h2>
+<p class="lead">Tohle je nejčastější zdroj chyb. Vezmi jednu entitu, jeden její výskyt, a „přejdi“ po čáře na druhou stranu. <strong>Symbol u cílové entity</strong> říká, s kolika jejími výskyty je ten jeden výskyt spojen.</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" style="max-width:900px;min-width:0;margin:0 auto" viewBox="0 0 800 195" role="img" aria-label="Čtení vztahu v notaci Crow's foot" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="195" fill="#04252e"/>
+<rect x="40" y="70" width="170" height="50" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="40" y="70" width="170" height="50" fill="#ffd447" fill-opacity=".14"/>
+<text x="125.0" y="101.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">pupil</text>
+<rect x="590" y="70" width="170" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="590" y="70" width="170" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="675.0" y="101.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">class</text>
+<polyline points="210.0,95.0 590.0,95.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="227.0" y1="95.0" x2="210.0" y2="85.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="227.0" y1="95.0" x2="210.0" y2="105.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="227.0" y1="95.0" x2="210.0" y2="95.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="238.0" cy="95.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="580.0" y1="103.0" x2="580.0" y2="87.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="572.0" y1="103.0" x2="572.0" y2="87.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="351.0" y="69.7" width="98.0" height="20.3" fill="#04252e"/>
+<text x="400.0" y="84.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">belongs_to</text>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#a8d65c"/></marker><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#c99aff"/></marker></defs>
+<line x1="130" y1="40" x2="560" y2="40" stroke="#a8d65c" stroke-width="2" marker-end="url(#ar)"/>
+<text x="400" y="28" font-size="14" fill="#a8d65c" text-anchor="middle" font-weight="700">1 žák patří do PRÁVĚ JEDNÉ třídy → čti symbol u class</text>
+<line x1="670" y1="150" x2="240" y2="150" stroke="#c99aff" stroke-width="2" marker-end="url(#ar2)"/>
+<text x="400" y="175" font-size="14" fill="#c99aff" text-anchor="middle" font-weight="700">1 třída má NULA AŽ N žáků ← čti symbol u pupil</text>
+</svg></div>
+<div class="grid2" style="margin-top:6px">
+<div class="card green"><h4>Zleva doprava</h4><p>Jeden <strong>pupil</strong> → symbol <span class="sym">||</span> u <strong>class</strong> → „Každý žák patří do <strong>právě jedné</strong> třídy.“ (R3)</p></div>
+<div class="card purple"><h4>Zprava doleva</h4><p>Jedna <strong>class</strong> → symbol <span class="sym">o&lt;</span> u <strong>pupil</strong> → „Třída může mít <strong>0 až N</strong> žáků.“</p></div>
+</div>
+</div>
+<div class="callout red"><strong>Pozor na rozdíl oproti minulé prezentaci:</strong> v Chenově zápisu jsme psali <code>1..1</code> pod <strong>pupil</strong> (údaj o účasti žáka). V Crow's foot je stejná informace nakreslená <strong>u class</strong> — symbol „přeskočí“ na druhý konec čáry. Význam se nemění, mění se jen místo, kde ho čteme.</div>
+<div class="callout"><strong>Kontrolní věta:</strong> „Jeden <em>[entita A]</em> <em>[sloveso]</em> <em>[symbol u B]</em> <em>[entita B]</em>.“ Když věta nedává smysl nebo odporuje zadání, symbol je na špatném konci.</div>
+</section>
+
+<!-- ================================================================ STEP 1 -->
+<section id="step1">
+<div class="eyebrow">KROK 1 • ENTITNÍ TYPY</div><h2>Nakresli obdélníky</h2>
+<div class="flow"><div class="flowbox on">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox">4<br>OMEZENÍ</div></div>
+<p class="lead">Za každý entitní typ z analýzy nakreslíme jeden obdélník jen s názvem. Ještě žádné čáry, žádné atributy — nejdřív rozmístíme „hráče“ na hrací plochu.</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 760 250" role="img" aria-label="ER diagram SCHOOL – name" xmlns="http://www.w3.org/2000/svg"><rect width="760" height="250" fill="#04252e"/>
+<rect x="30" y="160" width="190" height="50" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="30" y="160" width="190" height="50" fill="#ffd447" fill-opacity=".14"/>
+<text x="125.0" y="191.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">pupil</text>
+<rect x="285.0" y="40" width="190" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="285.0" y="40" width="190" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="380.0" y="71.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">class</text>
+<rect x="540" y="160" width="190" height="50" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="540" y="160" width="190" height="50" fill="#a8d65c" fill-opacity=".14"/>
+<text x="635.0" y="191.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">subject</text>
+</svg></div>
+<div class="grid3">
+<div class="card"><h4>Co kreslíme</h4><p>Obdélník = entitní typ. Název v jednotném čísle: <code>pupil</code>, <code>class</code>, <code>subject</code>.</p></div>
+<div class="card yellow"><h4>Rozmístění</h4><p>Entity, které spolu souvisejí, dáváme vedle sebe. Ušetříme si křížení čar. <code>class</code> je nahoře uprostřed, protože se váže na obě ostatní; <code>pupil</code> a <code>subject</code> jsou pod ní, aby mezi nimi mohla vést přímá čára.</p></div>
+<div class="card green"><h4>Kontrola</h4><p>Každý obdélník má oporu v zadání (R1, R2, R4). Nic nepřidáváme „pro jistotu“ (R8).</p></div>
+</div>
+</div>
+</section>
+
+<!-- ================================================================ STEP 2 -->
+<section id="step2">
+<div class="eyebrow">KROK 2 • VZTAHOVÉ TYPY</div><h2>Spoj obdélníky čarami a doplň symboly</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox on">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox">4<br>OMEZENÍ</div></div>
+<p class="lead">Každý vztahový typ je jedna čára se slovesem. Pak pro <strong>každý konec zvlášť</strong> položíme dvě otázky: <em>„nejvýše kolik?“</em> a <em>„musí alespoň jeden?“</em></p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 760 250" role="img" aria-label="ER diagram SCHOOL – lines" xmlns="http://www.w3.org/2000/svg"><rect width="760" height="250" fill="#04252e"/>
+<rect x="30" y="160" width="190" height="50" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="30" y="160" width="190" height="50" fill="#ffd447" fill-opacity=".14"/>
+<text x="125.0" y="191.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">pupil</text>
+<rect x="285.0" y="40" width="190" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="285.0" y="40" width="190" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="380.0" y="71.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">class</text>
+<rect x="540" y="160" width="190" height="50" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="540" y="160" width="190" height="50" fill="#a8d65c" fill-opacity=".14"/>
+<text x="635.0" y="191.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">subject</text>
+<polyline points="285.0,65.0 125.0,65.0 125.0,160.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="275.0" y1="73.0" x2="275.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="267.0" y1="73.0" x2="267.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="125.0" y1="143.0" x2="115.0" y2="160.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="125.0" y1="143.0" x2="135.0" y2="160.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="125.0" y1="143.0" x2="125.0" y2="160.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="125.0" cy="132.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="138.0" y="39.7" width="98.0" height="20.3" fill="#04252e"/>
+<text x="187.0" y="54.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">belongs_to</text>
+<polyline points="475.0,65.0 635.0,65.0 635.0,160.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="492.0" y1="65.0" x2="475.0" y2="55.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="492.0" y1="65.0" x2="475.0" y2="75.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="492.0" y1="65.0" x2="475.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="503.0" cy="65.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="635.0" y1="143.0" x2="625.0" y2="160.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="635.0" y1="143.0" x2="645.0" y2="160.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="635.0" y1="143.0" x2="635.0" y2="160.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="627.0" y1="137.0" x2="643.0" y2="137.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="543.6" y="39.7" width="72.8" height="20.3" fill="#04252e"/>
+<text x="580.0" y="54.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">teaches</text>
+<polyline points="220.0,185.0 540.0,185.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="237.0" y1="185.0" x2="220.0" y2="175.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="237.0" y1="185.0" x2="220.0" y2="195.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="237.0" y1="185.0" x2="220.0" y2="185.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="248.0" cy="185.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="523.0" y1="185.0" x2="540.0" y2="195.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="523.0" y1="185.0" x2="540.0" y2="175.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="523.0" y1="185.0" x2="540.0" y2="185.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="512.0" cy="185.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="343.6" y="159.7" width="72.8" height="20.3" fill="#04252e"/>
+<text x="380.0" y="174.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">attends</text>
+</svg></div>
+<div class="table-wrap"><table>
+<tr><th>Vztah</th><th>Otázka</th><th>Odpověď ze zadání</th><th>Symbol (kde)</th></tr>
+<tr><td rowspan="2"><strong>belongs_to</strong></td><td>Do kolika tříd patří jeden žák?</td><td>právě do jedné (R3)</td><td><span class="sym">||</span> u class</td></tr>
+<tr><td>Kolik žáků má jedna třída?</td><td>může více; minimum zadání neurčuje</td><td><span class="sym">o&lt;</span> u pupil</td></tr>
+<tr><td rowspan="2"><strong>teaches</strong></td><td>Kolik předmětů má jedna třída?</td><td>jeden nebo více (R5)</td><td><span class="sym">|&lt;</span> u subject</td></tr>
+<tr><td>V kolika třídách se učí jeden předmět?</td><td>může ve více; nemusí v žádné</td><td><span class="sym">o&lt;</span> u class</td></tr>
+<tr><td rowspan="2"><strong>attends</strong></td><td>Kolik předmětů navštěvuje jeden žák?</td><td>více; minimum neurčeno</td><td><span class="sym">o&lt;</span> u subject</td></tr>
+<tr><td>Kolik žáků navštěvuje jeden předmět?</td><td>více; minimum neurčeno</td><td><span class="sym">o&lt;</span> u pupil</td></tr>
+</table></div>
+</div>
+<div class="callout yellow"><strong>A co otazník <code>?..N</code> z minula?</strong> Diagram neumí nakreslit „nevím“ — musíme zvolit kroužek, nebo čárku. Volíme <strong>kroužek (0)</strong>, protože je to <strong>slabší tvrzení</strong>: nic nevynucuje, a tedy nic nedomýšlí. Do dokumentace si poznamenáme otázku pro zadavatele: <em>„Musí mít každý žák alespoň jeden předmět?“</em></div>
+<div class="callout">Čáry <code>belongs_to</code> a <code>teaches</code> se lomí, aby se nic nekřížilo. Na tvaru čáry nezáleží — důležité je, mezi kterými entitami vede a jaké symboly má na koncích. Symbol ale vždy kreslíme <strong>těsně u obdélníku</strong>.</div>
+</section>
+
+<!-- ================================================================ STEP 3 -->
+<section id="step3">
+<div class="eyebrow">KROK 3 • ATRIBUTY</div><h2>Vepiš atributy do obdélníků</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox on">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox">4<br>OMEZENÍ</div></div>
+<p class="lead">Ke každé entitě dopíšeme její atributy a vyznačíme identifikátor (<span class="flag f-pk">PK</span>), povinné (<span class="flag f-nn">*</span>) a nepovinné (<span class="flag">o</span>) atributy. Atributy vztahu <code>attends</code> připojíme přerušovanou čarou přímo ke vztahu.</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 840 539" role="img" aria-label="ER diagram SCHOOL – attrs" xmlns="http://www.w3.org/2000/svg"><rect width="840" height="539" fill="#04252e"/>
+<rect x="30" y="228" width="230" height="142" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="30" y="228" width="230" height="34" fill="#ffd447" fill-opacity=".2"/>
+<line x1="30" y1="262" x2="260" y2="262" stroke="#ffd447" stroke-width="1.5"/>
+<text x="145.0" y="251" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">pupil</text>
+<text x="40" y="286" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="70" y="286" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="40" y="310" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="310" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="40" y="334" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="334" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<text x="40" y="358" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="358" font-size="13" class="mono" fill="#f7fbfc">birth_date</text>
+<rect x="305.0" y="40" width="230" height="118" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="305.0" y="40" width="230" height="34" fill="#49dfff" fill-opacity=".2"/>
+<line x1="305.0" y1="74" x2="535.0" y2="74" stroke="#49dfff" stroke-width="1.5"/>
+<text x="420.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">class</text>
+<text x="315.0" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="345.0" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="315.0" y="122" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="345.0" y="122" font-size="13" class="mono" fill="#f7fbfc">code</text>
+<text x="315.0" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="345.0" y="146" font-size="13" class="mono" fill="#f7fbfc">established_year</text>
+<rect x="580" y="228" width="230" height="118" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="580" y="228" width="230" height="34" fill="#a8d65c" fill-opacity=".2"/>
+<line x1="580" y1="262" x2="810" y2="262" stroke="#a8d65c" stroke-width="1.5"/>
+<text x="695.0" y="251" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">subject</text>
+<text x="590" y="286" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="620" y="286" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="590" y="310" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="620" y="310" font-size="13" class="mono" fill="#f7fbfc">code</text>
+<text x="590" y="334" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="620" y="334" font-size="13" class="mono" fill="#f7fbfc">name</text>
+<polyline points="305.0,57.0 145.0,57.0 145.0,228.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="295.0" y1="65.0" x2="295.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="287.0" y1="65.0" x2="287.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="145.0" y1="211.0" x2="135.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="145.0" y1="211.0" x2="155.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="145.0" y1="211.0" x2="145.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="145.0" cy="200.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="158.0" y="31.7" width="98.0" height="20.3" fill="#04252e"/>
+<text x="207.0" y="46.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">belongs_to</text>
+<polyline points="535.0,57.0 695.0,57.0 695.0,228.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="552.0" y1="57.0" x2="535.0" y2="47.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="552.0" y1="57.0" x2="535.0" y2="67.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="552.0" y1="57.0" x2="535.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="563.0" cy="57.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="695.0" y1="211.0" x2="685.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="695.0" y1="211.0" x2="705.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="695.0" y1="211.0" x2="695.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="687.0" y1="205.0" x2="703.0" y2="205.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="603.6" y="31.7" width="72.8" height="20.3" fill="#04252e"/>
+<text x="640.0" y="46.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">teaches</text>
+<polyline points="260.0,245.0 580.0,245.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="277.0" y1="245.0" x2="260.0" y2="235.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="277.0" y1="245.0" x2="260.0" y2="255.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="277.0" y1="245.0" x2="260.0" y2="245.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="288.0" cy="245.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="563.0" y1="245.0" x2="580.0" y2="255.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="563.0" y1="245.0" x2="580.0" y2="235.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="563.0" y1="245.0" x2="580.0" y2="245.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="552.0" cy="245.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="383.6" y="219.7" width="72.8" height="20.3" fill="#04252e"/>
+<text x="420.0" y="234.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">attends</text>
+<line x1="420.0" y1="248.0" x2="420.0" y2="415" stroke="#c99aff" stroke-width="1.5" stroke-dasharray="5 4"/>
+<rect x="270.0" y="415" width="300" height="94" fill="#062f3a" stroke="#c99aff" stroke-width="2" stroke-dasharray="6 4"/>
+<rect x="270.0" y="415" width="300" height="34" fill="#c99aff" fill-opacity=".2"/>
+<line x1="270.0" y1="449" x2="570.0" y2="449" stroke="#c99aff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="420.0" y="438" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">attends (atributy vztahu)</text>
+<text x="280.0" y="473" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="310.0" y="473" font-size="13" class="mono" fill="#f7fbfc">attendance_type</text>
+<text x="280.0" y="497" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="310.0" y="497" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">grade</text>
+</svg></div>
+<div class="grid3">
+<div class="card"><h4>Identifikátor</h4><p>Každá entita má <code>id</code> označené <span class="flag f-pk">PK</span>. Jeho hodnota jednoznačně určuje jeden výskyt.</p></div>
+<div class="card yellow"><h4>Povinné / nepovinné</h4><p>R7: známka „nemusí být ještě známá“ → <code>grade</code> je nepovinný (<span class="flag">o</span>). Vše ostatní zadání uvádí jako údaje, které škola eviduje → povinné.</p></div>
+<div class="card purple"><h4>Atributy vztahu</h4><p><code>attendance_type</code> a <code>grade</code> nepatří žákovi ani předmětu, ale <strong>dvojici žák–předmět</strong>. Proto visí na čáře <code>attends</code>.</p></div>
+</div>
+</div>
+<div class="callout green"><strong>Zatím bez cizích klíčů!</strong> V konceptuálním diagramu nepíšeme do <code>pupil</code> atribut <code>class_id</code>. Vazbu na třídu už vyjadřuje čára <code>belongs_to</code>. Cizí klíče jsou věcí logického (relačního) návrhu.</div>
+</section>
+
+<!-- ================================================================ DATATYPES -->
+<section id="datatypes">
+<div class="eyebrow">KROK 3B • DATOVÉ TYPY</div><h2>Co je datový typ a proč ho atribut potřebuje</h2>
+<p class="lead"><strong>Datový typ</strong> určuje, <strong>jaké hodnoty</strong> smí atribut obsahovat (doména), <strong>jak se uloží</strong> a <strong>co s nimi databáze umí dělat</strong>. Je to první a nejjednodušší pravidlo, které chrání data před nesmysly.</p>
+<div class="grid4">
+<div class="card"><span class="badge">1 • Kontrola</span><h4>Odmítne nesmysl</h4><p>Do sloupce typu <code>DATE</code> nevložíš „zítra“ ani <code>2010-02-31</code>.</p></div>
+<div class="card yellow"><span class="badge yellow">2 • Operace</span><h4>Umí počítat</h4><p>S <code>DATE</code> spočítáš věk, s číslem průměr známek. S textem ne.</p></div>
+<div class="card green"><span class="badge green">3 • Řazení</span><h4>Správné pořadí</h4><p>Čísla: 9 &lt; 10. Text: „10“ &lt; „9“, protože se porovnává znak po znaku.</p></div>
+<div class="card purple"><span class="badge purple">4 • Místo</span><h4>Úspora a výkon</h4><p><code>TINYINT</code> zabere 1 bajt, <code>BIGINT</code> 8 bajtů. U milionů řádků je to znát.</p></div>
+</div>
+
+<div class="grid2" style="margin-top:20px">
+<div>
+<h3>Špatně: všechno jako text</h3>
+<pre class="bad"><span class="c">-- birth_date VARCHAR(20)</span>
+'2010-05-14'
+'14.5.2010'      <span class="e">← jiný formát</span>
+'31.2.2010'      <span class="e">← neexistující den</span>
+'nevím'          <span class="e">← vůbec není datum</span></pre>
+</div>
+<div>
+<h3>Správně: vhodný typ</h3>
+<pre class="good"><span class="c">-- birth_date DATE</span>
+'2010-05-14'     <span class="ok">✓ uloženo</span>
+'2010-02-31'     <span class="e">✗ chyba: Incorrect date value</span>
+<span class="c">-- a navíc to umí počítat:</span>
+<span class="k">SELECT</span> TIMESTAMPDIFF(YEAR, birth_date, CURDATE())</pre>
+</div>
+</div>
+
+<div class="panel" style="margin-top:20px">
+<h3>Základní datové typy MySQL / MariaDB</h3>
+<div class="table-wrap"><table>
+<tr><th>Skupina</th><th>Typ</th><th>Rozsah / velikost</th><th>Kdy použít</th></tr>
+<tr><td rowspan="4"><strong>Celá čísla</strong></td><td><code>TINYINT</code></td><td class="num-col">1 B: −128 … 127</td><td>malá čísla: známka, počet</td></tr>
+<tr><td><code>SMALLINT</code></td><td class="num-col">2 B: −32 768 … 32 767</td><td>rok, menší číselníky</td></tr>
+<tr><td><code>INT</code></td><td class="num-col">4 B: ≈ ±2,1 miliardy</td><td>identifikátory, běžná čísla</td></tr>
+<tr><td><code>BIGINT</code></td><td class="num-col">8 B: ≈ ±9,2·10<sup>18</sup></td><td>obrovské počty záznamů</td></tr>
+<tr><td rowspan="2"><strong>Desetinná čísla</strong></td><td><code>DECIMAL(p,s)</code></td><td class="num-col">přesné</td><td>peníze, cokoli, kde nesmí vzniknout zaokrouhlovací chyba</td></tr>
+<tr><td><code>FLOAT</code>, <code>DOUBLE</code></td><td class="num-col">přibližné</td><td>měření, vědecké výpočty</td></tr>
+<tr><td rowspan="3"><strong>Text</strong></td><td><code>CHAR(n)</code></td><td class="num-col">pevná délka n</td><td>vždy stejně dlouhé kódy: <code>CZ</code>, <code>USD</code></td></tr>
+<tr><td><code>VARCHAR(n)</code></td><td class="num-col">proměnná délka, max n</td><td>jména, názvy, e-maily</td></tr>
+<tr><td><code>TEXT</code></td><td class="num-col">dlouhý text</td><td>popisy, poznámky</td></tr>
+<tr><td rowspan="3"><strong>Datum a čas</strong></td><td><code>DATE</code></td><td class="num-col">RRRR-MM-DD</td><td>datum narození</td></tr>
+<tr><td><code>DATETIME</code></td><td class="num-col">RRRR-MM-DD hh:mm:ss</td><td>okamžik události</td></tr>
+<tr><td><code>YEAR</code></td><td class="num-col">1901 … 2155</td><td>samotný rok</td></tr>
+<tr><td><strong>Výčet</strong></td><td><code>ENUM('a','b')</code></td><td class="num-col">jedna z vyjmenovaných hodnot</td><td>malá, neměnná množina: typ účasti</td></tr>
+<tr><td><strong>Logická hodnota</strong></td><td><code>BOOLEAN</code></td><td class="num-col">= TINYINT(1): 0 / 1</td><td>ano/ne příznaky</td></tr>
+</table></div>
+</div>
+
+<div class="panel" style="margin-top:20px">
+<h3>Volba typů pro SCHOOL — a proč</h3>
+<div class="table-wrap"><table>
+<tr><th>Atribut</th><th>Datový typ</th><th>Zdůvodnění</th></tr>
+<tr><td><code>*.id</code></td><td><code>INT UNSIGNED</code></td><td>celé kladné číslo, dost místa pro jakýkoli počet žáků</td></tr>
+<tr><td><code>class.code</code></td><td><code>VARCHAR(10)</code></td><td>„2.A“, „4.B“ — krátký text s tečkou, nepočítáme s ním</td></tr>
+<tr><td><code>class.established_year</code></td><td><code>SMALLINT UNSIGNED</code></td><td>rok je celé nezáporné číslo; rozsah hlídá CHECK (alternativa: <code>YEAR</code>)</td></tr>
+<tr><td><code>pupil.first_name</code>, <code>last_name</code></td><td><code>VARCHAR(50)</code></td><td>různě dlouhý text</td></tr>
+<tr><td><code>pupil.birth_date</code></td><td><code>DATE</code></td><td>kontrola platnosti data, výpočet věku, řazení</td></tr>
+<tr><td><code>subject.code</code></td><td><code>VARCHAR(10)</code></td><td>„MAT“, „CJL“, „INF“</td></tr>
+<tr><td><code>subject.name</code></td><td><code>VARCHAR(100)</code></td><td>„Programové vybavení“ může být delší</td></tr>
+<tr><td><code>attends.attendance_type</code></td><td><code>ENUM('compulsory','optional')</code></td><td>R6 zná právě dvě hodnoty: povinný / volitelný</td></tr>
+<tr><td><code>attends.grade</code></td><td><code>TINYINT UNSIGNED</code></td><td>známka 1–5: stačí 1 bajt a dá se z ní spočítat průměr</td></tr>
+</table></div>
+</div>
+<div class="callout yellow"><strong>Ne všechno, co vypadá jako číslo, je číslo.</strong> Telefon <code>+420 777 123 456</code>, PSČ <code>012 34</code> nebo rodné číslo ukládáme jako <strong>text</strong>: nepočítáme s nimi, mohou začínat nulou a obsahují znaky jako <code>+</code> či <code>/</code>. Pravidlo: <em>„Budu s tím počítat?“</em> Pokud ne, je to nejspíš text.</div>
+</section>
+
+<!-- ================================================================ CONSTRAINTS -->
+<section id="constraints">
+<div class="eyebrow">KROK 4 • INTEGRITNÍ OMEZENÍ</div><h2>Co je integritní omezení (constraint)</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox on">4<br>OMEZENÍ</div></div>
+<p class="lead"><strong>Integritní omezení</strong> je pravidlo, které musí data v databázi <strong>vždy</strong> splňovat. Databázový systém ho hlídá sám: každý <code>INSERT</code> nebo <code>UPDATE</code>, který by pravidlo porušil, <strong>odmítne chybou</strong>.</p>
+<div class="grid2">
+<div class="card yellow"><h3>Proč to nehlídat v aplikaci?</h3><ul>
+<li>Do jedné databáze často zapisuje více aplikací (web, mobil, import z Excelu).</li>
+<li>Aplikace může mít chybu, správce může data upravit ručně.</li>
+<li>Databáze je <strong>poslední linie obrany</strong> — co projde do ní, už tam zůstane.</li>
+</ul></div>
+<div class="card"><h3>Od pravidla k omezení</h3><p>V konceptuálním návrhu jsme pravidla formulovali slovy („známka musí být z povolené množiny“). Teď je převedeme na konkrétní <strong>mechanismus</strong>, který databáze umí vynutit: <code>NOT NULL</code>, <code>UNIQUE</code>, <code>CHECK</code>…</p></div>
+</div>
+<div class="panel" style="margin-top:20px">
+<h3>Druhy integritních omezení</h3>
+<div class="table-wrap"><table>
+<tr><th>Druh</th><th>Co hlídá</th><th>Mechanismus</th><th>V SCHOOL</th></tr>
+<tr><td><strong>Entitní integrita</strong></td><td>každý výskyt je jednoznačně identifikovatelný</td><td><code>PRIMARY KEY</code></td><td><code>pupil.id</code>, <code>class.id</code>, <code>subject.id</code></td></tr>
+<tr><td><strong>Doménová integrita</strong></td><td>hodnota atributu je z povolené množiny</td><td>datový typ, <code>NOT NULL</code>, <code>UNSIGNED</code>, <code>ENUM</code>, <code>CHECK</code></td><td><code>grade</code> 1–5, <code>birth_date</code> je datum</td></tr>
+<tr><td><strong>Jedinečnost</strong></td><td>hodnota se v celé tabulce neopakuje</td><td><code>UNIQUE</code></td><td><code>subject.code</code></td></tr>
+<tr><td><strong>Referenční integrita</strong></td><td>vazba ukazuje na existující výskyt</td><td><code>FOREIGN KEY</code></td><td>čáry vztahů → <em>příští téma</em></td></tr>
+<tr><td><strong>Business pravidla</strong></td><td>složitější pravidla reality</td><td>často jen trigger nebo aplikace</td><td>žák navštěvuje jen předměty své třídy</td></tr>
+</table></div>
+</div>
+<div class="callout purple"><strong>Ne vše jde nakreslit.</strong> Pravidlo „žák navštěvuje jen předměty, které má jeho třída“ propojuje tři vztahy a do E-R diagramu ho symbolem nezakreslíme. Zapíšeme ho jako <strong>textovou poznámku</strong> k diagramu.</div>
+</section>
+
+<!-- ================================================================ PROPS -->
+<section id="props">
+<div class="eyebrow">4B • VLASTNOSTI SLOUPCE</div><h2>NOT NULL, UNIQUE, UNSIGNED, ZEROFILL, AUTO_INCREMENT</h2>
+<p class="lead">Tyto vlastnosti nastavujeme u každého atributu. Pozor: ne všechny jsou integritní omezení v pravém smyslu — některé jen mění rozsah typu, generují hodnotu nebo upravují výpis.</p>
+
+<div class="panel">
+<div class="table-wrap"><table>
+<tr><th>Zkratka</th><th>Vlastnost</th><th>Co dělá</th><th>Je to omezení?</th></tr>
+<tr><td><span class="flag f-nn">NN</span></td><td><code>NOT NULL</code></td><td>hodnota musí být vyplněna</td><td class="yes">ano</td></tr>
+<tr><td><span class="flag f-uq">UQ</span></td><td><code>UNIQUE</code></td><td>hodnota se v tabulce nesmí opakovat</td><td class="yes">ano</td></tr>
+<tr><td><span class="flag f-pk">PK</span></td><td><code>PRIMARY KEY</code></td><td>identifikátor řádku = NOT NULL + UNIQUE</td><td class="yes">ano</td></tr>
+<tr><td><span class="flag f-chk">CHK</span></td><td><code>CHECK</code></td><td>hodnota musí splnit podmínku</td><td class="yes">ano</td></tr>
+<tr><td><span class="flag f-un">UN</span></td><td><code>UNSIGNED</code></td><td>číslo bez znaménka: jen ≥ 0</td><td class="half">modifikátor typu, zužuje doménu</td></tr>
+<tr><td><span class="flag f-ai">AI</span></td><td><code>AUTO_INCREMENT</code></td><td>databáze sama přidělí další číslo</td><td class="no">ne — generuje hodnotu</td></tr>
+<tr><td><span class="flag f-zf">ZF</span></td><td><code>ZEROFILL</code></td><td>doplní nuly zleva při výpisu</td><td class="no">ne — jen formát zobrazení</td></tr>
+</table></div>
+</div>
+
+<div class="prop" style="margin-top:20px">
+<h3><span class="flag f-nn">NN</span> NOT NULL — hodnota musí být vyplněna</h3>
+<div class="grid2">
+<div>
+<p><code>NULL</code> znamená „hodnota <strong>chybí</strong> nebo je <strong>neznámá</strong>“. <code>NULL</code> <strong>není</strong> nula ani prázdný řetězec <code>''</code>.</p>
+<p>Atribut s <code>NOT NULL</code> musí mít hodnotu vždy. V diagramu odpovídá povinnému atributu <span class="flag f-nn">*</span>.</p>
+<p class="muted">SCHOOL: <code>first_name</code> je <code>NOT NULL</code> (žák bez jména nedává smysl); <code>grade</code> <code>NULL</code> povoluje, protože podle R7 nemusí být ještě známá.</p>
+</div>
+<pre><span class="k">INSERT INTO</span> pupil (first_name, last_name, birth_date)
+<span class="k">VALUES</span> (<span class="n">NULL</span>, <span class="s">'Novák'</span>, <span class="s">'2010-05-14'</span>);
+
+<span class="e">ERROR 1048 (23000):
+Column 'first_name' cannot be null</span></pre>
+</div>
+</div>
+
+<div class="prop" style="border-color:var(--purple)">
+<h3><span class="flag f-uq">UQ</span> UNIQUE — hodnota se nesmí opakovat</h3>
+<div class="grid2">
+<div>
+<p>Žádné dva řádky nesmí mít v daném sloupci stejnou hodnotu. Tabulka může mít <strong>více</strong> UNIQUE sloupců, ale jen <strong>jeden</strong> primární klíč.</p>
+<p><code>NULL</code> se za duplicitu nepovažuje — nepovinný UNIQUE sloupec může mít <code>NULL</code> ve více řádcích.</p>
+<p class="muted">SCHOOL: <code>subject.code</code> je UNIQUE — dva předměty s kódem „MAT“ by byly nejednoznačné. Zadání to výslovně neříká, je to <strong>předpoklad</strong>, který ověříme se zadavatelem. Naopak <code>class.code</code> UNIQUE <strong>není</strong>: označení „2.A“ se v různých letech opakuje.</p>
+</div>
+<pre><span class="k">INSERT INTO</span> subject (code, name)
+<span class="k">VALUES</span> (<span class="s">'MAT'</span>, <span class="s">'Matematika'</span>);   <span class="ok">✓</span>
+
+<span class="k">INSERT INTO</span> subject (code, name)
+<span class="k">VALUES</span> (<span class="s">'MAT'</span>, <span class="s">'Matika'</span>);
+
+<span class="e">ERROR 1062 (23000):
+Duplicate entry 'MAT' for key 'code'</span></pre>
+</div>
+</div>
+
+<div class="prop">
+<h3><span class="flag f-un">UN</span> UNSIGNED — číslo bez znaménka</h3>
+<div class="grid2">
+<div>
+<p>Celočíselný typ normálně ukládá záporná i kladná čísla. <code>UNSIGNED</code> záporná čísla zakáže a celý rozsah <strong>posune</strong> do kladných — při stejné velikosti v bajtech.</p>
+<div class="table-wrap"><table>
+<tr><th>Typ</th><th>SIGNED (výchozí)</th><th>UNSIGNED</th></tr>
+<tr><td><code>TINYINT</code></td><td class="num-col">−128 … 127</td><td class="num-col">0 … 255</td></tr>
+<tr><td><code>SMALLINT</code></td><td class="num-col">−32 768 … 32 767</td><td class="num-col">0 … 65 535</td></tr>
+<tr><td><code>INT</code></td><td class="num-col">−2 147 483 648 … 2 147 483 647</td><td class="num-col">0 … 4 294 967 295</td></tr>
+</table></div>
+<p class="muted" style="margin-top:10px">Použij tam, kde záporná hodnota nedává smysl: <code>id</code>, rok, známka, počet kusů.</p>
+</div>
+<pre><span class="k">INSERT INTO</span> attends (pupil_id, subject_id,
+                     attendance_type, grade)
+<span class="k">VALUES</span> (1, 1, <span class="s">'compulsory'</span>, <span class="n">-1</span>);
+
+<span class="e">ERROR 1264 (22003):
+Out of range value for column 'grade'</span>
+
+<span class="c">-- Pozn.: chyba nastane v tzv. strict módu
+-- (výchozí v MySQL 8 i MariaDB 10.2.4+).
+-- Bez něj se hodnota tiše ořízne na 0
+-- a vznikne jen varování!</span></pre>
+</div>
+</div>
+
+<div class="prop">
+<h3><span class="flag f-zf">ZF</span> ZEROFILL — doplnění nul zleva</h3>
+<div class="grid2">
+<div>
+<p>Při výpisu doplní číslo nulami zleva na zadanou šířku. <strong>Uložená hodnota se nemění</strong> — v databázi je pořád 42, jen se zobrazí jako <code>000042</code>.</p>
+<ul>
+<li><code>ZEROFILL</code> automaticky přidá i <code>UNSIGNED</code>.</li>
+<li>Typické použití: evidenční čísla pevné délky (<code>000042</code>).</li>
+<li><strong>Pozor:</strong> v MySQL 8.0.17+ je <code>ZEROFILL</code> i šířka <code>INT(6)</code> označena jako <em>zastaralá</em> (deprecated). Doporučuje se formátovat až při výpisu funkcí <code>LPAD()</code>. MariaDB ji stále podporuje.</li>
+</ul>
+<p class="muted">V SCHOOL ji nepoužijeme — žádný atribut nevyžaduje pevný formát čísla. Ukazujeme ji, protože ji uvidíš jako políčko <span class="flag f-zf">ZF</span> ve Workbenchi.</p>
+</div>
+<pre><span class="k">CREATE TABLE</span> demo (
+  ev_number <span class="k">INT</span>(6) <span class="k">ZEROFILL</span>
+);
+<span class="k">INSERT INTO</span> demo <span class="k">VALUES</span> (42);
+<span class="k">SELECT</span> ev_number <span class="k">FROM</span> demo;
+<span class="ok">-- 000042</span>
+
+<span class="c">-- doporučená náhrada bez ZEROFILL:</span>
+<span class="k">SELECT</span> LPAD(ev_number, 6, <span class="s">'0'</span>) <span class="k">FROM</span> demo;</pre>
+</div>
+</div>
+
+<div class="prop" style="border-color:var(--yellow)">
+<h3><span class="flag f-ai">AI</span> AUTO_INCREMENT — automatické číslování</h3>
+<div class="grid2">
+<div>
+<p>Když při vkládání hodnotu nezadáme, databáze sama přidělí <strong>další číslo v řadě</strong> (1, 2, 3…). Hodí se pro <strong>umělý identifikátor</strong> <code>id</code>, který nemá žádný význam v realitě, jen jednoznačně určuje řádek.</p>
+<ul>
+<li>Jen <strong>jeden</strong> sloupec v tabulce, celočíselný, musí být klíč (obvykle PK).</li>
+<li>Obvykle v kombinaci <code>INT UNSIGNED NOT NULL AUTO_INCREMENT</code>.</li>
+<li>Smazaná čísla se <strong>znovu nepoužijí</strong> — mezery v řadě (1, 2, 5, 6) jsou normální, ne chyba.</li>
+<li>Číslo posledního vloženého řádku vrátí <code>LAST_INSERT_ID()</code>.</li>
+</ul>
+</div>
+<pre><span class="k">INSERT INTO</span> class (code, established_year)
+<span class="k">VALUES</span> (<span class="s">'1.A'</span>, 2026);      <span class="c">-- id neuvádíme</span>
+<span class="k">INSERT INTO</span> class (code, established_year)
+<span class="k">VALUES</span> (<span class="s">'1.B'</span>, 2026);
+
+<span class="k">SELECT</span> id, code <span class="k">FROM</span> class;
+<span class="ok">-- 1 | 1.A
+-- 2 | 1.B</span>
+<span class="k">SELECT</span> LAST_INSERT_ID();   <span class="ok">-- 2</span></pre>
+</div>
+</div>
+
+<div class="callout">Je tu ještě jedna užitečná vlastnost: <code>DEFAULT</code> — výchozí hodnota, která se použije, když ji při vkládání nezadáme (např. <code>DEFAULT 'compulsory'</code>). Zadání SCHOOL žádnou výchozí hodnotu neuvádí, proto ji v modelu nepoužijeme.</div>
+</section>
+
+<!-- ================================================================ CHECK -->
+<section id="check">
+<div class="eyebrow">4C • CHECK</div><h2>CHECK: vlastní podmínka pro hodnotu</h2>
+<p class="lead">Datový typ říká „je to číslo“. <code>UNSIGNED</code> říká „není záporné“. Ale „známka je 1 až 5“ už neřekne žádný typ — na to máme <strong>CHECK</strong>: libovolnou podmínku, kterou musí každý řádek splnit.</p>
+<div class="grid2">
+<div>
+<h3>Zápis</h3>
+<pre><span class="k">CONSTRAINT</span> <span class="n">chk_attends_grade</span>
+  <span class="k">CHECK</span> (grade <span class="k">BETWEEN</span> 1 <span class="k">AND</span> 5)
+
+<span class="k">CONSTRAINT</span> <span class="n">chk_class_year</span>
+  <span class="k">CHECK</span> (established_year <span class="k">BETWEEN</span> 1900 <span class="k">AND</span> 2100)
+
+<span class="c">-- podmínka může porovnat i více sloupců řádku:</span>
+<span class="k">CHECK</span> (end_date &gt;= start_date)
+<span class="k">CHECK</span> (email <span class="k">LIKE</span> <span class="s">'%_@_%'</span>)</pre>
+<p class="muted">Pojmenované omezení (<code>chk_…</code>) se objeví v chybové hlášce, takže hned víš, které pravidlo bylo porušeno.</p>
+</div>
+<div>
+<h3>Co se stane při porušení</h3>
+<pre><span class="k">INSERT INTO</span> attends (pupil_id, subject_id,
+                     attendance_type, grade)
+<span class="k">VALUES</span> (1, 1, <span class="s">'compulsory'</span>, <span class="n">7</span>);
+
+<span class="c">-- MySQL 8:</span>
+<span class="e">ERROR 3819 (HY000): Check constraint
+'chk_attends_grade' is violated.</span>
+<span class="c">-- MariaDB:</span>
+<span class="e">ERROR 4025 (23000): CONSTRAINT
+`chk_attends_grade` failed for `school`.`attends`</span></pre>
+<pre><span class="k">VALUES</span> (1, 1, <span class="s">'compulsory'</span>, <span class="n">NULL</span>);   <span class="ok">✓ projde</span></pre>
+</div>
+</div>
+<div class="grid3" style="margin-top:18px">
+<div class="card green"><h4>NULL projde</h4><p>Podmínka s <code>NULL</code> nevyjde „nepravda“, ale „neznámo“ — a to CHECK propustí. Proto nepovinná známka (<code>NULL</code>) projde. Pokud hodnota chybět nesmí, přidej <code>NOT NULL</code>.</p></div>
+<div class="card yellow"><h4>Verze</h4><p>CHECK se skutečně vynucuje od <strong>MySQL 8.0.16</strong> a <strong>MariaDB 10.2.1</strong>. Starší verze zápis přijaly, ale pravidlo tiše ignorovaly!</p></div>
+<div class="card red"><h4>Co CHECK neumí</h4><p>Nesmí obsahovat poddotaz ani sahat do jiné tabulky. V MySQL nesmí používat ani funkce s proměnným výsledkem jako <code>CURDATE()</code> či <code>NOW()</code>.</p></div>
+</div>
+<div class="callout purple"><strong>Proto business pravidlo SCHOOL CHECKem nevyřešíme:</strong> „žák navštěvuje jen předměty své třídy“ vyžaduje nahlédnout do tabulek <code>pupil</code> a <code>teaches</code>. CHECK vidí jen hodnoty jednoho řádku. Takové pravidlo se řeší triggerem nebo v aplikaci.</div>
+</section>
+
+<!-- ================================================================ STEP 4 -->
+<section id="step4">
+<div class="eyebrow">KROK 4 • VÝSLEDNÝ E-R DIAGRAM</div><h2>Doplň datové typy a omezení</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox on">4<br>OMEZENÍ</div></div>
+<p class="lead">Do obdélníků přidáme ke každému atributu datový typ a zkratky omezení. Pravidla, která symbolem zakreslit nejde, připíšeme pod diagram.</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 1080 539" role="img" aria-label="ER diagram SCHOOL – full" xmlns="http://www.w3.org/2000/svg"><rect width="1080" height="539" fill="#04252e"/>
+<rect x="30" y="228" width="350" height="142" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="30" y="228" width="350" height="34" fill="#ffd447" fill-opacity=".2"/>
+<line x1="30" y1="262" x2="380" y2="262" stroke="#ffd447" stroke-width="1.5"/>
+<text x="205.0" y="251" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">pupil</text>
+<text x="40" y="286" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="70" y="286" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="220" y="286" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="370" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="348" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="326" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="40" y="310" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="310" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="220" y="310" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="370" y="310" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="40" y="334" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="334" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<text x="220" y="334" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="370" y="334" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="40" y="358" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="358" font-size="13" class="mono" fill="#f7fbfc">birth_date</text>
+<text x="220" y="358" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="370" y="358" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<rect x="365.0" y="40" width="350" height="118" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="365.0" y="40" width="350" height="34" fill="#49dfff" fill-opacity=".2"/>
+<line x1="365.0" y1="74" x2="715.0" y2="74" stroke="#49dfff" stroke-width="1.5"/>
+<text x="540.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">class</text>
+<text x="375.0" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="405.0" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="555.0" y="98" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="705.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="683.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="661.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="375.0" y="122" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="405.0" y="122" font-size="13" class="mono" fill="#f7fbfc">code</text>
+<text x="555.0" y="122" font-size="12" class="mono" fill="#49dfff">VARCHAR(10)</text>
+<text x="705.0" y="122" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="375.0" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="405.0" y="146" font-size="13" class="mono" fill="#f7fbfc">established_year</text>
+<text x="555.0" y="146" font-size="12" class="mono" fill="#49dfff">SMALLINT</text>
+<text x="705.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="676.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="654.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<rect x="700" y="228" width="350" height="118" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="700" y="228" width="350" height="34" fill="#a8d65c" fill-opacity=".2"/>
+<line x1="700" y1="262" x2="1050" y2="262" stroke="#a8d65c" stroke-width="1.5"/>
+<text x="875.0" y="251" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">subject</text>
+<text x="710" y="286" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="740" y="286" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="890" y="286" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="1040" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="1018" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="996" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="710" y="310" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="740" y="310" font-size="13" class="mono" fill="#f7fbfc">code</text>
+<text x="890" y="310" font-size="12" class="mono" fill="#49dfff">VARCHAR(10)</text>
+<text x="1040" y="310" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#c99aff">UQ</text>
+<text x="1018" y="310" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="710" y="334" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="740" y="334" font-size="13" class="mono" fill="#f7fbfc">name</text>
+<text x="890" y="334" font-size="12" class="mono" fill="#49dfff">VARCHAR(100)</text>
+<text x="1040" y="334" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<polyline points="365.0,57.0 205.0,57.0 205.0,228.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="355.0" y1="65.0" x2="355.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="347.0" y1="65.0" x2="347.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="205.0" y1="211.0" x2="195.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="205.0" y1="211.0" x2="215.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="205.0" y1="211.0" x2="205.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="205.0" cy="200.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="218.0" y="31.7" width="98.0" height="20.3" fill="#04252e"/>
+<text x="267.0" y="46.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">belongs_to</text>
+<polyline points="715.0,57.0 875.0,57.0 875.0,228.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="732.0" y1="57.0" x2="715.0" y2="47.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="732.0" y1="57.0" x2="715.0" y2="67.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="732.0" y1="57.0" x2="715.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="743.0" cy="57.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="875.0" y1="211.0" x2="865.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="875.0" y1="211.0" x2="885.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="875.0" y1="211.0" x2="875.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="867.0" y1="205.0" x2="883.0" y2="205.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="783.6" y="31.7" width="72.8" height="20.3" fill="#04252e"/>
+<text x="820.0" y="46.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">teaches</text>
+<polyline points="380.0,245.0 700.0,245.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="397.0" y1="245.0" x2="380.0" y2="235.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="397.0" y1="245.0" x2="380.0" y2="255.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="397.0" y1="245.0" x2="380.0" y2="245.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="408.0" cy="245.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="683.0" y1="245.0" x2="700.0" y2="255.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="683.0" y1="245.0" x2="700.0" y2="235.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="683.0" y1="245.0" x2="700.0" y2="245.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="672.0" cy="245.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="503.6" y="219.7" width="72.8" height="20.3" fill="#04252e"/>
+<text x="540.0" y="234.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">attends</text>
+<line x1="540.0" y1="248.0" x2="540.0" y2="415" stroke="#c99aff" stroke-width="1.5" stroke-dasharray="5 4"/>
+<rect x="305.0" y="415" width="470" height="94" fill="#062f3a" stroke="#c99aff" stroke-width="2" stroke-dasharray="6 4"/>
+<rect x="305.0" y="415" width="470" height="34" fill="#c99aff" fill-opacity=".2"/>
+<line x1="305.0" y1="449" x2="775.0" y2="449" stroke="#c99aff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="540.0" y="438" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">attends (atributy vztahu)</text>
+<text x="315.0" y="473" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="345.0" y="473" font-size="13" class="mono" fill="#f7fbfc">attendance_type</text>
+<text x="495.0" y="473" font-size="12" class="mono" fill="#49dfff">ENUM('compulsory','optional')</text>
+<text x="765.0" y="473" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="315.0" y="497" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="345.0" y="497" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">grade</text>
+<text x="495.0" y="497" font-size="12" class="mono" fill="#49dfff">TINYINT</text>
+<text x="765.0" y="497" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="736.0" y="497" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+</svg></div>
+<p class="diagram-cap">Legenda: <span class="flag f-pk">PK</span> identifikátor · <span class="flag f-nn">*</span> povinný · <span class="flag">o</span> nepovinný · <span class="flag f-nn">NN</span> NOT NULL · <span class="flag f-uq">UQ</span> UNIQUE · <span class="flag f-un">UN</span> UNSIGNED · <span class="flag f-ai">AI</span> AUTO_INCREMENT · <span class="flag f-chk">CHK</span> CHECK</p>
+<div class="grid2">
+<div class="card red"><h4>Podmínky CHECK</h4><p><code>chk_class_year</code>: <code>established_year BETWEEN 1900 AND 2100</code><br><code>chk_attends_grade</code>: <code>grade BETWEEN 1 AND 5</code></p></div>
+<div class="card purple"><h4>Textová omezení</h4><p><strong>B1</strong> (R6): žák navštěvuje pouze předměty, které jsou v učebním plánu jeho třídy.<br><strong>Otázka pro zadavatele:</strong> musí mít žák alespoň jeden předmět?</p></div>
+</div>
+</div>
+<div class="panel" style="margin-top:20px">
+<h3>Kontrola: každý symbol má svůj důvod</h3>
+<div class="table-wrap"><table>
+<tr><th>Prvek diagramu</th><th>Důvod</th></tr>
+<tr><td><span class="sym">||</span> u class na <code>belongs_to</code></td><td>R3: žák je právě v jedné třídě</td></tr>
+<tr><td><span class="sym">|&lt;</span> u subject na <code>teaches</code></td><td>R5: třída má jeden nebo více předmětů</td></tr>
+<tr><td><code>id</code> <span class="flag f-pk">PK</span> <span class="flag f-ai">AI</span> <span class="flag f-un">UN</span></td><td>R1, R2, R4: jednoznačný identifikátor; čísluje ho databáze; záporný být nemůže</td></tr>
+<tr><td><code>subject.code</code> <span class="flag f-uq">UQ</span></td><td>předpoklad: kód předmětu je jednoznačný (ověřit)</td></tr>
+<tr><td><code>grade</code> bez <span class="flag f-nn">NN</span>, s <span class="flag f-chk">CHK</span></td><td>R7: známka nemusí být známa; pokud je, musí být 1–5</td></tr>
+<tr><td><code>attendance_type</code> <code>ENUM</code> <span class="flag f-nn">NN</span></td><td>R6: vždy je známo, zda je předmět povinný, nebo volitelný</td></tr>
+</table></div>
+</div>
+</section>
+
+<!-- ================================================================ M:N -->
+<section id="mn">
+<div class="eyebrow">VZTAH M:N S ATRIBUTY</div><h2><code style="font-size:.8em">attends</code> dvěma způsoby</h2>
+<p class="lead">Vztah M:N, který nese vlastní atributy, můžeme zakreslit dvěma rovnocennými způsoby. Oba říkají totéž — liší se tím, jak blízko mají k budoucím tabulkám.</p>
+<div class="grid2">
+<div class="card purple"><span class="badge purple">Způsob A • konceptuální</span><h3>Čára M:N + atributy vztahu</h3><p>Jedna čára <span class="sym">o&lt;</span>—<span class="sym">&gt;o</span> a přerušovaný rámeček s atributy, který visí na čáře. Přesně odpovídá analýze: <code>attends</code> je <strong>vztah</strong>, který má vlastnosti. (Tak jsme ho kreslili v krocích 2–4.)</p></div>
+<div class="card yellow"><span class="badge yellow">Způsob B • rozložení</span><h3>Asociační entita</h3><p>Vztah M:N „povýšíme“ na samostatný obdélník <code>attends</code> a nahradíme ho dvěma vztahy 1:N. Identifikátorem je <strong>dvojice</strong> <code>pupil_id</code> + <code>subject_id</code>.</p></div>
+</div>
+<div class="panel" style="margin-top:20px">
+<h3>Způsob B: attends jako asociační entita</h3>
+<div class="diagram"><svg class="erd" viewBox="0 0 1080 602" role="img" aria-label="ER diagram SCHOOL – attends jako asociační entita" xmlns="http://www.w3.org/2000/svg"><rect width="1080" height="602" fill="#04252e"/>
+<rect x="30" y="228" width="350" height="142" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="30" y="228" width="350" height="34" fill="#ffd447" fill-opacity=".2"/>
+<line x1="30" y1="262" x2="380" y2="262" stroke="#ffd447" stroke-width="1.5"/>
+<text x="205.0" y="251" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">pupil</text>
+<text x="40" y="286" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="70" y="286" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="220" y="286" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="370" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="348" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="326" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="40" y="310" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="310" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="220" y="310" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="370" y="310" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="40" y="334" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="334" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<text x="220" y="334" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="370" y="334" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="40" y="358" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="358" font-size="13" class="mono" fill="#f7fbfc">birth_date</text>
+<text x="220" y="358" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="370" y="358" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<rect x="365.0" y="40" width="350" height="118" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="365.0" y="40" width="350" height="34" fill="#49dfff" fill-opacity=".2"/>
+<line x1="365.0" y1="74" x2="715.0" y2="74" stroke="#49dfff" stroke-width="1.5"/>
+<text x="540.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">class</text>
+<text x="375.0" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="405.0" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="555.0" y="98" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="705.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="683.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="661.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="375.0" y="122" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="405.0" y="122" font-size="13" class="mono" fill="#f7fbfc">code</text>
+<text x="555.0" y="122" font-size="12" class="mono" fill="#49dfff">VARCHAR(10)</text>
+<text x="705.0" y="122" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="375.0" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="405.0" y="146" font-size="13" class="mono" fill="#f7fbfc">established_year</text>
+<text x="555.0" y="146" font-size="12" class="mono" fill="#49dfff">SMALLINT</text>
+<text x="705.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="676.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="654.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<rect x="700" y="228" width="350" height="118" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="700" y="228" width="350" height="34" fill="#a8d65c" fill-opacity=".2"/>
+<line x1="700" y1="262" x2="1050" y2="262" stroke="#a8d65c" stroke-width="1.5"/>
+<text x="875.0" y="251" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">subject</text>
+<text x="710" y="286" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="740" y="286" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="890" y="286" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="1040" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="1018" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="996" y="286" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="710" y="310" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="740" y="310" font-size="13" class="mono" fill="#f7fbfc">code</text>
+<text x="890" y="310" font-size="12" class="mono" fill="#49dfff">VARCHAR(10)</text>
+<text x="1040" y="310" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#c99aff">UQ</text>
+<text x="1018" y="310" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="710" y="334" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="740" y="334" font-size="13" class="mono" fill="#f7fbfc">name</text>
+<text x="890" y="334" font-size="12" class="mono" fill="#49dfff">VARCHAR(100)</text>
+<text x="1040" y="334" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<polyline points="365.0,57.0 205.0,57.0 205.0,228.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="355.0" y1="65.0" x2="355.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="347.0" y1="65.0" x2="347.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="205.0" y1="211.0" x2="195.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="205.0" y1="211.0" x2="215.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="205.0" y1="211.0" x2="205.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="205.0" cy="200.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="218.0" y="31.7" width="98.0" height="20.3" fill="#04252e"/>
+<text x="267.0" y="46.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">belongs_to</text>
+<polyline points="715.0,57.0 875.0,57.0 875.0,228.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="732.0" y1="57.0" x2="715.0" y2="47.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="732.0" y1="57.0" x2="715.0" y2="67.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="732.0" y1="57.0" x2="715.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="743.0" cy="57.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="875.0" y1="211.0" x2="865.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="875.0" y1="211.0" x2="885.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="875.0" y1="211.0" x2="875.0" y2="228.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="867.0" y1="205.0" x2="883.0" y2="205.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="783.6" y="31.7" width="72.8" height="20.3" fill="#04252e"/>
+<text x="820.0" y="46.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">teaches</text>
+<rect x="300.0" y="430" width="480" height="142" fill="#062f3a" stroke="#c99aff" stroke-width="2"/>
+<rect x="300.0" y="430" width="480" height="34" fill="#c99aff" fill-opacity=".2"/>
+<line x1="300.0" y1="464" x2="780.0" y2="464" stroke="#c99aff" stroke-width="1.5"/>
+<text x="540.0" y="453" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">attends</text>
+<text x="310.0" y="488" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="340.0" y="488" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">pupil_id</text>
+<text x="490.0" y="488" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="770.0" y="488" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="748.0" y="488" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="726.0" y="488" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">FK</text>
+<text x="310.0" y="512" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="340.0" y="512" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">subject_id</text>
+<text x="490.0" y="512" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="770.0" y="512" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="748.0" y="512" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="726.0" y="512" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">FK</text>
+<text x="310.0" y="536" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="340.0" y="536" font-size="13" class="mono" fill="#f7fbfc">attendance_type</text>
+<text x="490.0" y="536" font-size="12" class="mono" fill="#49dfff">ENUM('compulsory','optional')</text>
+<text x="770.0" y="536" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="310.0" y="560" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="340.0" y="560" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">grade</text>
+<text x="490.0" y="560" font-size="12" class="mono" fill="#49dfff">TINYINT</text>
+<text x="770.0" y="560" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="741.0" y="560" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<polyline points="135.0,370.0 135.0,447.0 300.0,447.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="143.0" y1="380.0" x2="127.0" y2="380.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="143.0" y1="388.0" x2="127.0" y2="388.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="283.0" y1="447.0" x2="300.0" y2="457.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="283.0" y1="447.0" x2="300.0" y2="437.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="283.0" y1="447.0" x2="300.0" y2="447.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="272.0" cy="447.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="115.4" y="399.2" width="39.2" height="20.3" fill="#04252e"/>
+<text x="135.0" y="414.2" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">has</text>
+<polyline points="945.0,346.0 945.0,447.0 780.0,447.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="953.0" y1="356.0" x2="937.0" y2="356.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="953.0" y1="364.0" x2="937.0" y2="364.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="797.0" y1="447.0" x2="780.0" y2="437.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="797.0" y1="447.0" x2="780.0" y2="457.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="797.0" y1="447.0" x2="780.0" y2="447.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="808.0" cy="447.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="925.4" y="387.2" width="39.2" height="20.3" fill="#04252e"/>
+<text x="945.0" y="402.2" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">has</text>
+</svg></div>
+<div class="grid2">
+<div class="card"><h4>Jak se čte</h4><p>Jeden <strong>pupil</strong> má <span class="sym">o&lt;</span> 0..N záznamů <code>attends</code>. Jeden záznam <code>attends</code> patří <span class="sym">||</span> právě jednomu žákovi a právě jednomu předmětu.</p></div>
+<div class="card yellow"><h4>Proč PK ze dvou atributů</h4><p>Jeden žák může mít jeden předmět jen jednou. Dvojice (<code>pupil_id</code>, <code>subject_id</code>) se proto nesmí opakovat — je to <strong>složený identifikátor</strong>. <span class="flag f-fk">FK</span> značí odkaz na jinou entitu.</p></div>
+</div>
+</div>
+<div class="callout yellow"><strong>Kdy který?</strong> Způsob A je čistší pro konceptuální návrh a diskusi se zadavatelem. Způsob B je krok k logickému návrhu: relační databáze vztah M:N přímo neumí, každá čára M:N se v ní stane samostatnou tabulkou. (I <code>teaches</code> se v SQL stane tabulkou, i když žádné vlastní atributy nemá.)</div>
+</section>
+
+<!-- ================================================================ SQL -->
+<section id="sql">
+<div class="eyebrow">NÁHLED • KAM TO SMĚŘUJE</div><h2>Jak se diagram promítne do SQL</h2>
+<p class="lead">Tohle už je logický a fyzický návrh — podrobně příště. Ale je dobré vidět, že každá zkratka v obdélníku má v SQL svůj přesný protějšek.</p>
+<pre><span class="k">CREATE TABLE</span> class (
+  id               <span class="k">INT UNSIGNED NOT NULL AUTO_INCREMENT</span>,      <span class="c">-- PK UN NN AI</span>
+  code             <span class="k">VARCHAR</span>(10) <span class="k">NOT NULL</span>,                   <span class="c">-- NN</span>
+  established_year <span class="k">SMALLINT UNSIGNED NOT NULL</span>,            <span class="c">-- UN NN CHK</span>
+  <span class="k">PRIMARY KEY</span> (id),
+  <span class="k">CONSTRAINT</span> <span class="n">chk_class_year</span> <span class="k">CHECK</span> (established_year <span class="k">BETWEEN</span> 1900 <span class="k">AND</span> 2100)
+) <span class="k">ENGINE</span>=InnoDB;
+
+<span class="k">CREATE TABLE</span> subject (
+  id    <span class="k">INT UNSIGNED NOT NULL AUTO_INCREMENT</span>,
+  code  <span class="k">VARCHAR</span>(10) <span class="k">NOT NULL UNIQUE</span>,                        <span class="c">-- NN UQ</span>
+  name  <span class="k">VARCHAR</span>(100) <span class="k">NOT NULL</span>,
+  <span class="k">PRIMARY KEY</span> (id)
+) <span class="k">ENGINE</span>=InnoDB;
+
+<span class="k">CREATE TABLE</span> pupil (
+  id         <span class="k">INT UNSIGNED NOT NULL AUTO_INCREMENT</span>,
+  first_name <span class="k">VARCHAR</span>(50) <span class="k">NOT NULL</span>,
+  last_name  <span class="k">VARCHAR</span>(50) <span class="k">NOT NULL</span>,
+  birth_date <span class="k">DATE NOT NULL</span>,
+  class_id   <span class="k">INT UNSIGNED NOT NULL</span>,          <span class="c">-- čára belongs_to (|| u class) → cizí klíč, NOT NULL</span>
+  <span class="k">PRIMARY KEY</span> (id),
+  <span class="k">CONSTRAINT</span> <span class="n">fk_pupil_class</span> <span class="k">FOREIGN KEY</span> (class_id) <span class="k">REFERENCES</span> class(id)
+) <span class="k">ENGINE</span>=InnoDB;
+
+<span class="k">CREATE TABLE</span> teaches (                             <span class="c">-- M:N bez atributů → také tabulka</span>
+  class_id   <span class="k">INT UNSIGNED NOT NULL</span>,
+  subject_id <span class="k">INT UNSIGNED NOT NULL</span>,
+  <span class="k">PRIMARY KEY</span> (class_id, subject_id),
+  <span class="k">CONSTRAINT</span> <span class="n">fk_teaches_class</span>   <span class="k">FOREIGN KEY</span> (class_id)   <span class="k">REFERENCES</span> class(id),
+  <span class="k">CONSTRAINT</span> <span class="n">fk_teaches_subject</span> <span class="k">FOREIGN KEY</span> (subject_id) <span class="k">REFERENCES</span> subject(id)
+) <span class="k">ENGINE</span>=InnoDB;
+
+<span class="k">CREATE TABLE</span> attends (                             <span class="c">-- asociační entita (způsob B)</span>
+  pupil_id        <span class="k">INT UNSIGNED NOT NULL</span>,
+  subject_id      <span class="k">INT UNSIGNED NOT NULL</span>,
+  attendance_type <span class="k">ENUM</span>(<span class="s">'compulsory'</span>, <span class="s">'optional'</span>) <span class="k">NOT NULL</span>,
+  grade           <span class="k">TINYINT UNSIGNED NULL</span>,              <span class="c">-- nepovinný (R7)</span>
+  <span class="k">PRIMARY KEY</span> (pupil_id, subject_id),
+  <span class="k">CONSTRAINT</span> <span class="n">fk_attends_pupil</span>   <span class="k">FOREIGN KEY</span> (pupil_id)   <span class="k">REFERENCES</span> pupil(id),
+  <span class="k">CONSTRAINT</span> <span class="n">fk_attends_subject</span> <span class="k">FOREIGN KEY</span> (subject_id) <span class="k">REFERENCES</span> subject(id),
+  <span class="k">CONSTRAINT</span> <span class="n">chk_attends_grade</span>  <span class="k">CHECK</span> (grade <span class="k">BETWEEN</span> 1 <span class="k">AND</span> 5)
+) <span class="k">ENGINE</span>=InnoDB;</pre>
+<div class="callout">Všimni si, kde se v SQL objevil <code>class_id</code>: v diagramu ho nemáme, je to <strong>překlad čáry</strong> <code>belongs_to</code>. Jak přesně se čáry překládají na cizí klíče a tabulky, je téma <strong>logického návrhu</strong>.</div>
+</section>
+
+<!-- ================================================================ MISTAKES -->
+<section id="mistakes">
+<div class="eyebrow">POZOR NA TO</div><h2>Časté chyby v E-R diagramu</h2>
+<div class="grid3">
+<div class="card red"><h4>Symbol na špatném konci</h4><p>„Žák patří do jedné třídy“ → <span class="sym">||</span> patří <strong>k class</strong>, ne k pupil. Ověř větou.</p></div>
+<div class="card red"><h4>Seznam místo vztahu</h4><p>Atribut <code>subjects</code> v <code>pupil</code> s hodnotou „MAT, CJL, INF“. Více hodnot = vztah k samostatné entitě.</p></div>
+<div class="card red"><h4>Cizí klíče v konceptu</h4><p><code>class_id</code> v <code>pupil</code> a zároveň čára <code>belongs_to</code> = stejná informace dvakrát.</p></div>
+<div class="card yellow"><h4>Domyšlené minimum</h4><p>Čárka (povinnost) tam, kde zadání nic neříká. Raději kroužek a otázka pro zadavatele.</p></div>
+<div class="card yellow"><h4>Všechno jako VARCHAR</h4><p>Datum, známka i rok jako text → databáze nic nezkontroluje, špatně řadí a nepočítá.</p></div>
+<div class="card yellow"><h4>Telefon jako INT</h4><p>Ztratí úvodní nulu a „+“. Co se nepočítá, je text.</p></div>
+<div class="card"><h4>Míchání notací</h4><p>Kosočtverec z Chenovy notace a k tomu vraní stopy. Vyber jednu notaci a drž se jí.</p></div>
+<div class="card"><h4>Názvy v množném čísle</h4><p><code>Pupils</code>, <code>Třídy</code> → správně <code>pupil</code>, <code>class</code>: obdélník je <strong>typ</strong>, ne seznam.</p></div>
+<div class="card"><h4>Vztah bez slovesa</h4><p>Čára bez názvu nic neříká. Sloveso musí tvořit větu: <em>pupil belongs_to class</em>.</p></div>
+</div>
+</section>
+
+<!-- ================================================================ TASK -->
+<section id="task">
+<div class="eyebrow">PROCVIČENÍ</div><h2>Úkol: rozšiř SCHOOL o učitele</h2>
+<p class="lead">Zadavatel doplnil tři požadavky. Postupuj ve čtyřech krocích a výsledný E-R diagram nakresli (na papír, v draw.io nebo MySQL Workbench).</p>
+<div class="panel">
+<div class="table-wrap"><table>
+<tr><th>Č.</th><th>Nový požadavek</th></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R9</strong></td><td>Škola eviduje <strong>učitele</strong>. Každý učitel má jednoznačný identifikátor, jméno, příjmení a školní e-mail. Dva učitelé nemohou mít stejný e-mail.</td></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R10</strong></td><td>Každá třída má <strong>právě jednoho třídního učitele</strong>. Učitel může být třídním učitelem <strong>nejvýše jedné</strong> třídy.</td></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R11</strong></td><td>Učitel může mít <strong>aprobaci</strong> pro více předmětů. Jeden předmět může vyučovat více aprobovaných učitelů.</td></tr>
+</table></div>
+<div class="step-list" style="margin-top:20px">
+<div class="step"><div class="num">1</div><div><h4>Entitní typy</h4><p class="muted">Který nový obdélník přibude a jak se bude jmenovat?</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Vztahové typy</h4><p class="muted">Které nové čáry přibudou? Jaké symboly budou na každém konci? Ověř je kontrolní větou.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Atributy a datové typy</h4><p class="muted">Jaké atributy má učitel? Které jsou povinné? Jaký datový typ zvolíš pro e-mail?</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Integritní omezení</h4><p class="muted">Které zkratky (NN, UQ, UN, AI, CHK) dopíšeš? Napiš alespoň jednu podmínku CHECK.</p></div></div>
+</div>
+<details>
+<summary>Zobrazit řešení</summary>
+<div class="diagram"><svg class="erd" viewBox="0 0 920 632" role="img" aria-label="Řešení úkolu – SCHOOL s učitelem" xmlns="http://www.w3.org/2000/svg"><rect width="920" height="632" fill="#04252e"/>
+<rect x="30" y="460" width="230" height="142" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="30" y="460" width="230" height="34" fill="#ffd447" fill-opacity=".2"/>
+<line x1="30" y1="494" x2="260" y2="494" stroke="#ffd447" stroke-width="1.5"/>
+<text x="145.0" y="483" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">pupil</text>
+<text x="40" y="518" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="70" y="518" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="40" y="542" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="542" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="40" y="566" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="566" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<text x="40" y="590" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="590" font-size="13" class="mono" fill="#f7fbfc">birth_date</text>
+<rect x="305.0" y="272" width="230" height="118" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="305.0" y="272" width="230" height="34" fill="#49dfff" fill-opacity=".2"/>
+<line x1="305.0" y1="306" x2="535.0" y2="306" stroke="#49dfff" stroke-width="1.5"/>
+<text x="420.0" y="295" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">class</text>
+<text x="315.0" y="330" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="345.0" y="330" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="315.0" y="354" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="345.0" y="354" font-size="13" class="mono" fill="#f7fbfc">code</text>
+<text x="315.0" y="378" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="345.0" y="378" font-size="13" class="mono" fill="#f7fbfc">established_year</text>
+<rect x="580" y="460" width="230" height="118" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="580" y="460" width="230" height="34" fill="#a8d65c" fill-opacity=".2"/>
+<line x1="580" y1="494" x2="810" y2="494" stroke="#a8d65c" stroke-width="1.5"/>
+<text x="695.0" y="483" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">subject</text>
+<text x="590" y="518" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="620" y="518" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="590" y="542" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="620" y="542" font-size="13" class="mono" fill="#f7fbfc">code</text>
+<text x="590" y="566" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="620" y="566" font-size="13" class="mono" fill="#f7fbfc">name</text>
+<rect x="305.0" y="30" width="230" height="142" fill="#062f3a" stroke="#c99aff" stroke-width="2"/>
+<rect x="305.0" y="30" width="230" height="34" fill="#c99aff" fill-opacity=".2"/>
+<line x1="305.0" y1="64" x2="535.0" y2="64" stroke="#c99aff" stroke-width="1.5"/>
+<text x="420.0" y="53" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">teacher</text>
+<text x="315.0" y="88" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="345.0" y="88" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="315.0" y="112" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="345.0" y="112" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="315.0" y="136" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="345.0" y="136" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<text x="315.0" y="160" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="345.0" y="160" font-size="13" class="mono" fill="#f7fbfc">email</text>
+<polyline points="305.0,289.0 145.0,289.0 145.0,460.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="295.0" y1="297.0" x2="295.0" y2="281.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="287.0" y1="297.0" x2="287.0" y2="281.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="145.0" y1="443.0" x2="135.0" y2="460.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="145.0" y1="443.0" x2="155.0" y2="460.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="145.0" y1="443.0" x2="145.0" y2="460.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="145.0" cy="432.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="158.0" y="263.7" width="98.0" height="20.3" fill="#04252e"/>
+<text x="207.0" y="278.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">belongs_to</text>
+<polyline points="535.0,289.0 695.0,289.0 695.0,460.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="552.0" y1="289.0" x2="535.0" y2="279.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="552.0" y1="289.0" x2="535.0" y2="299.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="552.0" y1="289.0" x2="535.0" y2="289.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="563.0" cy="289.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="695.0" y1="443.0" x2="685.0" y2="460.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="695.0" y1="443.0" x2="705.0" y2="460.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="695.0" y1="443.0" x2="695.0" y2="460.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="687.0" y1="437.0" x2="703.0" y2="437.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="603.6" y="263.7" width="72.8" height="20.3" fill="#04252e"/>
+<text x="640.0" y="278.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">teaches</text>
+<polyline points="260.0,477.0 580.0,477.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="277.0" y1="477.0" x2="260.0" y2="467.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="277.0" y1="477.0" x2="260.0" y2="487.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="277.0" y1="477.0" x2="260.0" y2="477.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="288.0" cy="477.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="563.0" y1="477.0" x2="580.0" y2="487.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="563.0" y1="477.0" x2="580.0" y2="467.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="563.0" y1="477.0" x2="580.0" y2="477.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="552.0" cy="477.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="383.6" y="451.7" width="72.8" height="20.3" fill="#04252e"/>
+<text x="420.0" y="466.7" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">attends</text>
+<polyline points="420.0,172.0 420.0,272.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="428.0" y1="182.0" x2="412.0" y2="182.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="428.0" y1="190.0" x2="412.0" y2="190.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="412.0" y1="262.0" x2="428.0" y2="262.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="420.0" cy="248.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="338.9" y="214.7" width="162.2" height="18.8" fill="#04252e"/>
+<text x="420.0" y="228.6" text-anchor="middle" font-size="13" font-weight="800" font-style="italic" fill="#ffd447">is_class_teacher_of</text>
+<polyline points="535.0,47.0 860.0,47.0 860.0,477.0 810.0,477.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="552.0" y1="47.0" x2="535.0" y2="37.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="552.0" y1="47.0" x2="535.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="552.0" y1="47.0" x2="535.0" y2="47.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="563.0" cy="47.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="827.0" y1="477.0" x2="810.0" y2="467.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="827.0" y1="477.0" x2="810.0" y2="487.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="827.0" y1="477.0" x2="810.0" y2="477.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="838.0" cy="477.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="628.1" y="22.6" width="138.8" height="18.8" fill="#04252e"/>
+<text x="697.5" y="36.6" text-anchor="middle" font-size="13" font-weight="800" font-style="italic" fill="#ffd447">is_qualified_for</text>
+</svg></div>
+<div class="table-wrap"><table>
+<tr><th>Krok</th><th>Řešení</th></tr>
+<tr><td>1</td><td>Nový entitní typ <code>teacher</code> (R9).</td></tr>
+<tr><td>2</td><td><code>is_class_teacher_of</code> (1:1): u teacher <span class="sym">||</span> — třída má právě jednoho třídního; u class <span class="sym">o|</span> — učitel je třídním nejvýše jedné třídy, ale nemusí být vůbec.<br><code>is_qualified_for</code> (M:N): na obou koncích <span class="sym">o&lt;</span> — „může mít“ nic nevynucuje.</td></tr>
+<tr><td>3</td><td><code>id</code> <span class="flag f-pk">PK</span>, <code>first_name</code>, <code>last_name</code>, <code>email</code> — všechny povinné. <code>id INT UNSIGNED</code>, jména <code>VARCHAR(50)</code>, <code>email VARCHAR(255)</code>.</td></tr>
+<tr><td>4</td><td><code>id</code>: <span class="flag f-un">UN</span> <span class="flag f-nn">NN</span> <span class="flag f-ai">AI</span>; <code>email</code>: <span class="flag f-nn">NN</span> <span class="flag f-uq">UQ</span> <span class="flag f-chk">CHK</span> — <code>CHECK (email LIKE '%_@_%')</code>.</td></tr>
+</table></div>
+<p class="muted" style="margin-top:12px">Na zamyšlení: v diagramu chybí datové typy a omezení (krok 4). Doplň je sám. A ještě jedna otázka: jak bys zakreslil, že předmět ve <em>konkrétní třídě</em> učí <em>konkrétní učitel</em>? (Nápověda: týká se tří entit najednou.)</p>
+</details>
+</div>
+
+<div class="panel" style="margin-top:20px">
+<h3>Kontrolní otázky</h3>
+<details><summary>1. Co vyjadřuje kroužek a co čárka na konci čáry?</summary><p>Kroužek = minimum 0 (účast nepovinná), čárka dál od entity = minimum 1 (povinná). Čárka u entity = maximum 1, vraní stopa = maximum N.</p></details>
+<details><summary>2. Proč je symbol pro „žák je právě v jedné třídě“ nakreslen u class?</summary><p>Crow's foot se čte přes čáru: vyjdu z jednoho žáka a symbol u cílové entity říká, s kolika třídami je spojen.</p></details>
+<details><summary>3. Co je datový typ a k čemu slouží?</summary><p>Určuje množinu přípustných hodnot atributu, způsob uložení a operace, které s hodnotou lze provádět. Chrání data, umožňuje výpočty a správné řazení a šetří místo.</p></details>
+<details><summary>4. Jaký je rozdíl mezi NOT NULL a CHECK?</summary><p>NOT NULL jen vyžaduje, aby hodnota byla vyplněna. CHECK ověřuje, zda vyplněná hodnota splňuje podmínku. Hodnotu NULL CHECK propustí.</p></details>
+<details><summary>5. Je AUTO_INCREMENT integritní omezení?</summary><p>Ne. Hodnotu generuje, nic nekontroluje. Jedinečnost id zajišťuje až PRIMARY KEY.</p></details>
+<details><summary>6. Proč má sloupec grade typ TINYINT UNSIGNED a ještě CHECK?</summary><p>TINYINT UNSIGNED povolí 0–255 a zabere 1 bajt. Že je známka 1–5, už žádný datový typ neřekne, to doplní až CHECK.</p></details>
+</div>
+
+<div class="callout green" style="margin-top:22px"><strong>Shrnutí:</strong> <code>1. obdélníky → 2. čáry + symboly Crow's foot → 3. atributy + datové typy → 4. integritní omezení</code>. E-R diagram je výsledek analýzy, ne její začátek. Každý symbol v něm musí jít obhájit požadavkem.</div>
+<div class="callout yellow"><strong>Příště:</strong> logický návrh — jak z E-R diagramu vzniknou tabulky, primární a cizí klíče.</div>
+</section>
+
+<footer>Výukový materiál • Konceptuální návrh databáze • Případová studie SCHOOL • E-R diagram (Crow's foot)</footer>
+</main>
+<script>
+const links=[...document.querySelectorAll('nav a')], sections=[...document.querySelectorAll('main section[id]')];
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{
+ if(e.isIntersecting) links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));
+}),{rootMargin:'-22% 0px -68% 0px'});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=1000)document.querySelector('aside').style.display='none'}));
+</script>
+</body>
+</html>

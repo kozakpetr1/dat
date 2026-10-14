@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konceptuální návrh databáze — VOŠ, SPŠ a SOŠ Varnsdorf</title>
+<meta name="description" content="Výuková prezentace o konceptuálním návrhu databáze, entitách, vztazích, kardinalitě, parcialitě a integritních omezeních.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,200;0,400;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg-top:#003b4b;--bg-bottom:#006783;--text:#fff;
+ --yellow:#ffd400;--yellow2:#ffea80;--blue:#41d7ff;--blue2:#00c0f3;
+ --green:#a6ce39;--green2:#c2dd78;--panel:rgba(0,27,34,.48);
+ --panel2:rgba(0,27,34,.68);--muted:rgba(255,255,255,.64);
+ --sidebar:280px;--danger:#ef4444;--purple:#c084fc;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Raleway,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg-top),var(--bg-bottom)) fixed;line-height:1.6}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ radial-gradient(circle at 78% 8%,rgba(65,215,255,.10),transparent 25%),
+ radial-gradient(circle at 18% 70%,rgba(166,206,57,.07),transparent 25%)}
+a{color:inherit}
+aside{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:2rem 1.5rem;background:rgba(0,20,26,.76);backdrop-filter:blur(20px);z-index:10}
+main{margin-left:var(--sidebar);max-width:1250px;padding:3.5rem 3rem 5rem}
+.logo{display:flex;align-items:center;gap:1rem;text-decoration:none;margin-bottom:2.6rem}
+.logo svg{width:50px;height:43px;flex:none}.logo b{font-size:.84rem;line-height:1.25;letter-spacing:.05em}.logo span{color:var(--blue)}
+.nav-title{font-size:.72rem;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:1rem}
+nav ul{list-style:none}nav li{margin-bottom:.35rem}
+nav a{display:flex;gap:.75rem;align-items:center;text-decoration:none;color:rgba(255,255,255,.68);padding:.72rem .9rem;font-weight:600;font-size:.86rem;border-left:3px solid transparent;transition:.2s}
+nav a:hover,nav a.active{color:#fff;background:rgba(65,215,255,.09);border-left-color:var(--blue)}
+section{scroll-margin-top:2rem;margin-bottom:5.5rem}
+.eyebrow{color:var(--blue);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.16em}
+h1{font-size:clamp(2.7rem,6vw,5.2rem);line-height:1.02;letter-spacing:-.045em;margin:.6rem 0 1.4rem}
+h1 em{font-style:normal;color:var(--yellow)}
+h2{font-size:clamp(1.9rem,4vw,2.7rem);line-height:1.15;margin:.35rem 0 1.2rem;letter-spacing:-.025em}
+h3{font-size:1.35rem;line-height:1.25;margin-bottom:.65rem}
+h4{font-size:1rem;margin-bottom:.4rem}
+p{margin-bottom:1rem}strong{font-weight:700}.muted{color:var(--muted)}
+.lead{font-size:1.18rem;font-weight:200;line-height:1.7}
+.hero{min-height:78vh;display:flex;align-items:center}.hero-inner{max-width:940px}
+.hero-kicker{display:inline-flex;align-items:center;gap:.55rem;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:.76rem}
+.hero-kicker:before{content:"";width:28px;height:3px;background:var(--green)}
+.hero-sub{max-width:800px;font-size:1.28rem;color:rgba(255,255,255,.84);font-weight:200}
+.chips{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.8rem}.chip{padding:.42rem .75rem;background:rgba(255,255,255,.07);font-size:.8rem;font-weight:600}
+.panel{background:var(--panel);backdrop-filter:blur(12px);box-shadow:0 12px 35px rgba(0,0,0,.22);padding:2rem}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.card{background:rgba(0,20,26,.34);padding:1.45rem;min-height:100%}
+.card.accent-blue{border-top:3px solid var(--blue)}.card.accent-yellow{border-top:3px solid var(--yellow)}.card.accent-green{border-top:3px solid var(--green)}.card.accent-purple{border-top:3px solid var(--purple)}
+.icon{font-size:1.7rem;margin-bottom:.7rem}.card p:last-child{margin-bottom:0}
+.question{font-size:1.55rem;font-weight:600;line-height:1.3}.answer{margin-top:1.1rem;padding-left:1rem;border-left:3px solid var(--yellow)}
+.callout{margin-top:1.4rem;padding:1.1rem 1.25rem;border-left:4px solid var(--blue);background:rgba(65,215,255,.07)}
+.callout.yellow{border-left-color:var(--yellow);background:rgba(255,212,0,.07)}
+.callout.green{border-left-color:var(--green);background:rgba(166,206,57,.07)}
+.callout.purple{border-left-color:var(--purple);background:rgba(192,132,252,.07)}
+ul{list-style:none;margin:.7rem 0}li{padding:.28rem 0 .28rem 1.35rem;position:relative}li:before{content:"";position:absolute;left:0;top:.78em;width:.72em;height:.72em;background:var(--yellow);clip-path:polygon(0 0,100% 50%,0 100%,20% 50%)}
+.code{font-family:Consolas,monospace;background:rgba(0,0,0,.3);padding:.12rem .35rem;color:var(--yellow2)}
+.badge{display:inline-block;padding:.18rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.b-blue{background:rgba(65,215,255,.14);color:var(--blue)}.b-yellow{background:rgba(255,212,0,.14);color:var(--yellow)}.b-green{background:rgba(166,206,57,.14);color:var(--green)}.b-purple{background:rgba(192,132,252,.14);color:var(--purple)}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:.7rem;align-items:center;margin:1.6rem 0}
+.flowbox{padding:1rem;text-align:center;background:rgba(0,20,26,.55);font-weight:700;border-top:2px solid var(--blue)}
+.arrow{color:var(--yellow);font-size:1.4rem}
+.timeline{display:grid;gap:1rem;margin-top:1.4rem}.step{display:grid;grid-template-columns:50px 1fr;gap:1rem;align-items:start}
+.step-num{width:42px;height:42px;display:grid;place-items:center;background:var(--blue2);color:#002d38;font-weight:700}
+.step h3{margin:.1rem 0 .2rem}.step p{color:rgba(255,255,255,.75)}
+.compare{width:100%;border-collapse:collapse;font-size:.92rem}.compare th{text-align:left;color:var(--blue);font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;background:rgba(0,20,26,.75);padding:1rem}.compare td{padding:1rem;background:rgba(0,20,26,.25);vertical-align:top}.compare tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.entity-box{display:flex;align-items:center;justify-content:center;min-height:105px;padding:1rem 1.2rem;background:rgba(0,20,26,.55);border:2px solid var(--blue);font-weight:700;font-size:1.15rem;text-align:center}
+.relation-box{
+ width:118px;height:118px;
+ display:flex;align-items:center;justify-content:center;
+ margin:auto;
+ padding:1.2rem;
+ background:rgba(255,212,0,.12);
+ border:2px solid var(--yellow);
+ clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+ font-weight:700;text-align:center;
+ line-height:1.15;
+}
+.er-row{display:grid;grid-template-columns:1fr 130px 1fr;gap:1rem;align-items:center;margin:1.3rem 0}
+.cardinality{font-family:Consolas,monospace;color:var(--yellow2);font-size:1.1rem;text-align:center}
+.note{font-size:.86rem;color:var(--muted)}
+.schema{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0}
+.schema-card{background:rgba(0,20,26,.52);padding:1rem;border-top:3px solid var(--green)}
+.schema-card h4{color:var(--green);font-size:1.05rem}.schema-card div{font-family:Consolas,monospace;font-size:.84rem;color:rgba(255,255,255,.82);padding:.18rem 0}
+.key{color:var(--yellow2)}.fk{color:var(--blue)}
+.check{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}
+.check div{background:rgba(0,20,26,.35);padding:.8rem 1rem}.check b{color:var(--green)}
+footer{padding:2rem 0;color:var(--muted);font-size:.75rem;border-top:1px solid rgba(255,255,255,.08)}
+.mobile{display:none}
+@media(max-width:991px){
+ aside{display:none}.mobile{display:flex;position:sticky;top:0;z-index:20;background:rgba(0,20,26,.92);backdrop-filter:blur(15px);padding:.8rem 1rem;justify-content:space-between;align-items:center}.mobile .logo{margin:0}.mobile button{background:none;border:0;color:#fff;font-size:1.5rem}
+ main{margin:0;padding:2rem 1.2rem}.hero{min-height:75vh}.grid2,.grid3,.check,.schema{grid-template-columns:1fr}.flow,.er-row{grid-template-columns:1fr;gap:.5rem}.arrow{transform:rotate(90deg);text-align:center}.relation-box{width:105px;height:105px}.panel{padding:1.35rem}.compare{min-width:760px}.table-wrap{overflow:auto}
+}
+</style>
+</head>
+<body>
+<div class="mobile">
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a>
+<button onclick="document.querySelector('aside').style.display='block'">☰</button>
+</div>
+
+<aside>
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd400"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffea80"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#41d7ff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c0f3"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#c2dd78"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a6ce39"/></svg><b>VOŠ | SPŠ | SOŠ<br><span>Varnsdorf</span></b></a>
+<div class="nav-title">DATABÁZE • NÁVRH</div>
+<nav><ul>
+<li><a class="active" href="#start">⌂ <span>Co je návrh databáze?</span></a></li>
+<li><a href="#concept">◈ <span>Konceptuální návrh</span></a></li>
+<li><a href="#terms">◇ <span>Základní pojmy</span></a></li>
+<li><a href="#entities">▣ <span>Entitní typy</span></a></li>
+<li><a href="#relations">↔ <span>Vztahové typy</span></a></li>
+<li><a href="#constraints">∷ <span>Kardinalita a parcialita</span></a></li>
+<li><a href="#workflow">→ <span>Postup návrhu</span></a></li>
+<li><a href="#integrity">✓ <span>Integritní omezení</span></a></li>
+<li><a href="#notation">▤ <span>Jak návrh vyjádřit?</span></a></li>
+<li><a href="#er">✦ <span>ER model a diagram</span></a></li>
+<li><a href="#summary">★ <span>Co si odnést</span></a></li>
+</ul></nav>
+<div class="side-note">Databáze • Informatika<br>Konceptuální návrh</div>
+</aside>
+
+<main>
+<section id="start" class="hero">
+<div class="hero-inner">
+<div class="hero-kicker">Informatika • Databáze • 2. část</div>
+<h1>Nejdřív navrhni.<br><em>Teprve potom ukládej.</em></h1>
+<p class="hero-sub">Konceptuální návrh databáze je okamžik, kdy z popisu reálného světa vytváříme <strong>přehledný model dat a jejich vztahů</strong> — ještě bez řešení konkrétních tabulek, SQL nebo MariaDB.</p>
+<div class="chips"><span class="chip">entita</span><span class="chip">vztah</span><span class="chip">atribut</span><span class="chip">kardinalita</span><span class="chip">integrita</span></div>
+<div class="callout yellow"><strong>Hlavní myšlenka:</strong> dobrý návrh začíná otázkou „Co ve skutečnosti evidujeme a jak to spolu souvisí?“, nikoli otázkou „Jaké tabulky vytvoříme?“</div>
+</div>
+</section>
+
+<section id="concept">
+<div class="eyebrow">01 • PROČ</div><h2>Co je konceptuální návrh a proč ho potřebujeme?</h2>
+<p class="lead">V předchozí prezentaci jsme si ukázali, proč databáze potřebujeme, co je DBMS a jaké existují databázové modely. Relační databáze pak data ukládá do tabulek — ale <strong>kde se vezme jejich struktura?</strong></p>
+<div class="grid3">
+<div class="card accent-yellow"><div class="icon">🧠</div><h3>Rozumíme problému</h3><p>Nejdřív popíšeme realitu a požadavky bez vazby na konkrétní DBMS nebo SQL.</p></div>
+<div class="card accent-blue"><div class="icon">🧩</div><h3>Odhalíme souvislosti</h3><p>Určíme, které objekty evidujeme a jaké vztahy mezi nimi existují.</p></div>
+<div class="card accent-green"><div class="icon">🛡️</div><h3>Chyby zachytíme dříve</h3><p>Nejasná pravidla a chybějící vztahy se hledají levněji v modelu než v hotové aplikaci.</p></div>
+</div>
+<div class="callout"><strong>Konceptuální model</strong> je zjednodušený popis reality z pohledu potřeb informačního systému. Nemá řešit technické detaily uložení dat.</div>
+</section>
+
+<section id="terms">
+<div class="eyebrow">02 • TERMINOLOGIE</div><h2>Čtyři pojmy, které nesmíme zaměnit</h2>
+<div class="grid2">
+<div class="card accent-blue"><span class="badge b-blue">Entitní typ</span><h3>Co evidujeme?</h3><p>Skupina objektů stejného druhu, o kterých chceme v databázi uchovávat údaje.</p><p class="muted">Např. <span class="code">ŽÁK</span>, <span class="code">MENTOR</span>, <span class="code">FIRMA</span>.</p></div>
+<div class="card accent-yellow"><span class="badge b-yellow">Entita</span><h3>Jeden konkrétní objekt</h3><p>Konkrétní výskyt entitního typu.</p><p class="muted">Např. žák „Jan Novák“ je jedna <strong>entita</strong> typu ŽÁK.</p></div>
+<div class="card accent-green"><span class="badge b-green">Vztahový typ</span><h3>Jak spolu souvisejí?</h3><p>Typová vazba mezi entitními typy.</p><p class="muted">Např. <span class="code">ŽÁK — absolvuje — PRAXE</span>.</p></div>
+<div class="card accent-purple"><span class="badge b-purple">Konkrétní vztah</span><h3>Jedno konkrétní propojení</h3><p>Konkrétní výskyt vztahového typu mezi konkrétními entitami.</p><p class="muted">Jan Novák <strong>absolvuje</strong> praxi ve firmě ABC.</p></div>
+</div>
+<div class="callout yellow"><strong>Pomůcka:</strong> entitní typ = „druh“, entita = „jeden konkrétní kus“. Vztahový typ = „způsob souvislosti“, konkrétní vztah = „jedno konkrétní propojení“.</div>
+</section>
+
+<section id="entities">
+<div class="eyebrow">03 • KROK 1</div><h2>Entitní typy: co vlastně evidujeme?</h2>
+<p class="lead">Entitní typy hledáme v podstatných <strong>objektech nebo konceptech</strong>, které mají v systému vlastní význam a o kterých potřebujeme uchovávat informace.</p>
+<div class="grid3">
+<div class="card accent-yellow"><h3>Hledej podstatná jména</h3><p>V zadání se opakují pojmy jako zákazník, objednávka, produkt, učitel, kurz, firma.</p></div>
+<div class="card accent-blue"><h3>Každý typ má smysl</h3><p>Pokud objekt potřebuje vlastní údaje nebo se na něj odkazují jiné objekty, pravděpodobně patří do modelu.</p></div>
+<div class="card accent-green"><h3>Nezaměňuj typ a atribut</h3><p>„Adresa“ může být atribut zákazníka. „Zákazník“ je typ objektu, který má vlastní identitu.</p></div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<h3>Příklad: evidence souvislé praxe</h3>
+<div class="schema">
+<div class="schema-card"><h4>student</h4><div>first_name</div><div>last_name</div><div>school_class</div></div>
+<div class="schema-card"><h4>mentor</h4><div>first_name</div><div>last_name</div><div>contact</div></div>
+<div class="schema-card"><h4>company</h4><div>name</div><div>address</div><div>contact</div></div>
+</div>
+<p class="note">Zatím neřešíme názvy tabulek, datové typy ani SQL. Pouze si vymezujeme významové objekty.</p>
+</div>
+<div class="callout yellow"><strong>Dobrá kontrolní otázka:</strong> „Kdybych tento pojem odstranil, ztratil bych část informace, kterou systém potřebuje evidovat?“</div>
+</section>
+
+<section id="relations">
+<div class="eyebrow">04 • KROK 2</div><h2>Vztahové typy: co spolu souvisí?</h2>
+<p class="lead">Jakmile známe hlavní entitní typy, hledáme <strong>významové vazby</strong> mezi nimi. Vztah by měl být pojmenovatelný a měl by odpovídat pravidlu reálného světa.</p>
+<div class="er-row">
+<div class="entity-box">ŽÁK</div>
+<div class="relation-box">absolvuje</div>
+<div class="entity-box">PRAXE</div>
+</div>
+<div class="er-row">
+<div class="entity-box">MENTOR</div>
+<div class="relation-box">vede</div>
+<div class="entity-box">PRAXE</div>
+</div>
+<div class="er-row">
+<div class="entity-box">FIRMA</div>
+<div class="relation-box">poskytuje</div>
+<div class="entity-box">PRAXE</div>
+</div>
+<div class="grid2">
+<div class="card accent-blue"><h3>Vztah není atribut</h3><p>Pokud máme „žák má mentora“, nejde automaticky o atribut <span class="code">mentor</span>. Je potřeba zjistit, jaké jsou počty a pravidla vazby.</p></div>
+<div class="card accent-green"><h3>Vztah může mít vlastní význam</h3><p>Například vztah „žák absolvuje praxi“ může nést informace jako datum od–do, pokud patří k samotnému vztahu.</p></div>
+</div>
+<div class="callout"><strong>Pravidlo:</strong> entitní typy odpovídají především na otázku <em>„co?“</em>, vztahové typy na otázku <em>„jak spolu souvisejí?“</em>.</div>
+</section>
+
+<section id="constraints">
+<div class="eyebrow">05 • KARDINALITA A PARCIALITA</div><h2>Kolik a povinně?</h2>
+<p class="lead">Nestačí říct, že dva entitní typy spolu souvisejí. Potřebujeme popsat <strong>kolik</strong> entit může nebo musí být ve vztahu.</p>
+<div class="grid2">
+<div class="card accent-yellow">
+<h3>Kardinalita</h3>
+<p>Udává početní rozsah účasti entity na vztahu — například <strong>1:1, 1:N nebo M:N</strong>.</p>
+<ul>
+<li><strong>1:1</strong> — jedna k jedné</li>
+<li><strong>1:N</strong> — jedna k mnoha</li>
+<li><strong>M:N</strong> — mnoho k mnoha</li>
+</ul>
+</div>
+<div class="card accent-blue">
+<h3>Parcialita / účast</h3>
+<p>Říká, zda je účast ve vztahu <strong>povinná, nebo volitelná</strong>.</p>
+<ul>
+<li><strong>povinná účast</strong> — entita musí mít alespoň jeden vztah</li>
+<li><strong>nepovinná účast</strong> — entita může existovat i bez tohoto vztahu</li>
+</ul>
+</div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<h3>Příklad: ŽÁK — absolvuje — PRAXE</h3>
+<table class="compare">
+<thead><tr><th>Otázka</th><th>Význam</th><th>Příklad pravidla</th></tr></thead>
+<tbody>
+<tr><td>Kolik praxí může mít jeden žák?</td><td>Kardinalita</td><td>1:N nebo 1:1 podle zadání</td></tr>
+<tr><td>Musí mít každý žák praxi?</td><td>Parcialita</td><td>ano → povinná účast; ne → nepovinná</td></tr>
+<tr><td>Kolik žáků může být v jedné praxi?</td><td>Kardinalita</td><td>1 nebo více — podle pravidel systému</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout yellow"><strong>Pozor:</strong> „1:N“ samo o sobě neříká, zda je účast povinná. Kardinalita a parcialita řeší dvě různé vlastnosti vztahu.</div>
+</section>
+
+<section id="workflow">
+<div class="eyebrow">06 • ZÁKLADNÍ POSTUP</div><h2>Od zadání k modelu</h2>
+<p class="lead">Návrh postupně zpřesňujeme. Nejdříve řešíme význam, potom vlastnosti a pravidla.</p>
+<div class="panel">
+<div class="timeline">
+<div class="step"><div class="step-num">1</div><div><h3>Entitní typy</h3><p>Určíme hlavní objekty a koncepty, které potřebujeme evidovat.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><h3>Vztahové typy</h3><p>Určíme významové vazby mezi entitními typy a pojmenujeme je.</p></div></div>
+<div class="step"><div class="step-num">3</div><div><h3>Atributy</h3><p>Ke každému entitnímu typu přiřadíme vlastnosti, které potřebujeme uchovávat. U vztahů posoudíme případné vlastní atributy.</p></div></div>
+<div class="step"><div class="step-num">4</div><div><h3>Integritní omezení</h3><p>Zapíšeme pravidla, která musí platit — identita, povinnost hodnot, přípustné hodnoty, kardinality a další business pravidla.</p></div></div>
+</div>
+</div>
+<div class="flow">
+<div class="flowbox">1. ENTITY</div><div class="arrow">→</div>
+<div class="flowbox">2. VZTAHY</div><div class="arrow">→</div>
+<div class="flowbox">3. ATRIBUTY</div><div class="arrow">→</div>
+<div class="flowbox">4. OMEZENÍ</div>
+</div>
+<div class="callout green"><strong>Dobrá praxe:</strong> průběžně kontroluj model proti zadání. Každý významný požadavek by měl mít v modelu své místo a každé pravidlo by mělo být obhajitelné zadáním.</div>
+</section>
+
+<section id="integrity">
+<div class="eyebrow">07 • KROK 4</div><h2>Integritní omezení: pravidla, která model nesmí porušit</h2>
+<p class="lead">Databáze nemá pouze data uchovávat. Musí také bránit vzniku stavů, které odporují pravidlům modelované reality.</p>
+<div class="grid2">
+<div class="card accent-yellow"><h3>Entitní integrita</h3><p>Každá entita musí být jednoznačně identifikovatelná. V relační databázi se to typicky projeví primárním klíčem.</p></div>
+<div class="card accent-blue"><h3>Referenční integrita</h3><p>Odkaz mezi záznamy nesmí vést na neexistující záznam. V relační databázi ji typicky zajišťují cizí klíče.</p></div>
+<div class="card accent-green"><h3>Doménová omezení</h3><p>Hodnoty musí odpovídat povolenému typu, rozsahu nebo množině hodnot — například známka 1–5.</p></div>
+<div class="card accent-purple"><h3>Business pravidla</h3><p>Pravidla konkrétního systému: například datum ukončení nesmí předcházet datu zahájení.</p></div>
+</div>
+<div class="check" style="margin-top:1.5rem">
+<div><b>✓ Identita:</b> Jak poznám konkrétní entitu?</div>
+<div><b>✓ Povinnost:</b> Které údaje musí být vyplněny?</div>
+<div><b>✓ Hodnoty:</b> Jaké hodnoty jsou přípustné?</div>
+<div><b>✓ Vazby:</b> Které vztahy jsou povinné a kolik jich může být?</div>
+</div>
+</section>
+
+<section id="notation">
+<div class="eyebrow">08 • VYJÁDŘENÍ NÁVRHU</div><h2>Jak můžeme návrh zapsat?</h2>
+<p class="lead">Stejný konceptuální návrh lze vyjádřit různými způsoby. Pro výuku je důležité rozumět významu, ne memorovat jednu grafickou notaci.</p>
+<div class="grid3">
+<div class="card accent-blue"><span class="badge b-blue">Text</span><h3>Slovní popis</h3><p>„Každý žák je zařazen do jedné třídy. Třída může mít mnoho žáků.“</p><p class="note">Dobré pro prvotní analýzu požadavků.</p></div>
+<div class="card accent-yellow"><span class="badge b-yellow">ER diagram</span><h3>Grafický model</h3><p>Entity, vztahy, atributy a omezení zobrazíme diagramem.</p><p class="note">Vhodné pro komunikaci návrhu.</p></div>
+<div class="card accent-green"><span class="badge b-green">Tabulkový zápis</span><h3>Strukturovaný seznam</h3><p>Entitní typy, atributy, identifikátory a vztahy lze popsat tabulkami.</p><p class="note">Vhodné pro kontrolu úplnosti návrhu.</p></div>
+</div>
+<div class="panel" style="margin-top:1.5rem">
+<h3>Dva časté grafické přístupy</h3>
+<table class="compare">
+<thead><tr><th>Přístup</th><th>Typické prvky</th><th>Výhoda</th></tr></thead>
+<tbody>
+<tr><td><strong>Chenova notace</strong></td><td>entity, relationship, atributy</td><td>výrazně odděluje entity a vztahy</td></tr>
+<tr><td><strong>Crow's Foot</strong></td><td>entity + čáry s kardinalitou</td><td>velmi názorně vyjadřuje počty a často se používá v praxi</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout"><strong>Dobrá praxe:</strong> zvolená notace musí být konzistentní. Nemíchej bezdůvodně symboliku různých notací v jednom diagramu.</div>
+</section>
+
+<section id="er">
+<div class="eyebrow">09 • ER MODEL</div><h2>ER model a ER diagram</h2>
+<p class="lead">ER (<strong>Entity–Relationship</strong>) model je způsob, jak konceptuální návrh databáze přehledně popsat pomocí <strong>entitních typů, vztahových typů, atributů a omezení</strong>.</p>
+<div class="grid3">
+<div class="card accent-blue"><h3>Co popisuje?</h3><p>Jaké objekty evidujeme, jaké mají vlastnosti a jak spolu souvisejí.</p></div>
+<div class="card accent-yellow"><h3>ER diagram</h3><p>Grafické vyjádření ER modelu. Pomáhá návrh rychle pochopit, kontrolovat a diskutovat.</p></div>
+<div class="card accent-green"><h3>Teď bez detailů</h3><p>Konkrétní symboliku a pravidla tvorby ER diagramu si podrobně ukážeme v příštím tématu.</p></div>
+</div>
+<div class="callout purple"><strong>Co si zapamatovat:</strong> ER model je konceptuální pohled na data. ER diagram je jeden ze způsobů, jak tento model graficky vyjádřit.</div>
+</section>
+
+<section id="case-study">
+<div class="eyebrow">10 • PŘÍPADOVÁ STUDIE</div><h2>Od zadání ke konceptuálnímu návrhu</h2>
+<p class="lead">Ukážeme si celý základní postup na malém příkladu. Cílem není vytvořit hotovou databázi, ale <strong>pochopit postup uvažování</strong>.</p>
+<div class="callout blue" style="margin-bottom:1.5rem"><strong>Pojmenování:</strong> názvy modelových entit, atributů a vztahů zapisujeme v angličtině, malými písmeny, bez diakritiky a pro více slov používáme <strong>snake_case</strong>. Entitní typy jsou podstatná jména v jednotném čísle. Tento zápis odpovídá doporučením pro databáze na stránce Dobré praktiky. <span class="muted">Např. <span class="code">student</span>, <span class="code">school_class</span>, <span class="code">first_name</span>.</span></div>
+<div class="panel">
+<h3>Zadání</h3>
+<p>Škola eviduje <strong>žáky</strong> a <strong>třídy</strong>. Každý žák je zařazen právě do jedné třídy. Jedna třída může mít více žáků. O žákovi potřebujeme znát jeho identifikátor, jméno a příjmení. O třídě potřebujeme znát její identifikátor a označení.</p>
+</div>
+
+<div class="timeline" style="margin-top:1.8rem">
+<div class="step"><div class="step-num">1</div><div>
+<h3>Entitní typy → co evidujeme?</h3>
+<p>Z textu zadání vybereme významné objekty: <strong>student</strong> a <strong>school_class</strong>.</p>
+</div></div>
+
+<div class="step"><div class="step-num">2</div><div>
+<h3>Vztahový typ → jak spolu souvisejí?</h3>
+<p>Žák je <strong>zařazen do</strong> třídy. Vztahový typ proto pojmenujeme <strong>enrollment</strong>.</p>
+<div class="er-row">
+<div class="entity-box">student</div><div class="relation-box">enrollment</div><div class="entity-box">school_class</div>
+</div>
+</div></div>
+
+<div class="step"><div class="step-num">3</div><div>
+<h3>Atributy → co o nich potřebujeme vědět?</h3>
+<div class="schema">
+<div class="schema-card"><h4>student</h4><div class="key">id — PK</div><div>first_name</div><div>last_name</div></div>
+<div class="schema-card"><h4>school_class</h4><div class="key">id — PK</div><div>code</div></div>
+</div>
+<p class="note">Primární klíč zde chápeme jako atribut, který jednoznačně identifikuje konkrétní entitu. V této fázi ještě neřešíme datové typy ani konkrétní SQL.</p>
+</div></div>
+
+<div class="step"><div class="step-num">4</div><div>
+<h3>Integritní omezení → jaká pravidla musí platit?</h3>
+<ul>
+<li>Každý žák musí být zařazen právě do jedné třídy.</li>
+<li>Jedna třída může mít více žáků.</li>
+<li>Každý žák má jednoznačný identifikátor.</li>
+<li>Každá třída má jednoznačný identifikátor.</li>
+</ul>
+</div></div>
+</div>
+
+<div class="callout yellow"><strong>Výsledek:</strong> z běžného slovního zadání jsme postupně získali strukturu modelu. Nezačali jsme tabulkami, ale významem dat a pravidly reality.</div>
+</section>
+
+<section id="case-diagram">
+<div class="eyebrow">11 • OVĚŘENÍ VZTAHU</div><h2>Diagram výskytu entit a vztahů</h2>
+<p class="lead">Před vytvořením výsledného ER diagramu může pomoci jednoduché <strong>uvažování nad konkrétními výskyty</strong>. Podíváme se, jak mohou být jednotlivé entity propojeny.</p>
+<div class="panel">
+<div class="er-row">
+<div class="entity-box">student<br><span class="note">Jan Novák</span></div>
+<div class="relation-box">enrollment</div>
+<div class="entity-box">school_class<br><span class="note">3.A</span></div>
+</div>
+<div class="er-row">
+<div class="entity-box">student<br><span class="note">Eva Svobodová</span></div>
+<div class="relation-box">enrollment</div>
+<div class="entity-box">school_class<br><span class="note">3.A</span></div>
+</div>
+<div class="er-row">
+<div class="entity-box">student<br><span class="note">Petr Dvořák</span></div>
+<div class="relation-box">enrollment</div>
+<div class="entity-box">school_class<br><span class="note">2.B</span></div>
+</div>
+<div class="callout green"><strong>Co vidíme?</strong> Více žáků může být spojeno s jednou třídou. Zároveň každý uvedený žák má právě jedno zařazení. Vztah tedy odpovídá kardinalitě <strong>student : school_class = N : 1</strong>.</div>
+<div class="callout yellow"><strong>Parcialita:</strong> podle zadání je účast žáka ve vztahu povinná — každý žák musí být zařazen do třídy. U třídy bychom podle přesného zadání museli určit, zda může existovat bez jediného žáka; pokud to zadání neříká, tuto vlastnost nemáme domýšlet.</div>
+</div>
+</section>
+
+<section id="notation-case">
+<div class="eyebrow">12 • SLOVNÍ ZÁPIS NÁVRHU</div><h2>Výsledek bez kreslení diagramu</h2>
+<p class="lead">Stejný návrh můžeme vyjádřit jednoduchým zápisem. Tento zápis je vhodný pro rychlou kontrolu, zda jsme na nic podstatného nezapomněli.</p>
+<div class="panel">
+<div class="card accent-blue" style="margin-bottom:1rem">
+<h3>E: entitní typy</h3>
+<p class="code">E: student(id, first_name, last_name)</p>
+<p class="code">E: school_class(id, code)</p>
+</div>
+<div class="card accent-yellow">
+<h3>R: vztahový typ</h3>
+<p class="code">R: enrollment(student, school_class)</p>
+</div>
+</div>
+<div class="callout green"><strong>Pojmenování v návrhu:</strong> <span class="code">student</span>, <span class="code">school_class</span>, <span class="code">first_name</span> a <span class="code">last_name</span> jsou anglické názvy v lowercase/snake_case. Primární klíč se jmenuje jednoduše <span class="code">id</span>; prefix názvu entity do něj nepřidáváme.</div>
+<div class="callout"><strong>Význam zápisu:</strong> <span class="code">E</span> označuje entitní typ a jeho atributy; <span class="code">R</span> označuje vztahový typ a entitní typy, které propojuje.</div>
+<div class="grid2" style="margin-top:1.5rem">
+<div class="card accent-green"><h3>Co jsme navrhli?</h3><p>2 entitní typy + 1 vztahový typ + atributy + pravidla kardinality a parciality.</p></div>
+<div class="card accent-purple"><h3>Co jsme ještě nenavrhli?</h3><p>Tabulky, SQL, datové typy, indexy ani konkrétní implementaci v MariaDB. To přijde až v dalších krocích.</p></div>
+</div>
+</section>
+
+<section id="summary">
+<div class="eyebrow">13 • CO SI ODNÉST</div><h2>Deset vět, které bys měl umět vysvětlit</h2>
+<div class="grid2">
+<div class="card"><h3>① Proč návrh?</h3><p>Protože databáze má odrážet význam a pravidla reálného světa.</p></div>
+<div class="card"><h3>② Entitní typ</h3><p>Typ objektů, o kterých chceme uchovávat údaje.</p></div>
+<div class="card"><h3>③ Entita</h3><p>Jeden konkrétní výskyt entitního typu.</p></div>
+<div class="card"><h3>④ Vztahový typ</h3><p>Významová vazba mezi entitními typy.</p></div>
+<div class="card"><h3>⑤ Kardinalita</h3><p>Kolik entit může nebo musí být ve vztahu.</p></div>
+<div class="card"><h3>⑥ Parcialita</h3><p>Zda je účast entity ve vztahu povinná, nebo nepovinná.</p></div>
+<div class="card"><h3>⑦ Postup</h3><p>Entitní typy → vztahové typy → atributy → integritní omezení.</p></div>
+<div class="card"><h3>⑧ Integrita</h3><p>Pravidla, která brání vzniku nesmyslných nebo nekonzistentních dat.</p></div>
+<div class="card"><h3>⑨ Diagram</h3><p>Grafické vyjádření usnadňuje komunikaci a kontrolu návrhu.</p></div>
+<div class="card"><h3>⑩ ER model</h3><p>Konceptuální model lze graficky vyjádřit například ER diagramem.</p></div>
+</div>
+<div class="callout green" style="margin-top:1.8rem"><strong>Případová studie:</strong> student + school_class → enrollment → atributy → integritní omezení. Teprve potom má smysl převádět konceptuální návrh do relačních tabulek.</div>
+<div class="callout yellow" style="margin-top:1rem"><strong>Nejdůležitější otázka při návrhu:</strong> „Jaké pravidlo reálného světa tento prvek modelu vyjadřuje?“</div>
+</section>
+
+<footer>VOŠ, SPŠ a SOŠ Varnsdorf • Výukový materiál — Konceptuální návrh databáze • Navazuje na prezentaci „Databáze jednoduše“.</footer>
+</main>
+
+<script>
+const links=[...document.querySelectorAll('nav a')], sections=[...document.querySelectorAll('main section[id]')];
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{
+ if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}
+}),{rootMargin:'-25% 0px -65% 0px'});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=991)document.querySelector('aside').style.display='none'}));
+</script>
+</body>
+</html>
