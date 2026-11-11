@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-R diagram — vzorový příklad LIBRARY</title>
+<meta name="description" content="Vzorový příklad: konceptuální návrh databáze výpůjček knih v knihovně (kniha, autor, čtenář, výpůjčka) jako E-R diagram ve čtyřech krocích – entitní typy, vztahové typy s rozkladem vazby M:N, atributy s datovými typy a integritní omezení.">
+<style>
+:root{
+  --bg:#062b35;--bg2:#08495a;--panel:rgba(2,22,28,.58);--panel2:rgba(3,31,39,.82);
+  --text:#f7fbfc;--muted:rgba(247,251,252,.68);--cyan:#49dfff;--yellow:#ffd447;
+  --green:#a8d65c;--purple:#c99aff;--red:#ff7d7d;--sidebar:285px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(160deg,var(--bg),var(--bg2)) fixed;line-height:1.62}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+radial-gradient(circle at 78% 5%,rgba(73,223,255,.12),transparent 28%),
+radial-gradient(circle at 15% 72%,rgba(168,214,92,.08),transparent 26%)}
+aside{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:28px 22px;background:rgba(1,16,21,.82);backdrop-filter:blur(16px);z-index:10;overflow-y:auto}
+main{margin-left:var(--sidebar);max-width:1320px;padding:42px 48px 70px}
+.logo{display:flex;align-items:center;gap:13px;text-decoration:none;color:#fff;margin-bottom:30px}
+.logo svg{width:48px;height:42px}.logo b{font-size:13px;line-height:1.25;letter-spacing:.04em}.logo span{color:var(--cyan)}
+.nav-title{font-size:11px;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:13px}
+nav ul{list-style:none}nav li{margin-bottom:2px}
+nav a{display:flex;gap:10px;align-items:center;text-decoration:none;color:rgba(255,255,255,.67);padding:6px 10px;border-left:3px solid transparent;font-size:13px;font-weight:700}
+nav a:hover,nav a.active{color:#fff;background:rgba(73,223,255,.09);border-left-color:var(--cyan)}
+nav a .ic{width:18px;text-align:center;flex:none}
+.side-note{margin-top:22px;color:rgba(255,255,255,.42);font-size:11px}
+section{scroll-margin-top:25px;margin-bottom:82px}
+.hero{min-height:76vh;display:flex;align-items:center}.hero-inner{max-width:1000px}
+.eyebrow{color:var(--cyan);font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:800}
+h1{font-size:clamp(42px,6vw,78px);line-height:1.02;letter-spacing:-.045em;margin:9px 0 22px}
+h1 em{font-style:normal;color:var(--yellow)}
+h2{font-size:clamp(30px,4vw,46px);line-height:1.12;letter-spacing:-.03em;margin:6px 0 18px}
+h3{font-size:21px;line-height:1.25;margin-bottom:9px}
+h4{font-size:16px;margin-bottom:6px}
+p{margin-bottom:14px}.lead{font-size:20px;line-height:1.7;font-weight:300;max-width:980px}
+.muted{color:var(--muted)}strong{font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:25px}.chip{padding:7px 12px;background:rgba(255,255,255,.07);font-size:12px;font-weight:700}
+.panel{background:var(--panel);backdrop-filter:blur(10px);padding:27px;box-shadow:0 14px 38px rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.05)}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:rgba(1,20,26,.42);padding:20px;border-top:3px solid var(--cyan);height:100%}
+.card.yellow{border-color:var(--yellow)}.card.green{border-color:var(--green)}.card.purple{border-color:var(--purple)}.card.red{border-color:var(--red)}
+.callout{margin-top:20px;padding:15px 18px;border-left:4px solid var(--cyan);background:rgba(73,223,255,.065)}
+.callout.yellow{border-color:var(--yellow);background:rgba(255,212,71,.07)}
+.callout.green{border-color:var(--green);background:rgba(168,214,92,.07)}
+.callout.purple{border-color:var(--purple);background:rgba(201,154,255,.07)}
+.callout.red{border-color:var(--red);background:rgba(255,125,125,.07)}
+.badge{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;padding:4px 7px;margin-bottom:8px;background:rgba(73,223,255,.12);color:var(--cyan)}
+.badge.yellow{color:var(--yellow);background:rgba(255,212,71,.12)}.badge.green{color:var(--green);background:rgba(168,214,92,.12)}.badge.purple{color:var(--purple);background:rgba(201,154,255,.12)}.badge.red{color:var(--red);background:rgba(255,125,125,.12)}
+ul{list-style:none;margin:8px 0}li{position:relative;padding:5px 0 5px 22px}li:before{content:"";position:absolute;left:2px;top:14px;width:8px;height:8px;background:var(--yellow);clip-path:polygon(0 0,100% 50%,0 100%,22% 50%)}
+nav li{padding:0}nav li:before{display:none}
+code,.code{font-family:Consolas,monospace;color:#ffe98d;background:rgba(0,0,0,.25);padding:2px 5px}
+.flow{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr 40px 1fr;align-items:center;gap:5px;margin:25px 0}.flowbox{text-align:center;padding:15px 8px;background:rgba(0,15,20,.56);border-top:3px solid var(--cyan);font-weight:800}.flowbox small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:4px}.flowbox.on{background:rgba(73,223,255,.16);border-top-color:var(--yellow)}.arrow{text-align:center;color:var(--yellow);font-size:25px}
+.step-list{display:grid;gap:14px}.step{display:grid;grid-template-columns:54px 1fr;gap:16px;align-items:start}.num{width:45px;height:45px;display:grid;place-items:center;background:var(--cyan);color:#03303a;font-weight:900;font-size:19px}
+.minmax{font-family:Consolas,monospace;color:var(--green);font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:14px}th{background:rgba(0,15,20,.78);color:var(--cyan);text-align:left;text-transform:uppercase;letter-spacing:.08em;font-size:11px;padding:12px}td{padding:12px;background:rgba(255,255,255,.025);vertical-align:top;border-bottom:1px solid rgba(255,255,255,.06)}
+td.num-col{font-family:Consolas,monospace;white-space:nowrap}
+.table-wrap{overflow-x:auto}
+footer{padding:24px 0;color:var(--muted);font-size:11px;border-top:1px solid rgba(255,255,255,.08)}
+/* ER diagramy */
+.diagram{overflow-x:auto;margin:18px 0;border:1px solid rgba(255,255,255,.07)}
+.diagram svg{display:block;width:100%;height:auto;min-width:720px}
+.erd text{font-family:Arial,Helvetica,sans-serif}.erd .mono{font-family:Consolas,monospace}
+.grid2>*,.grid3>*,.grid4>*{min-width:0}
+.diagram-cap{font-size:13px;color:var(--muted);margin-top:-8px;margin-bottom:14px}
+/* kód */
+pre{font-family:Consolas,monospace;background:rgba(0,0,0,.34);padding:16px 18px;overflow:auto;font-size:13.5px;line-height:1.55;color:#e8f6f9;border-left:3px solid var(--cyan);margin:12px 0}
+pre.bad{border-left-color:var(--red)}pre.good{border-left-color:var(--green)}
+pre .k{color:var(--cyan);font-weight:700}pre .c{color:rgba(247,251,252,.48)}pre .s{color:var(--green)}pre .e{color:var(--red)}pre .n{color:var(--yellow)}pre .ok{color:var(--green)}
+.flag{display:inline-block;font-family:Consolas,monospace;font-weight:800;font-size:12px;padding:2px 7px;margin:1px 2px 1px 0;background:rgba(255,255,255,.07)}
+.f-pk{color:var(--yellow)}.f-fk{color:var(--cyan)}.f-nn{color:var(--green)}.f-uq{color:var(--purple)}.f-un{color:var(--cyan)}.f-ai{color:var(--cyan)}.f-zf{color:var(--cyan)}.f-chk{color:var(--red)}
+.sym{font-family:Consolas,monospace;font-weight:900;color:var(--yellow);font-size:18px;letter-spacing:.06em}
+.yes{color:var(--green);font-weight:800}.no{color:var(--red);font-weight:800}.half{color:var(--yellow);font-weight:800}
+details{margin-top:14px;background:rgba(0,15,20,.45);padding:14px 18px;border-left:3px solid var(--yellow)}
+summary{cursor:pointer;font-weight:800;color:var(--yellow)}
+details[open] summary{margin-bottom:10px}
+.prop{background:rgba(1,20,26,.42);padding:22px;border-top:3px solid var(--cyan);margin-bottom:18px}
+.prop h3{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.prop h3 .flag{font-size:13px}
+.prop .grid2{gap:14px}
+.mobile{display:none}
+@media(max-width:1000px){
+ aside{display:none}.mobile{display:flex;position:sticky;top:0;z-index:20;background:rgba(1,16,21,.94);padding:12px 15px;justify-content:space-between;align-items:center}.mobile .logo{margin:0}.mobile button{background:none;border:0;color:#fff;font-size:25px}
+ main{margin:0;padding:25px 15px 55px}.grid2,.grid3,.grid4{grid-template-columns:1fr}.flow{grid-template-columns:1fr;gap:7px}.arrow{transform:rotate(90deg)}.panel{padding:18px}.hero{min-height:72vh}.table-wrap table{min-width:700px}
+ .lead{font-size:18px}
+}
+</style>
+</head>
+
+<body>
+<div class="mobile">
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd447"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffe98d"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#49dfff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c5ee"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#bfe083"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a8d65c"/></svg><b>LIBRARY<br><span>E-R DIAGRAM</span></b></a><button onclick="document.querySelector('aside').style.display='block'" aria-label="Menu">☰</button>
+</div>
+
+<aside>
+<a class="logo" href="#start"><svg viewBox="0 0 1000 866"><polygon points="0 0 500 0 500 188 326 188 0 0" fill="#ffd447"/><polygon points="0 0 326 188 413 339 250 433 0 0" fill="#ffe98d"/><polygon points="500 0 1000 0 674 188 500 188 500 0" fill="#49dfff"/><polygon points="674 188 1000 0 750 433 587 339 674 188" fill="#00c5ee"/><polygon points="250 433 413 339 500 490 500 866 250 433" fill="#bfe083"/><polygon points="500 490 587 339 750 433 500 866 500 490" fill="#a8d65c"/></svg><b>LIBRARY<br><span>E-R DIAGRAM</span></b></a>
+<div class="nav-title">VZOROVÝ PŘÍKLAD</div>
+<nav><ul>
+<li><a class="active" href="#start"><span class="ic">⌂</span><span>Úvod</span></a></li>
+<li><a href="#zadani"><span class="ic">≡</span><span>Zadání R1–R8</span></a></li>
+<li><a href="#naming"><span class="ic">Aa</span><span>Pravidla pojmenování</span></a></li>
+<li><a href="#step1"><span class="ic">1</span><span>Krok 1: entitní typy</span></a></li>
+<li><a href="#step2"><span class="ic">2</span><span>Krok 2: vztahové typy</span></a></li>
+<li><a href="#mn"><span class="ic">⇄</span><span>Rozklad M:N</span></a></li>
+<li><a href="#step3"><span class="ic">3</span><span>Krok 3: atributy</span></a></li>
+<li><a href="#datatypes"><span class="ic">T</span><span>Datové typy</span></a></li>
+<li><a href="#step4"><span class="ic">4</span><span>Krok 4: omezení</span></a></li>
+<li><a href="#result"><span class="ic">★</span><span>Výsledný E-R diagram</span></a></li>
+<li><a href="#mistakes"><span class="ic">!</span><span>Na co si dát pozor</span></a></li>
+<li><a href="#task"><span class="ic">✎</span><span>Úkol a otázky</span></a></li>
+</ul></nav>
+<div class="side-note">Databáze • E-R diagram<br>Vzorový příklad LIBRARY</div>
+</aside>
+
+<main>
+<!-- ================================================================ START -->
+<section id="start" class="hero">
+<div class="hero-inner">
+<div class="eyebrow">Databáze • konceptuální návrh • vzorový příklad</div>
+<h1>Knihovna od zadání<br><em>po E-R diagram.</em></h1>
+<p class="lead">Minule jsme se na databázi <strong>school</strong> naučili kreslit E-R diagram v notaci Crow's foot. Dnes stejný postup použijeme na nové zadání — databázi <strong>library</strong> pro evidenci výpůjček knih. Projdeme všechny <strong>čtyři kroky</strong> a u každého symbolu si řekneme, z kterého požadavku vychází.</p>
+<div class="chips"><span class="chip">book</span><span class="chip">author</span><span class="chip">reader</span><span class="chip">loan</span><span class="chip">rozklad M:N → book_author</span><span class="chip">Crow's foot</span><span class="chip">datové typy</span><span class="chip">NN · UQ · UN · AI · CHK</span></div>
+<div class="callout yellow"><strong>Postup je stejný jako v kapitole 4:</strong> <code>1. obdélníky → 2. čáry + symboly Crow's foot → 3. atributy + datové typy → 4. integritní omezení</code>. Zkus si nejdřív každý krok nakreslit sám a teprve potom ho porovnej s řešením.</div>
+</div>
+</section>
+
+<!-- ================================================================ ZADÁNÍ -->
+<section id="zadani">
+<div class="eyebrow">00 • ZADÁNÍ</div><h2>Co po nás chce knihovna</h2>
+<p class="lead">Městská knihovna chce evidovat své knihy, jejich autory, čtenáře a výpůjčky. Od knihovnice jsme sepsali tyto požadavky. Každý prvek diagramu musí mít oporu v některém z nich.</p>
+<div class="panel">
+<div class="table-wrap"><table>
+<tr><th>Č.</th><th>Požadavek</th></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R1</strong></td><td>Knihovna eviduje <strong>knihy</strong>. Každá kniha má jednoznačný identifikátor, ISBN, název a rok vydání. Dvě knihy nemohou mít stejné ISBN. U některých starých knih rok vydání <strong>není znám</strong>.</td></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R2</strong></td><td>Knihovna eviduje <strong>autory</strong>. Každý autor má jednoznačný identifikátor, jméno a příjmení.</td></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R3</strong></td><td>Každá kniha má <strong>jednoho nebo více autorů</strong>. Autor se eviduje jen tehdy, když od něj knihovna má <strong>alespoň jednu</strong> knihu; může jich mít i více. U knihy se eviduje <strong>pořadí autorů</strong> (1. autor, 2. autor…).</td></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R4</strong></td><td>Knihovna eviduje <strong>čtenáře</strong>. Každý čtenář má jednoznačný identifikátor, číslo čtenářského průkazu (vždy 8 znaků), jméno, příjmení, e-mail a datum registrace. Dva čtenáři nemohou mít stejné číslo průkazu. E-mail čtenář uvést <strong>nemusí</strong>.</td></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R5</strong></td><td>Knihovna eviduje <strong>výpůjčky</strong>. Každá výpůjčka patří <strong>právě jednomu čtenáři</strong> a týká se <strong>právě jedné knihy</strong>. Čtenář může mít libovolný počet výpůjček, i žádnou, a tutéž knihu si může půjčit opakovaně. Kniha nemusí být půjčena nikdy.</td></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R6</strong></td><td>U výpůjčky se eviduje datum půjčení, datum, do kdy má být kniha vrácena, a datum skutečného vrácení, které <strong>není známo</strong>, dokud čtenář knihu nevrátí. Termín vrácení ani skutečné vrácení nesmí být dřív než půjčení.</td></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R7</strong></td><td>Knihovna má od každé knihy jen jeden exemplář, proto jednu knihu nemůže mít <strong>současně</strong> půjčenou více čtenářů.</td></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R8</strong></td><td>Model má zachytit pouze informace uvedené v zadání. Co zadání neříká, to nebudeme bezdůvodně domýšlet.</td></tr>
+</table></div>
+</div>
+<div class="callout"><strong>Jak zadání číst:</strong> podstatná jména, o kterých se eviduje více údajů (kniha, autor, čtenář, výpůjčka), jsou kandidáti na <strong>entitní typy</strong>. Slovesa a vazby mezi nimi („má autora“, „patří čtenáři“) jsou <strong>vztahové typy</strong>. Vlastnosti (název, ISBN, datum…) jsou <strong>atributy</strong> a slova jako <em>jednoznačný</em>, <em>nemusí</em>, <em>nesmí</em> nebo <em>vždy</em> prozrazují <strong>integritní omezení</strong>.</div>
+</section>
+
+<!-- ================================================================ NAMING -->
+<section id="naming">
+<div class="eyebrow">PŘED KRESLENÍM</div><h2>Pravidla pojmenování</h2>
+<p class="lead">Všechny prvky diagramu pojmenujeme <strong>anglicky</strong> a podle jedné konvence. Názvy pak beze změny použijeme jako názvy tabulek a sloupců v SQL.</p>
+<div class="grid4">
+<div class="card"><span class="badge">Entitní typ</span><h4>Jednotné číslo</h4><p><code>book</code>, <code>reader</code>, <code>loan</code> — ne <code>books</code> ani <code>Kniha</code>. Obdélník je <strong>typ</strong>, ne seznam.</p></div>
+<div class="card yellow"><span class="badge yellow">snake_case</span><h4>Malá písmena a podtržítka</h4><p><code>book_author</code>, <code>last_name</code>, <code>due_date</code> — žádné mezery, diakritika ani <code>CamelCase</code>.</p></div>
+<div class="card green"><span class="badge green">Atributy</span><h4>Jednotné přípony</h4><p>Data končí <code>_date</code> (<code>loan_date</code>, <code>due_date</code>, <code>return_date</code>, <code>registration_date</code>), rok <code>_year</code>, odkaz na entitu <code>_id</code>.</p></div>
+<div class="card purple"><span class="badge purple">Vztah</span><h4>Sloveso</h4><p><code>makes</code>, <code>concerns</code>, <code>has_author</code> — z entity, slovesa a entity musí jít složit větu: <em>reader makes loan</em>.</p></div>
+</div>
+<div class="table-wrap" style="margin-top:20px"><table>
+<tr><th>Pojem ze zadání</th><th>Název v diagramu</th><th>Pojem ze zadání</th><th>Název v diagramu</th></tr>
+<tr><td>kniha</td><td><code>book</code></td><td>čtenář</td><td><code>reader</code></td></tr>
+<tr><td>autor</td><td><code>author</code></td><td>výpůjčka</td><td><code>loan</code></td></tr>
+<tr><td>autor knihy (rozklad M:N)</td><td><code>book_author</code></td><td>číslo průkazu</td><td><code>card_number</code></td></tr>
+<tr><td>rok vydání</td><td><code>publication_year</code></td><td>pořadí autora</td><td><code>author_order</code></td></tr>
+</table></div>
+</section>
+
+<!-- ================================================================ STEP 1 -->
+<section id="step1">
+<div class="eyebrow">KROK 1 • ENTITNÍ TYPY</div><h2>Nakresli obdélníky</h2>
+<div class="flow"><div class="flowbox on">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox">4<br>OMEZENÍ</div></div>
+<p class="lead">Za každý entitní typ ze zadání nakreslíme jeden obdélník jen s názvem. Ještě žádné čáry, žádné atributy — nejdřív rozmístíme „hráče“ na hrací plochu.</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 930 290" role="img" aria-label="E-R diagram LIBRARY – krok 1: entitní typy" xmlns="http://www.w3.org/2000/svg"><rect width="930" height="290" fill="#04252e"/>
+<rect x="30" y="40" width="190" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="30" y="40" width="190" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="125.0" y="71.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">author</text>
+<rect x="710" y="40" width="190" height="50" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="710" y="40" width="190" height="50" fill="#ffd447" fill-opacity=".14"/>
+<text x="805.0" y="71.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">book</text>
+<rect x="30" y="200" width="190" height="50" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="30" y="200" width="190" height="50" fill="#a8d65c" fill-opacity=".14"/>
+<text x="125.0" y="231.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">reader</text>
+<rect x="370" y="200" width="190" height="50" fill="#062f3a" stroke="#ff7d7d" stroke-width="2"/>
+<rect x="370" y="200" width="190" height="50" fill="#ff7d7d" fill-opacity=".14"/>
+<text x="465.0" y="231.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">loan</text>
+</svg></div>
+<div class="grid3">
+<div class="card"><h4>Co kreslíme</h4><p>Obdélník = entitní typ. Čtyři názvy v jednotném čísle: <code>book</code> (R1), <code>author</code> (R2), <code>reader</code> (R4), <code>loan</code> (R5).</p></div>
+<div class="card yellow"><h4>Rozmístění</h4><p><code>book</code> je vpravo nahoře, protože se váže na autory i na výpůjčky. <code>loan</code> leží mezi čtenářem a knihou. Mezi <code>author</code> a <code>book</code> necháváme <strong>volné místo</strong> — za chvíli se nám bude hodit.</p></div>
+<div class="card green"><h4>Kontrola</h4><p>Každý obdélník má oporu v zadání. Nepřidáváme „pro jistotu“ např. <code>publisher</code> nebo <code>genre</code> — zadání o nich nic neříká (R8).</p></div>
+</div>
+</div>
+<div class="callout purple"><strong>Proč je výpůjčka samostatná entita, a ne jen vztah čtenář–kniha?</strong> Tentýž čtenář si podle R5 může půjčit tutéž knihu <strong>opakovaně</strong>. Dvojice (čtenář, kniha) tedy výpůjčku jednoznačně neurčuje. Výpůjčka je samostatná <strong>událost</strong> s vlastními údaji (R6) a s vlastním identifikátorem.</div>
+</section>
+
+<!-- ================================================================ STEP 2 -->
+<section id="step2">
+<div class="eyebrow">KROK 2 • VZTAHOVÉ TYPY</div><h2>Spoj obdélníky čarami a doplň symboly</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox on">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox">4<br>OMEZENÍ</div></div>
+<p class="lead">Každý vztahový typ je jedna čára se slovesem. Pak pro <strong>každý konec zvlášť</strong> položíme dvě otázky: <em>„nejvýše kolik?“</em> a <em>„musí alespoň jeden?“</em> Symbol kreslíme u entity, na kterou se ptáme.</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 930 290" role="img" aria-label="E-R diagram LIBRARY – krok 2: vztahové typy" xmlns="http://www.w3.org/2000/svg"><rect width="930" height="290" fill="#04252e"/>
+<rect x="30" y="40" width="190" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="30" y="40" width="190" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="125.0" y="71.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">author</text>
+<rect x="710" y="40" width="190" height="50" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="710" y="40" width="190" height="50" fill="#ffd447" fill-opacity=".14"/>
+<text x="805.0" y="71.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">book</text>
+<rect x="30" y="200" width="190" height="50" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="30" y="200" width="190" height="50" fill="#a8d65c" fill-opacity=".14"/>
+<text x="125.0" y="231.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">reader</text>
+<rect x="370" y="200" width="190" height="50" fill="#062f3a" stroke="#ff7d7d" stroke-width="2"/>
+<rect x="370" y="200" width="190" height="50" fill="#ff7d7d" fill-opacity=".14"/>
+<text x="465.0" y="231.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">loan</text>
+<polyline points="220.0,65.0 710.0,65.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="237.0" y1="65.0" x2="220.0" y2="75.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="237.0" y1="65.0" x2="220.0" y2="55.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="237.0" y1="65.0" x2="220.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="243.0" y1="73.0" x2="243.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="693.0" y1="65.0" x2="710.0" y2="55.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="693.0" y1="65.0" x2="710.0" y2="75.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="693.0" y1="65.0" x2="710.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="687.0" y1="57.0" x2="687.0" y2="73.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="432.8" y="36.0" width="64.4" height="20.3" fill="#04252e"/>
+<text x="465.0" y="51.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">writes</text>
+<polyline points="220.0,225.0 370.0,225.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="230.0" y1="233.0" x2="230.0" y2="217.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="238.0" y1="233.0" x2="238.0" y2="217.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="353.0" y1="225.0" x2="370.0" y2="215.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="353.0" y1="225.0" x2="370.0" y2="235.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="353.0" y1="225.0" x2="370.0" y2="225.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="342.0" cy="225.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="267.0" y="196.0" width="56.0" height="20.3" fill="#04252e"/>
+<text x="295.0" y="211.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">makes</text>
+<polyline points="560.0,225.0 805.0,225.0 805.0,90.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="577.0" y1="225.0" x2="560.0" y2="235.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="577.0" y1="225.0" x2="560.0" y2="215.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="577.0" y1="225.0" x2="560.0" y2="225.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="588.0" cy="225.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="797.0" y1="100.0" x2="813.0" y2="100.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="797.0" y1="108.0" x2="813.0" y2="108.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="641.9" y="196.0" width="81.2" height="20.3" fill="#04252e"/>
+<text x="682.5" y="211.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">concerns</text>
+</svg></div>
+<div class="table-wrap"><table>
+<tr><th>Vztah</th><th>Otázka</th><th>Odpověď ze zadání</th><th>Symbol (kde)</th></tr>
+<tr><td rowspan="2"><strong>writes</strong></td><td>Kolik knih má jeden autor?</td><td>alespoň jednu, může více (R3)</td><td><span class="sym">|&lt;</span> u book</td></tr>
+<tr><td>Kolik autorů má jedna kniha?</td><td>jednoho nebo více (R3)</td><td><span class="sym">|&lt;</span> u author</td></tr>
+<tr><td rowspan="2"><strong>makes</strong></td><td>Kolika čtenářům patří jedna výpůjčka?</td><td>právě jednomu (R5)</td><td><span class="sym">||</span> u reader</td></tr>
+<tr><td>Kolik výpůjček má jeden čtenář?</td><td>libovolně, i žádnou (R5)</td><td><span class="sym">o&lt;</span> u loan</td></tr>
+<tr><td rowspan="2"><strong>concerns</strong></td><td>Kolika knih se týká jedna výpůjčka?</td><td>právě jedné (R5)</td><td><span class="sym">||</span> u book</td></tr>
+<tr><td>Kolikrát může být jedna kniha půjčena?</td><td>libovolněkrát, i nikdy (R5)</td><td><span class="sym">o&lt;</span> u loan</td></tr>
+</table></div>
+</div>
+<div class="grid2" style="margin-top:20px">
+<div class="card green"><h4>Kontrolní věty</h4><p>„Jeden <strong>reader</strong> makes <span class="sym">o&lt;</span> <strong>0 až N</strong> výpůjček.“<br>„Jedna <strong>loan</strong> concerns <span class="sym">||</span> <strong>právě jednu</strong> knihu.“<br>„Jedna <strong>book</strong> má <span class="sym">|&lt;</span> <strong>jednoho nebo více</strong> autorů.“</p></div>
+<div class="card yellow"><h4>Zjištění</h4><p>Vztah <code>writes</code> má na <strong>obou</strong> koncích vraní stopu — je to vztah <strong>M:N</strong>. Relační databáze ho přímo uložit neumí a navíc R3 chce u každé dvojice kniha–autor evidovat <strong>pořadí autora</strong>. Proto vztah rozložíme.</p></div>
+</div>
+<div class="callout">Čára <code>concerns</code> se lomí, aby se nic nekřížilo. Na tvaru čáry nezáleží — důležité je, mezi kterými entitami vede a jaké symboly má na koncích. Symbol ale vždy kreslíme <strong>těsně u obdélníku</strong>.</div>
+</section>
+
+<!-- ================================================================ M:N -->
+<section id="mn">
+<div class="eyebrow">KROK 2B • ROZKLAD VZTAHU M:N</div><h2><code style="font-size:.8em">writes</code> → asociační entita <code style="font-size:.8em">book_author</code></h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox on">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox">4<br>OMEZENÍ</div></div>
+<p class="lead">Vztah M:N „povýšíme“ na samostatný obdélník <code>book_author</code> a nahradíme ho <strong>dvěma vztahy 1:N</strong>. Jeden výskyt <code>book_author</code> = jeden autor u jedné konkrétní knihy (např. „Karel Čapek je 1. autorem knihy R.U.R.“).</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 930 290" role="img" aria-label="E-R diagram LIBRARY – krok 2: vztahové typy po rozkladu M:N" xmlns="http://www.w3.org/2000/svg"><rect width="930" height="290" fill="#04252e"/>
+<rect x="30" y="40" width="190" height="50" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="30" y="40" width="190" height="50" fill="#49dfff" fill-opacity=".14"/>
+<text x="125.0" y="71.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">author</text>
+<rect x="710" y="40" width="190" height="50" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="710" y="40" width="190" height="50" fill="#ffd447" fill-opacity=".14"/>
+<text x="805.0" y="71.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">book</text>
+<rect x="30" y="200" width="190" height="50" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="30" y="200" width="190" height="50" fill="#a8d65c" fill-opacity=".14"/>
+<text x="125.0" y="231.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">reader</text>
+<rect x="370" y="200" width="190" height="50" fill="#062f3a" stroke="#ff7d7d" stroke-width="2"/>
+<rect x="370" y="200" width="190" height="50" fill="#ff7d7d" fill-opacity=".14"/>
+<text x="465.0" y="231.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">loan</text>
+<rect x="370" y="40" width="190" height="50" fill="#062f3a" stroke="#c99aff" stroke-width="2"/>
+<rect x="370" y="40" width="190" height="50" fill="#c99aff" fill-opacity=".14"/>
+<text x="465.0" y="71.0" text-anchor="middle" font-size="18" font-weight="800" fill="#f7fbfc">book_author</text>
+<polyline points="220.0,65.0 370.0,65.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="230.0" y1="73.0" x2="230.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="238.0" y1="73.0" x2="238.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="353.0" y1="65.0" x2="370.0" y2="55.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="353.0" y1="65.0" x2="370.0" y2="75.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="353.0" y1="65.0" x2="370.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="347.0" y1="57.0" x2="347.0" y2="73.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="254.4" y="36.0" width="81.2" height="20.3" fill="#04252e"/>
+<text x="295.0" y="51.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">has_book</text>
+<polyline points="560.0,65.0 710.0,65.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="577.0" y1="65.0" x2="560.0" y2="75.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="577.0" y1="65.0" x2="560.0" y2="55.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="577.0" y1="65.0" x2="560.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="583.0" y1="73.0" x2="583.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="700.0" y1="57.0" x2="700.0" y2="73.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="692.0" y1="57.0" x2="692.0" y2="73.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="586.0" y="36.0" width="98.0" height="20.3" fill="#04252e"/>
+<text x="635.0" y="51.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">has_author</text>
+<polyline points="220.0,225.0 370.0,225.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="230.0" y1="233.0" x2="230.0" y2="217.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="238.0" y1="233.0" x2="238.0" y2="217.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="353.0" y1="225.0" x2="370.0" y2="215.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="353.0" y1="225.0" x2="370.0" y2="235.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="353.0" y1="225.0" x2="370.0" y2="225.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="342.0" cy="225.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="267.0" y="196.0" width="56.0" height="20.3" fill="#04252e"/>
+<text x="295.0" y="211.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">makes</text>
+<polyline points="560.0,225.0 805.0,225.0 805.0,90.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="577.0" y1="225.0" x2="560.0" y2="235.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="577.0" y1="225.0" x2="560.0" y2="215.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="577.0" y1="225.0" x2="560.0" y2="225.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="588.0" cy="225.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="797.0" y1="100.0" x2="813.0" y2="100.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="797.0" y1="108.0" x2="813.0" y2="108.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="641.9" y="196.0" width="81.2" height="20.3" fill="#04252e"/>
+<text x="682.5" y="211.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">concerns</text>
+</svg></div>
+<div class="table-wrap"><table>
+<tr><th>Vztah</th><th>Otázka</th><th>Odpověď</th><th>Symbol (kde)</th></tr>
+<tr><td rowspan="2"><strong>has_author</strong></td><td>Kolik záznamů <code>book_author</code> má jedna kniha?</td><td>tolik, kolik má autorů: alespoň jeden (R3)</td><td><span class="sym">|&lt;</span> u book_author</td></tr>
+<tr><td>Ke kolika knihám patří jeden záznam <code>book_author</code>?</td><td>právě k jedné</td><td><span class="sym">||</span> u book</td></tr>
+<tr><td rowspan="2"><strong>has_book</strong></td><td>Kolik záznamů <code>book_author</code> má jeden autor?</td><td>tolik, kolik napsal knih: alespoň jeden (R3)</td><td><span class="sym">|&lt;</span> u book_author</td></tr>
+<tr><td>Ke kolika autorům patří jeden záznam <code>book_author</code>?</td><td>právě k jednomu</td><td><span class="sym">||</span> u author</td></tr>
+</table></div>
+</div>
+<div class="grid3" style="margin-top:20px">
+<div class="card"><h4>Jak rozklad funguje</h4><p>Vraní stopy původního M:N <strong>zůstanou</strong> na svých místech, jen se přestěhují k nové entitě. Na straně původních entit vždy přibude <span class="sym">||</span>: každý záznam spojuje <strong>právě jednu</strong> knihu s <strong>právě jedním</strong> autorem.</p></div>
+<div class="card yellow"><h4>Název</h4><p>Asociační entitu pojmenujeme složením názvů obou entit v jednotném čísle: <code>book_author</code>. Je hned jasné, co spojuje.</p></div>
+<div class="card purple"><h4>Kam patří pořadí autora</h4><p><code>author_order</code> nepatří knize (ta má autorů více) ani autorovi (u každé knihy může být jinak). Patří <strong>dvojici kniha–autor</strong>, a tedy do <code>book_author</code>.</p></div>
+</div>
+<div class="callout yellow"><strong>Srovnej s kapitolou 4:</strong> u <code>attends</code> jsme viděli dva rovnocenné způsoby — čáru M:N s atributy vztahu (způsob A), nebo asociační entitu (způsob B). Tady volíme rovnou <strong>způsob B</strong>: je blíž budoucím tabulkám a nemusíme kreslit přerušovaný rámeček s atributy vztahu.</div>
+</section>
+
+<!-- ================================================================ STEP 3 -->
+<section id="step3">
+<div class="eyebrow">KROK 3 • ATRIBUTY</div><h2>Vepiš atributy do obdélníků</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox on">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox">4<br>OMEZENÍ</div></div>
+<p class="lead">Ke každé entitě dopíšeme její atributy a vyznačíme identifikátor (<span class="flag f-pk">PK</span>), povinné (<span class="flag f-nn">*</span>) a nepovinné (<span class="flag">o</span>) atributy.</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 1050 512" role="img" aria-label="E-R diagram LIBRARY – krok 3: atributy" xmlns="http://www.w3.org/2000/svg"><rect width="1050" height="512" fill="#04252e"/>
+<rect x="30" y="40" width="230" height="118" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="30" y="40" width="230" height="34" fill="#49dfff" fill-opacity=".2"/>
+<line x1="30" y1="74" x2="260" y2="74" stroke="#49dfff" stroke-width="1.5"/>
+<text x="145.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">author</text>
+<text x="40" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="70" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="40" y="122" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="122" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="40" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="146" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<rect x="410" y="40" width="230" height="118" fill="#062f3a" stroke="#c99aff" stroke-width="2"/>
+<rect x="410" y="40" width="230" height="34" fill="#c99aff" fill-opacity=".2"/>
+<line x1="410" y1="74" x2="640" y2="74" stroke="#c99aff" stroke-width="1.5"/>
+<text x="525.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">book_author</text>
+<text x="420" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="450" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">book_id</text>
+<text x="420" y="122" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="450" y="122" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">author_id</text>
+<text x="420" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="450" y="146" font-size="13" class="mono" fill="#f7fbfc">author_order</text>
+<rect x="790" y="40" width="230" height="142" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="790" y="40" width="230" height="34" fill="#ffd447" fill-opacity=".2"/>
+<line x1="790" y1="74" x2="1020" y2="74" stroke="#ffd447" stroke-width="1.5"/>
+<text x="905.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">book</text>
+<text x="800" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="830" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="800" y="122" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="830" y="122" font-size="13" class="mono" fill="#f7fbfc">isbn</text>
+<text x="800" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="830" y="146" font-size="13" class="mono" fill="#f7fbfc">title</text>
+<text x="800" y="170" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="830" y="170" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">publication_year</text>
+<rect x="30" y="292" width="230" height="190" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="30" y="292" width="230" height="34" fill="#a8d65c" fill-opacity=".2"/>
+<line x1="30" y1="326" x2="260" y2="326" stroke="#a8d65c" stroke-width="1.5"/>
+<text x="145.0" y="315" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">reader</text>
+<text x="40" y="350" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="70" y="350" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="40" y="374" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="374" font-size="13" class="mono" fill="#f7fbfc">card_number</text>
+<text x="40" y="398" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="398" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="40" y="422" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="422" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<text x="40" y="446" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="70" y="446" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">email</text>
+<text x="40" y="470" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="470" font-size="13" class="mono" fill="#f7fbfc">registration_date</text>
+<rect x="410" y="292" width="230" height="142" fill="#062f3a" stroke="#ff7d7d" stroke-width="2"/>
+<rect x="410" y="292" width="230" height="34" fill="#ff7d7d" fill-opacity=".2"/>
+<line x1="410" y1="326" x2="640" y2="326" stroke="#ff7d7d" stroke-width="1.5"/>
+<text x="525.0" y="315" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">loan</text>
+<text x="420" y="350" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="450" y="350" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="420" y="374" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="450" y="374" font-size="13" class="mono" fill="#f7fbfc">loan_date</text>
+<text x="420" y="398" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="450" y="398" font-size="13" class="mono" fill="#f7fbfc">due_date</text>
+<text x="420" y="422" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="450" y="422" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">return_date</text>
+<polyline points="260.0,57.0 410.0,57.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="270.0" y1="65.0" x2="270.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="278.0" y1="65.0" x2="278.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="393.0" y1="57.0" x2="410.0" y2="47.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="393.0" y1="57.0" x2="410.0" y2="67.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="393.0" y1="57.0" x2="410.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="387.0" y1="49.0" x2="387.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="294.4" y="28.0" width="81.2" height="20.3" fill="#04252e"/>
+<text x="335.0" y="43.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">has_book</text>
+<polyline points="640.0,57.0 790.0,57.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="657.0" y1="57.0" x2="640.0" y2="67.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="657.0" y1="57.0" x2="640.0" y2="47.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="657.0" y1="57.0" x2="640.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="663.0" y1="65.0" x2="663.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="780.0" y1="49.0" x2="780.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="772.0" y1="49.0" x2="772.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="666.0" y="28.0" width="98.0" height="20.3" fill="#04252e"/>
+<text x="715.0" y="43.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">has_author</text>
+<polyline points="260.0,309.0 410.0,309.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="270.0" y1="317.0" x2="270.0" y2="301.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="278.0" y1="317.0" x2="278.0" y2="301.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="393.0" y1="309.0" x2="410.0" y2="299.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="393.0" y1="309.0" x2="410.0" y2="319.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="393.0" y1="309.0" x2="410.0" y2="309.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="382.0" cy="309.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="307.0" y="280.0" width="56.0" height="20.3" fill="#04252e"/>
+<text x="335.0" y="295.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">makes</text>
+<polyline points="640.0,309.0 905.0,309.0 905.0,182.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="657.0" y1="309.0" x2="640.0" y2="319.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="657.0" y1="309.0" x2="640.0" y2="299.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="657.0" y1="309.0" x2="640.0" y2="309.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="668.0" cy="309.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="897.0" y1="192.0" x2="913.0" y2="192.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="897.0" y1="200.0" x2="913.0" y2="200.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="731.9" y="280.0" width="81.2" height="20.3" fill="#04252e"/>
+<text x="772.5" y="295.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">concerns</text>
+</svg></div>
+<div class="grid3">
+<div class="card"><h4>Identifikátor</h4><p><code>book</code>, <code>author</code>, <code>reader</code> a <code>loan</code> mají umělý identifikátor <code>id</code> označený <span class="flag f-pk">PK</span>. Výpůjčka ho potřebuje, protože se dvojice čtenář–kniha může opakovat (R5).</p></div>
+<div class="card yellow"><h4>Povinné / nepovinné</h4><p>Nepovinné jsou jen tři atributy, u kterých to zadání výslovně říká: <code>publication_year</code> (R1 „není znám“), <code>email</code> (R4 „nemusí“) a <code>return_date</code> (R6 „není známo, dokud…“). Vše ostatní je povinné.</p></div>
+<div class="card purple"><h4>Složený identifikátor</h4><p><code>book_author</code> identifikuje <strong>dvojice</strong> <code>book_id</code> + <code>author_id</code>: jeden autor může být u jedné knihy uveden jen jednou. Oba atributy jsou odkazy na jiné entity (jako <code>pupil_id</code> a <code>subject_id</code> u <code>attends</code>).</p></div>
+</div>
+</div>
+<div class="callout green"><strong>Zatím bez cizích klíčů!</strong> Do <code>loan</code> nepíšeme <code>reader_id</code> ani <code>book_id</code>. Vazbu na čtenáře a knihu už vyjadřují čáry <code>makes</code> a <code>concerns</code>. Výjimkou je asociační entita <code>book_author</code>, jejíž identifikátor se z odkazů přímo skládá.</div>
+</section>
+
+<!-- ================================================================ DATATYPES -->
+<section id="datatypes">
+<div class="eyebrow">KROK 3B • DATOVÉ TYPY</div><h2>Volba datových typů — a proč</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox on">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox">4<br>OMEZENÍ</div></div>
+<p class="lead">U každého atributu se zeptáme: <em>Jaké hodnoty smí obsahovat? Budu s nimi počítat? Jak dlouhé mohou být?</em></p>
+<div class="panel">
+<div class="table-wrap"><table>
+<tr><th>Atribut</th><th>Datový typ</th><th>Zdůvodnění</th></tr>
+<tr><td><code>*.id</code></td><td><code>INT UNSIGNED</code></td><td>celé kladné číslo, dost místa pro libovolný počet knih, čtenářů i výpůjček</td></tr>
+<tr><td><code>book.isbn</code></td><td><code>VARCHAR(17)</code></td><td>„978-80-7106-123-4“ — obsahuje pomlčky (a starší ISBN i písmeno X), nepočítáme s ním → <strong>text</strong>; s pomlčkami má nejvýše 17 znaků</td></tr>
+<tr><td><code>book.title</code></td><td><code>VARCHAR(200)</code></td><td>názvy knih bývají i dlouhé</td></tr>
+<tr><td><code>book.publication_year</code></td><td><code>SMALLINT UNSIGNED</code></td><td>rok je celé nezáporné číslo; rozsah hlídá CHECK (<code>YEAR</code> nestačí — začíná až rokem 1901)</td></tr>
+<tr><td><code>author.first_name</code>, <code>last_name</code></td><td><code>VARCHAR(50)</code></td><td>různě dlouhý text</td></tr>
+<tr><td><code>book_author.book_id</code>, <code>author_id</code></td><td><code>INT UNSIGNED</code></td><td>odkaz musí mít <strong>stejný typ</strong> jako <code>id</code>, na které odkazuje</td></tr>
+<tr><td><code>book_author.author_order</code></td><td><code>TINYINT UNSIGNED</code></td><td>pořadí 1, 2, 3… — malé celé číslo, podle kterého budeme řadit; stačí 1 bajt</td></tr>
+<tr><td><code>reader.card_number</code></td><td><code>CHAR(8)</code></td><td>R4: <strong>vždy 8 znaků</strong> → pevná délka; může začínat nulou, nepočítáme s ním → text</td></tr>
+<tr><td><code>reader.first_name</code>, <code>last_name</code></td><td><code>VARCHAR(50)</code></td><td>různě dlouhý text</td></tr>
+<tr><td><code>reader.email</code></td><td><code>VARCHAR(255)</code></td><td>e-mailová adresa může být dlouhá</td></tr>
+<tr><td><code>reader.registration_date</code></td><td><code>DATE</code></td><td>jen den, bez času</td></tr>
+<tr><td><code>loan.loan_date</code>, <code>due_date</code>, <code>return_date</code></td><td><code>DATE</code></td><td>kontrola platnosti data, porovnání (je po termínu?) a výpočet počtu dní</td></tr>
+</table></div>
+</div>
+<div class="callout yellow"><strong>Ne všechno, co vypadá jako číslo, je číslo.</strong> ISBN i číslo průkazu jsou „čísla“ jen podle jména. Pravidlo z kapitoly 4: <em>„Budu s tím počítat?“</em> Pokud ne, je to text. Naopak <code>author_order</code> je opravdu číslo — podle něj řadíme autory.</div>
+</section>
+
+<!-- ================================================================ STEP 4 -->
+<section id="step4">
+<div class="eyebrow">KROK 4 • INTEGRITNÍ OMEZENÍ</div><h2>Ze slov zadání na omezení</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox on">4<br>OMEZENÍ</div></div>
+<p class="lead">Pravidla ze zadání převedeme na mechanismy, které databáze umí vynutit: <code>PRIMARY KEY</code>, <code>NOT NULL</code>, <code>UNIQUE</code>, <code>UNSIGNED</code>, <code>CHECK</code>. Co symbolem vyjádřit nejde, zapíšeme jako textové omezení.</p>
+<div class="panel">
+<div class="table-wrap"><table>
+<tr><th>Slova v zadání</th><th>Požadavek</th><th>Omezení</th></tr>
+<tr><td>„jednoznačný identifikátor“</td><td>R1, R2, R4</td><td><code>id</code>: <span class="flag f-pk">PK</span> <span class="flag f-un">UN</span> <span class="flag f-nn">NN</span> <span class="flag f-ai">AI</span></td></tr>
+<tr><td>„dvě knihy nemohou mít stejné ISBN“</td><td>R1</td><td><code>isbn</code>: <span class="flag f-nn">NN</span> <span class="flag f-uq">UQ</span></td></tr>
+<tr><td>„dva čtenáři nemohou mít stejné číslo průkazu“</td><td>R4</td><td><code>card_number</code>: <span class="flag f-nn">NN</span> <span class="flag f-uq">UQ</span></td></tr>
+<tr><td>„rok vydání není znám“</td><td>R1</td><td><code>publication_year</code> bez <span class="flag f-nn">NN</span>, <span class="flag f-un">UN</span> <span class="flag f-chk">CHK</span> <code>BETWEEN 1450 AND 2100</code></td></tr>
+<tr><td>„e-mail uvést nemusí“</td><td>R4</td><td><code>email</code> bez <span class="flag f-nn">NN</span>, <span class="flag f-chk">CHK</span> <code>LIKE '%_@_%'</code></td></tr>
+<tr><td>„pořadí autorů (1., 2. …)“</td><td>R3</td><td><code>author_order</code>: <span class="flag f-un">UN</span> <span class="flag f-nn">NN</span> <span class="flag f-chk">CHK</span> <code>&gt;= 1</code></td></tr>
+<tr><td>„nesmí být dřív než půjčení“</td><td>R6</td><td><code>due_date</code>: <span class="flag f-nn">NN</span> <span class="flag f-chk">CHK</span> <code>&gt;= loan_date</code>; <code>return_date</code>: <span class="flag f-chk">CHK</span> <code>&gt;= loan_date</code></td></tr>
+<tr><td>„vrácení není známo, dokud…“</td><td>R6</td><td><code>return_date</code> bez <span class="flag f-nn">NN</span> — hodnota <code>NULL</code> = kniha je stále půjčená</td></tr>
+<tr><td>„nemůže mít současně více čtenářů“</td><td>R7</td><td>nelze symbolem ani CHECKem → <strong>textové omezení B1</strong></td></tr>
+</table></div>
+</div>
+<div class="grid3" style="margin-top:20px">
+<div class="card green"><h4>NULL a CHECK</h4><p><code>CHECK (return_date &gt;= loan_date)</code> nevrácené výpůjčce (<code>NULL</code>) nevadí: podmínka vyjde „neznámo“ a CHECK ji propustí. Přesně to R6 chce.</p></div>
+<div class="card yellow"><h4>CHECK se dvěma sloupci</h4><p>CHECK smí porovnat více sloupců <strong>téhož řádku</strong>: <code>due_date &gt;= loan_date</code> je v pořádku. Nesmí ale použít <code>CURDATE()</code>, takže „datum půjčení není v budoucnu“ CHECKem v MySQL nezapíšeme.</p></div>
+<div class="card red"><h4>Co CHECK neumí</h4><p>R7 vyžaduje nahlédnout do <strong>ostatních</strong> výpůjček téže knihy. CHECK vidí jen jeden řádek, proto se takové pravidlo řeší triggerem nebo v aplikaci.</p></div>
+</div>
+</section>
+
+<!-- ================================================================ RESULT -->
+<section id="result">
+<div class="eyebrow">KROK 4 • VÝSLEDNÝ E-R DIAGRAM</div><h2>Doplň datové typy a omezení</h2>
+<div class="flow"><div class="flowbox">1<br>ENTITNÍ TYPY</div><div class="arrow">→</div><div class="flowbox">2<br>VZTAHOVÉ TYPY</div><div class="arrow">→</div><div class="flowbox">3<br>ATRIBUTY<small>+ datové typy</small></div><div class="arrow">→</div><div class="flowbox on">4<br>OMEZENÍ</div></div>
+<p class="lead">Do obdélníků přidáme ke každému atributu datový typ a zkratky omezení. Pravidla, která symbolem zakreslit nejde, připíšeme pod diagram.</p>
+<div class="panel">
+<div class="diagram"><svg class="erd" viewBox="0 0 1350 512" role="img" aria-label="E-R diagram LIBRARY – krok 4: datové typy a omezení" xmlns="http://www.w3.org/2000/svg"><rect width="1350" height="512" fill="#04252e"/>
+<rect x="30" y="40" width="330" height="118" fill="#062f3a" stroke="#49dfff" stroke-width="2"/>
+<rect x="30" y="40" width="330" height="34" fill="#49dfff" fill-opacity=".2"/>
+<line x1="30" y1="74" x2="360" y2="74" stroke="#49dfff" stroke-width="1.5"/>
+<text x="195.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">author</text>
+<text x="40" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="70" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="205" y="98" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="350.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="328.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="306.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="40" y="122" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="122" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="205" y="122" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="350.0" y="122" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="40" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="146" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<text x="205" y="146" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="350.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<rect x="510" y="40" width="330" height="118" fill="#062f3a" stroke="#c99aff" stroke-width="2"/>
+<rect x="510" y="40" width="330" height="34" fill="#c99aff" fill-opacity=".2"/>
+<line x1="510" y1="74" x2="840" y2="74" stroke="#c99aff" stroke-width="1.5"/>
+<text x="675.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">book_author</text>
+<text x="520" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="550" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">book_id</text>
+<text x="685" y="98" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="830.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="808.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="786.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">FK</text>
+<text x="520" y="122" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="550" y="122" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">author_id</text>
+<text x="685" y="122" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="830.0" y="122" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="808.0" y="122" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="786.0" y="122" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">FK</text>
+<text x="520" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="550" y="146" font-size="13" class="mono" fill="#f7fbfc">author_order</text>
+<text x="685" y="146" font-size="12" class="mono" fill="#49dfff">TINYINT</text>
+<text x="830.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="801.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="779.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<rect x="990" y="40" width="330" height="142" fill="#062f3a" stroke="#ffd447" stroke-width="2"/>
+<rect x="990" y="40" width="330" height="34" fill="#ffd447" fill-opacity=".2"/>
+<line x1="990" y1="74" x2="1320" y2="74" stroke="#ffd447" stroke-width="1.5"/>
+<text x="1155.0" y="63" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">book</text>
+<text x="1000" y="98" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="1030" y="98" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="1165" y="98" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="1310.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="1288.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="1266.0" y="98" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="1000" y="122" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="1030" y="122" font-size="13" class="mono" fill="#f7fbfc">isbn</text>
+<text x="1165" y="122" font-size="12" class="mono" fill="#49dfff">VARCHAR(17)</text>
+<text x="1310.0" y="122" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#c99aff">UQ</text>
+<text x="1288.0" y="122" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="1000" y="146" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="1030" y="146" font-size="13" class="mono" fill="#f7fbfc">title</text>
+<text x="1165" y="146" font-size="12" class="mono" fill="#49dfff">VARCHAR(200)</text>
+<text x="1310.0" y="146" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="1000" y="170" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="1030" y="170" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">publication_year</text>
+<text x="1165" y="170" font-size="12" class="mono" fill="#49dfff">SMALLINT</text>
+<text x="1310.0" y="170" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="1281.0" y="170" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<rect x="30" y="292" width="330" height="190" fill="#062f3a" stroke="#a8d65c" stroke-width="2"/>
+<rect x="30" y="292" width="330" height="34" fill="#a8d65c" fill-opacity=".2"/>
+<line x1="30" y1="326" x2="360" y2="326" stroke="#a8d65c" stroke-width="1.5"/>
+<text x="195.0" y="315" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">reader</text>
+<text x="40" y="350" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="70" y="350" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="205" y="350" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="350.0" y="350" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="328.0" y="350" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="306.0" y="350" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="40" y="374" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="374" font-size="13" class="mono" fill="#f7fbfc">card_number</text>
+<text x="205" y="374" font-size="12" class="mono" fill="#49dfff">CHAR(8)</text>
+<text x="350.0" y="374" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#c99aff">UQ</text>
+<text x="328.0" y="374" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="40" y="398" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="398" font-size="13" class="mono" fill="#f7fbfc">first_name</text>
+<text x="205" y="398" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="350.0" y="398" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="40" y="422" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="422" font-size="13" class="mono" fill="#f7fbfc">last_name</text>
+<text x="205" y="422" font-size="12" class="mono" fill="#49dfff">VARCHAR(50)</text>
+<text x="350.0" y="422" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="40" y="446" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="70" y="446" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">email</text>
+<text x="205" y="446" font-size="12" class="mono" fill="#49dfff">VARCHAR(255)</text>
+<text x="350.0" y="446" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="40" y="470" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="70" y="470" font-size="13" class="mono" fill="#f7fbfc">registration_date</text>
+<text x="205" y="470" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="350.0" y="470" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<rect x="510" y="292" width="330" height="142" fill="#062f3a" stroke="#ff7d7d" stroke-width="2"/>
+<rect x="510" y="292" width="330" height="34" fill="#ff7d7d" fill-opacity=".2"/>
+<line x1="510" y1="326" x2="840" y2="326" stroke="#ff7d7d" stroke-width="1.5"/>
+<text x="675.0" y="315" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">loan</text>
+<text x="520" y="350" font-size="12" font-weight="800" class="mono" fill="#ffd447">PK</text>
+<text x="550" y="350" font-size="13" class="mono" fill="#ffd447" text-decoration="underline">id</text>
+<text x="685" y="350" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="830.0" y="350" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">AI</text>
+<text x="808.0" y="350" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="786.0" y="350" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="520" y="374" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="550" y="374" font-size="13" class="mono" fill="#f7fbfc">loan_date</text>
+<text x="685" y="374" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="830.0" y="374" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="520" y="398" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="550" y="398" font-size="13" class="mono" fill="#f7fbfc">due_date</text>
+<text x="685" y="398" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="830.0" y="398" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="801.0" y="398" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="520" y="422" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="550" y="422" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">return_date</text>
+<text x="685" y="422" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="830.0" y="422" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<polyline points="360.0,57.0 510.0,57.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="370.0" y1="65.0" x2="370.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="378.0" y1="65.0" x2="378.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="493.0" y1="57.0" x2="510.0" y2="47.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="493.0" y1="57.0" x2="510.0" y2="67.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="493.0" y1="57.0" x2="510.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="487.0" y1="49.0" x2="487.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="394.4" y="28.0" width="81.2" height="20.3" fill="#04252e"/>
+<text x="435.0" y="43.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">has_book</text>
+<polyline points="840.0,57.0 990.0,57.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="857.0" y1="57.0" x2="840.0" y2="67.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="857.0" y1="57.0" x2="840.0" y2="47.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="857.0" y1="57.0" x2="840.0" y2="57.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="863.0" y1="65.0" x2="863.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="980.0" y1="49.0" x2="980.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="972.0" y1="49.0" x2="972.0" y2="65.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="866.0" y="28.0" width="98.0" height="20.3" fill="#04252e"/>
+<text x="915.0" y="43.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">has_author</text>
+<polyline points="360.0,309.0 510.0,309.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="370.0" y1="317.0" x2="370.0" y2="301.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="378.0" y1="317.0" x2="378.0" y2="301.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="493.0" y1="309.0" x2="510.0" y2="299.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="493.0" y1="309.0" x2="510.0" y2="319.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="493.0" y1="309.0" x2="510.0" y2="309.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="482.0" cy="309.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<rect x="407.0" y="280.0" width="56.0" height="20.3" fill="#04252e"/>
+<text x="435.0" y="295.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">makes</text>
+<polyline points="840.0,309.0 1155.0,309.0 1155.0,182.0" fill="none" stroke="#ffd447" stroke-width="2"/>
+<line x1="857.0" y1="309.0" x2="840.0" y2="319.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="857.0" y1="309.0" x2="840.0" y2="299.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="857.0" y1="309.0" x2="840.0" y2="309.0" stroke="#ffd447" stroke-width="2"/>
+<circle cx="868.0" cy="309.0" r="6" fill="#04252e" stroke="#ffd447" stroke-width="2"/>
+<line x1="1147.0" y1="192.0" x2="1163.0" y2="192.0" stroke="#ffd447" stroke-width="2"/>
+<line x1="1147.0" y1="200.0" x2="1163.0" y2="200.0" stroke="#ffd447" stroke-width="2"/>
+<rect x="956.9" y="280.0" width="81.2" height="20.3" fill="#04252e"/>
+<text x="997.5" y="295.0" text-anchor="middle" font-size="14" font-weight="800" font-style="italic" fill="#ffd447">concerns</text>
+</svg></div>
+<p class="diagram-cap">Legenda: <span class="flag f-pk">PK</span> identifikátor · <span class="flag f-nn">*</span> povinný · <span class="flag">o</span> nepovinný · <span class="flag f-nn">NN</span> NOT NULL · <span class="flag f-uq">UQ</span> UNIQUE · <span class="flag f-un">UN</span> UNSIGNED · <span class="flag f-ai">AI</span> AUTO_INCREMENT · <span class="flag f-chk">CHK</span> CHECK · <span class="flag f-fk">FK</span> odkaz na jinou entitu</p>
+<div class="grid2">
+<div class="card red"><h4>Podmínky CHECK</h4><p><code>chk_book_year</code>: <code>publication_year BETWEEN 1450 AND 2100</code><br><code>chk_book_author_order</code>: <code>author_order &gt;= 1</code><br><code>chk_reader_email</code>: <code>email LIKE '%_@_%'</code><br><code>chk_loan_due</code>: <code>due_date &gt;= loan_date</code><br><code>chk_loan_return</code>: <code>return_date &gt;= loan_date</code></p></div>
+<div class="card purple"><h4>Textová omezení</h4><p><strong>B1</strong> (R7): jedna kniha smí mít nejvýše jednu výpůjčku s nevyplněným <code>return_date</code>.<br><strong>B2</strong> (R3): u jedné knihy se pořadí autora nesmí opakovat — dvojice (<code>book_id</code>, <code>author_order</code>) je jedinečná.<br><strong>Otázka pro zadavatele:</strong> bude knihovna někdy mít od jedné knihy více exemplářů?</p></div>
+</div>
+</div>
+<div class="panel" style="margin-top:20px">
+<h3>Kontrola: každý symbol má svůj důvod</h3>
+<div class="table-wrap"><table>
+<tr><th>Prvek diagramu</th><th>Důvod</th></tr>
+<tr><td><span class="sym">|&lt;</span> u book_author na <code>has_author</code></td><td>R3: kniha má jednoho nebo více autorů</td></tr>
+<tr><td><span class="sym">|&lt;</span> u book_author na <code>has_book</code></td><td>R3: autor je v evidenci, jen když od něj knihovna má alespoň jednu knihu</td></tr>
+<tr><td><span class="sym">||</span> u book a u author</td><td>rozklad M:N: každý záznam <code>book_author</code> spojuje právě jednu knihu s právě jedním autorem</td></tr>
+<tr><td><span class="sym">||</span> u reader na <code>makes</code></td><td>R5: výpůjčka patří právě jednomu čtenáři</td></tr>
+<tr><td><span class="sym">||</span> u book na <code>concerns</code></td><td>R5: výpůjčka se týká právě jedné knihy</td></tr>
+<tr><td><span class="sym">o&lt;</span> u loan (obě čáry)</td><td>R5: čtenář nemusí mít žádnou výpůjčku; kniha nemusí být nikdy půjčena</td></tr>
+<tr><td><code>book_id</code> + <code>author_id</code> <span class="flag f-pk">PK</span> <span class="flag f-fk">FK</span></td><td>složený identifikátor: autor je u jedné knihy uveden jen jednou</td></tr>
+<tr><td><code>isbn</code>, <code>card_number</code> <span class="flag f-uq">UQ</span></td><td>R1, R4: hodnota se nesmí opakovat</td></tr>
+<tr><td><code>publication_year</code>, <code>email</code>, <code>return_date</code> bez <span class="flag f-nn">NN</span></td><td>R1, R4, R6: hodnota může chybět</td></tr>
+</table></div>
+</div>
+</section>
+
+<!-- ================================================================ MISTAKES -->
+<section id="mistakes">
+<div class="eyebrow">POZOR NA TO</div><h2>Na co si v tomto příkladu dát pozor</h2>
+<div class="grid3">
+<div class="card red"><h4>Výpůjčka jako M:N</h4><p>Čára M:N <code>borrows</code> mezi <code>reader</code> a <code>book</code> by nedovolila půjčit si tutéž knihu dvakrát. Opakovaná událost = samostatná entita s vlastním <code>id</code>.</p></div>
+<div class="card red"><h4>Autoři jako seznam</h4><p>Atribut <code>authors</code> v <code>book</code> s hodnotou „Čapek, Čapek“. Více hodnot = vztah k samostatné entitě.</p></div>
+<div class="card red"><h4>Pořadí autora u autora</h4><p><code>author_order</code> v entitě <code>author</code>: tentýž autor je u jedné knihy první a u jiné druhý. Patří do <code>book_author</code>.</p></div>
+<div class="card yellow"><h4>Povinné datum vrácení</h4><p><code>return_date</code> s <span class="flag f-nn">NN</span> by znemožnilo uložit výpůjčku, která ještě nebyla vrácena.</p></div>
+<div class="card yellow"><h4>ISBN jako číslo</h4><p><code>BIGINT</code> ztratí pomlčky i znak X. Co se nepočítá, je text.</p></div>
+<div class="card yellow"><h4>Domyšlené údaje</h4><p><code>publisher</code>, <code>genre</code>, <code>phone</code> — zadání je nechce (R8). Raději se zeptej zadavatele.</p></div>
+<div class="card"><h4>Nejednotné názvy</h4><p><code>loanDate</code>, <code>DueDate</code>, <code>returned</code> v jedné entitě. Drž jednu konvenci: <code>loan_date</code>, <code>due_date</code>, <code>return_date</code>.</p></div>
+<div class="card"><h4>Množné číslo</h4><p><code>books</code>, <code>Readers</code> → správně <code>book</code>, <code>reader</code>: obdélník je <strong>typ</strong>, ne seznam.</p></div>
+<div class="card"><h4>Symbol na špatném konci</h4><p>„Výpůjčka patří právě jednomu čtenáři“ → <span class="sym">||</span> patří <strong>k reader</strong>, ne k loan. Ověř větou.</p></div>
+</div>
+</section>
+
+<!-- ================================================================ TASK -->
+<section id="task">
+<div class="eyebrow">PROCVIČENÍ</div><h2>Úkol: rozšiř LIBRARY o žánry</h2>
+<p class="lead">Zadavatel doplnil nový požadavek. Postupuj ve čtyřech krocích a výsledný E-R diagram nakresli (na papír, v draw.io nebo MySQL Workbench).</p>
+<div class="panel">
+<div class="table-wrap"><table>
+<tr><th>Č.</th><th>Nový požadavek</th></tr>
+<tr><td class="num-col"><strong style="color:var(--yellow)">R9</strong></td><td>Knihovna eviduje <strong>žánry</strong>. Každý žánr má jednoznačný identifikátor a název; dva žánry nemohou mít stejný název. Kniha může patřit do <strong>více žánrů</strong>, ale nemusí do žádného. Žánr může zahrnovat více knih a může být založen dřív, než do něj knihovna nějakou knihu zařadí.</td></tr>
+</table></div>
+<div class="step-list" style="margin-top:20px">
+<div class="step"><div class="num">1</div><div><h4>Entitní typy</h4><p class="muted">Který nový obdélník přibude a jak se bude jmenovat?</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Vztahové typy</h4><p class="muted">Jaký je vztah mezi knihou a žánrem? Jaké symboly budou na koncích? Je potřeba ho rozložit?</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Atributy a datové typy</h4><p class="muted">Jaké atributy má žánr a jaký mají datový typ?</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Integritní omezení</h4><p class="muted">Které zkratky (NN, UQ, UN, AI, CHK) dopíšeš?</p></div></div>
+</div>
+<details>
+<summary>Zobrazit řešení</summary>
+<div class="table-wrap"><table>
+<tr><th>Krok</th><th>Řešení</th></tr>
+<tr><td>1</td><td>Nový entitní typ <code>genre</code> (R9).</td></tr>
+<tr><td>2</td><td>Vztah <code>book</code>–<code>genre</code> je M:N s <span class="sym">o&lt;</span> na obou koncích (kniha nemusí mít žánr, žánr nemusí mít knihu). Rozložíme ho na asociační entitu <code>book_genre</code>: u ní <span class="sym">o&lt;</span> na obou čarách, u <code>book</code> a <code>genre</code> <span class="sym">||</span>.</td></tr>
+<tr><td>3</td><td><code>genre</code>: <code>id</code> <span class="flag f-pk">PK</span> <code>INT UNSIGNED</code>, <code>name</code> <span class="flag f-nn">*</span> <code>VARCHAR(50)</code>. <code>book_genre</code>: složený identifikátor <code>book_id</code> + <code>genre_id</code>, oba <code>INT UNSIGNED</code> <span class="flag f-fk">FK</span>. Žádné další atributy zadání nechce.</td></tr>
+<tr><td>4</td><td><code>genre.id</code>: <span class="flag f-un">UN</span> <span class="flag f-nn">NN</span> <span class="flag f-ai">AI</span>; <code>genre.name</code>: <span class="flag f-nn">NN</span> <span class="flag f-uq">UQ</span>; <code>book_genre.book_id</code>, <code>genre_id</code>: <span class="flag f-un">UN</span> <span class="flag f-nn">NN</span>.</td></tr>
+</table></div>
+<p class="muted" style="margin-top:12px">Na zamyšlení: jak by se model změnil, kdyby knihovna měla od jedné knihy více exemplářů? (Nápověda: výpůjčka by se netýkala knihy, ale konkrétního exempláře.)</p>
+</details>
+</div>
+
+<div class="panel" style="margin-top:20px">
+<h3>Kontrolní otázky</h3>
+<details><summary>1. Proč je loan entitní typ, a ne vztah M:N mezi reader a book?</summary><p>Čtenář si může tutéž knihu půjčit opakovaně (R5) a každá výpůjčka má vlastní údaje (R6). Dvojice čtenář–kniha výpůjčku jednoznačně neurčuje, proto potřebuje vlastní identifikátor.</p></details>
+<details><summary>2. Jak poznáš, že vztah je M:N?</summary><p>Na obou koncích čáry je vraní stopa — maximum je N z obou stran. U <code>writes</code>: kniha má více autorů a autor více knih.</p></details>
+<details><summary>3. Co se stane se symboly při rozkladu M:N?</summary><p>Vraní stopy se přestěhují k asociační entitě, minima zůstanou zachována. U původních entit přibude <span class="sym">||</span>, protože každý záznam asociační entity spojuje právě jednu knihu s právě jedním autorem.</p></details>
+<details><summary>4. Proč je author_order v book_author?</summary><p>Pořadí není vlastnost knihy ani autora, ale jejich dvojice: tentýž autor může být u jedné knihy první a u jiné druhý.</p></details>
+<details><summary>5. Proč nemá return_date omezení NOT NULL a přesto má CHECK?</summary><p>Dokud kniha není vrácena, datum není známo (NULL). Pokud vyplněno je, nesmí být dřív než datum půjčení — to hlídá CHECK, který hodnotu NULL propustí.</p></details>
+<details><summary>6. Proč má card_number typ CHAR(8), a ne INT?</summary><p>Má vždy přesně 8 znaků (pevná délka → CHAR), může začínat nulou a nepočítáme s ním, takže je to text.</p></details>
+</div>
+
+<div class="callout green" style="margin-top:22px"><strong>Shrnutí:</strong> <code>1. obdélníky → 2. čáry + symboly Crow's foot (a rozklad M:N) → 3. atributy + datové typy → 4. integritní omezení</code>. Každý symbol, každý datový typ i každé omezení v diagramu musí jít obhájit požadavkem ze zadání.</div>
+</section>
+
+<footer>Výukový materiál • Konceptuální návrh databáze • Vzorový příklad LIBRARY • E-R diagram (Crow's foot)</footer>
+</main>
+<script>
+const links=[...document.querySelectorAll('nav a')], sections=[...document.querySelectorAll('main section[id]')];
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{
+ if(e.isIntersecting) links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));
+}),{rootMargin:'-22% 0px -68% 0px'});
+sections.forEach(s=>obs.observe(s));
+links.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=1000)document.querySelector('aside').style.display='none'}));
+</script>
+</body>
+</html>

@@ -29,6 +29,12 @@ window.ROCNIKY = [
         "soubor": "2r/4_databaze_IV_er_diagram.html",
         "nazev": "E-R diagram — případová studie SCHOOL",
         "popis": "Výuková webová prezentace: vyjádření konceptuálního návrhu databáze school pomocí E-R diagramu (entity jako obdélník s atributy, vztahy v notaci Crow's foot), datové typy a integritní omezení."
+      },
+      {
+        "cislo": 5,
+        "soubor": "2r/5_databaze_V_er_diagram_vzorovy_priklad.html",
+        "nazev": "E-R diagram — vzorový příklad LIBRARY",
+        "popis": "Vzorový příklad: konceptuální návrh databáze výpůjček knih v knihovně (kniha, autor, čtenář, výpůjčka) jako E-R diagram ve čtyřech krocích – entitní typy, vztahové typy s rozkladem vazby M:N, atributy s datovými typy a integritní omezení."
       }
     ]
   },
