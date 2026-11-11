@@ -601,7 +601,7 @@ details[open] summary{margin-bottom:10px}
 <text x="70" y="470" font-size="13" class="mono" fill="#f7fbfc">registration_date</text>
 <text x="205" y="470" font-size="12" class="mono" fill="#49dfff">DATE</text>
 <text x="350.0" y="470" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
-<rect x="510" y="292" width="330" height="142" fill="#062f3a" stroke="#ff7d7d" stroke-width="2"/>
+<rect x="510" y="292" width="330" height="190" fill="#062f3a" stroke="#ff7d7d" stroke-width="2"/>
 <rect x="510" y="292" width="330" height="34" fill="#ff7d7d" fill-opacity=".2"/>
 <line x1="510" y1="326" x2="840" y2="326" stroke="#ff7d7d" stroke-width="1.5"/>
 <text x="675.0" y="315" text-anchor="middle" font-size="16" font-weight="800" fill="#f7fbfc">loan</text>
@@ -612,18 +612,30 @@ details[open] summary{margin-bottom:10px}
 <text x="808.0" y="350" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
 <text x="786.0" y="350" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
 <text x="520" y="374" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
-<text x="550" y="374" font-size="13" class="mono" fill="#f7fbfc">loan_date</text>
-<text x="685" y="374" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="550" y="374" font-size="13" class="mono" fill="#f7fbfc">reader_id</text>
+<text x="685" y="374" font-size="12" class="mono" fill="#49dfff">INT</text>
 <text x="830.0" y="374" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="808.0" y="374" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="786.0" y="374" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">FK</text>
 <text x="520" y="398" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
-<text x="550" y="398" font-size="13" class="mono" fill="#f7fbfc">due_date</text>
-<text x="685" y="398" font-size="12" class="mono" fill="#49dfff">DATE</text>
-<text x="830.0" y="398" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
-<text x="801.0" y="398" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
-<text x="520" y="422" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
-<text x="550" y="422" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">return_date</text>
+<text x="550" y="398" font-size="13" class="mono" fill="#f7fbfc">book_id</text>
+<text x="685" y="398" font-size="12" class="mono" fill="#49dfff">INT</text>
+<text x="830.0" y="398" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="808.0" y="398" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">UN</text>
+<text x="786.0" y="398" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#49dfff">FK</text>
+<text x="520" y="422" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="550" y="422" font-size="13" class="mono" fill="#f7fbfc">loan_date</text>
 <text x="685" y="422" font-size="12" class="mono" fill="#49dfff">DATE</text>
-<text x="830.0" y="422" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="830.0" y="422" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="520" y="446" font-size="12" font-weight="800" class="mono" fill="#a8d65c">*</text>
+<text x="550" y="446" font-size="13" class="mono" fill="#f7fbfc">due_date</text>
+<text x="685" y="446" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="830.0" y="446" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
+<text x="801.0" y="446" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#a8d65c">NN</text>
+<text x="520" y="470" font-size="12" font-weight="800" class="mono" fill="rgba(247,251,252,.6)">o</text>
+<text x="550" y="470" font-size="13" class="mono" fill="rgba(247,251,252,.6)" font-style="italic">return_date</text>
+<text x="685" y="470" font-size="12" class="mono" fill="#49dfff">DATE</text>
+<text x="830.0" y="470" text-anchor="end" font-size="10.5" font-weight="800" class="mono" fill="#ff7d7d">CHK</text>
 <polyline points="360.0,57.0 510.0,57.0" fill="none" stroke="#ffd447" stroke-width="2"/>
 <line x1="370.0" y1="65.0" x2="370.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
 <line x1="378.0" y1="65.0" x2="378.0" y2="49.0" stroke="#ffd447" stroke-width="2"/>
@@ -678,6 +690,7 @@ details[open] summary{margin-bottom:10px}
 <tr><td><span class="sym">||</span> u book na <code>concerns</code></td><td>R5: výpůjčka se týká právě jedné knihy</td></tr>
 <tr><td><span class="sym">o&lt;</span> u loan (obě čáry)</td><td>R5: čtenář nemusí mít žádnou výpůjčku; kniha nemusí být nikdy půjčena</td></tr>
 <tr><td><code>book_id</code> + <code>author_id</code> <span class="flag f-pk">PK</span> <span class="flag f-fk">FK</span></td><td>složený identifikátor: autor je u jedné knihy uveden jen jednou</td></tr>
+<tr><td><code>loan.reader_id</code>, <code>loan.book_id</code> <span class="flag f-fk">FK</span> <span class="flag f-nn">NN</span></td><td>R5: cizí klíče za čarami <code>makes</code> a <code>concerns</code>; povinné, protože výpůjčka patří právě jednomu čtenáři a týká se právě jedné knihy</td></tr>
 <tr><td><code>isbn</code>, <code>card_number</code> <span class="flag f-uq">UQ</span></td><td>R1, R4: hodnota se nesmí opakovat</td></tr>
 <tr><td><code>publication_year</code>, <code>email</code>, <code>return_date</code> bez <span class="flag f-nn">NN</span></td><td>R1, R4, R6: hodnota může chybět</td></tr>
 </table></div>
